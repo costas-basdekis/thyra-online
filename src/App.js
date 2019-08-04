@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component, Fragment} from 'react';
 import './App.css';
+import Game from "./game";
+import Board from "./components/board";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  static PLAYER_NAMES = {
+    [Game.PLAYER_A]: "Player A",
+    [Game.PLAYER_B]: "Player B",
+  };
+  static MOVE_TYPE_NAMES = {
+    [Game.MOVE_TYPE_PLACE_FIRST_WORKER]: "Place your first worker",
+    [Game.MOVE_TYPE_PLACE_SECOND_WORKER]: "Place your second worker",
+  };
+
+  state = {
+    game: new Game(),
+  };
+
+  render() {
+
+    const {game} = this.state;
+    return (
+      <Fragment>
+        <div>
+          {game.finished ? (
+            <Fragment>
+              {this.constructor.PLAYER_NAMES[game.winner]} won!
+            </Fragment>
+          ) : (
+            <Fragment>
+              Next player: {this.constructor.PLAYER_NAMES[game.nextPlayer]}
+              <br />
+              {this.constructor.MOVE_TYPE_NAMES[game.moveType]}
+            </Fragment>
+          )}
+        </div>
+        <Board game={game} />
+      </Fragment>
+    );
+  }
 }
 
 export default App;

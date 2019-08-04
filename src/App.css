@@ -22,12 +22,12 @@ div#root {
 }
 
 .cell.available {
-    background-color: darkmagenta;
+    border-color: aquamarine;
     cursor: pointer;
 }
 
 .cell.available:hover {
-    background-color: magenta;
+    border-color: black;
 }
 
 .cell .worker {

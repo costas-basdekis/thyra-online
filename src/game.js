@@ -89,6 +89,10 @@ class Game {
     return this.rows.map(y => this.columns.map(x => !cells[y][x].player));
   }
 
+  getPlayerAvailableMoves(cells, player) {
+    return this.rows.map(y => this.columns.map(x => cells[y][x].player === player));
+  }
+
   checkCanMakeMove(expectedMoveType, coordinates) {
     if (this.finished) {
       throw new Error("The game has already finished");
@@ -148,14 +152,17 @@ class Game {
         },
       },
     };
+    const nextPlayer = this.constructor.OTHER_PLAYER[this.nextPlayer];
     return new this.constructor(cells, {
-      nextPlayer: this.constructor.OTHER_PLAYER[this.nextPlayer],
-      moveType: this.nextPlayer === this.constructor.PLAYER_A
-        ? this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER
-        : this.constructor.MOVE_TYPE_MOVE_WORKER,
+      nextPlayer: nextPlayer,
+      moveType: nextPlayer === this.constructor.PLAYER_A
+        ? this.constructor.MOVE_TYPE_MOVE_WORKER
+        : this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER,
       finished: this.finished,
       winner: this.winner,
-      availableMoves: this.getEmptyCellsAvailableMoves(cells),
+      availableMoves: nextPlayer === this.constructor.PLAYER_A
+        ? this.getPlayerAvailableMoves(cells, nextPlayer)
+        : this.getEmptyCellsAvailableMoves(cells),
     });
   }
 }

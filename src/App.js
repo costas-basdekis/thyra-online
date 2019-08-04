@@ -16,7 +16,7 @@ class App extends Component {
   };
 
   state = {
-    game: new Game(),
+    game: Game.create(),
   };
 
   makeMove = newGame => {
@@ -28,6 +28,8 @@ class App extends Component {
     return (
       <Fragment>
         <div>
+          Move: {game.moveCount}
+          <br />
           {game.finished ? (
             <Fragment>
               {this.constructor.PLAYER_NAMES[game.winner]} won!

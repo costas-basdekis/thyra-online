@@ -102,6 +102,7 @@ class Game {
       Math.abs(x - coordinates.x) <= 1
       && Math.abs(y - coordinates.y) <= 1
       && !cells[y][x].player
+      && cells[y][x].level <= 3
       && cells[y][x].level <= maximumLevel
     )));
   }

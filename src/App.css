@@ -45,3 +45,11 @@ div#root {
 .cell .worker.player-player-b {
     background-color: lightgrey;
 }
+
+.level.level-1 {
+    display: block;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    background-color: #EEE;
+    border: 2px solid black;
+}

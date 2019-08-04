@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import 'fomantic-ui-css/semantic.css';
+import { Container, Header } from 'semantic-ui-react';
 import './styles/App.css';
 import Game from "./game/game";
 import Play from "./components/play";
@@ -19,7 +21,10 @@ class App extends Component {
   render() {
     const {game} = this.state;
     return (
-      <Play game={game} makeMove={this.makeMove} undo={this.undo}/>
+      <Container>
+        <Header>Thyra Online</Header>
+        <Play game={game} makeMove={this.makeMove} undo={this.undo}/>
+      </Container>
     );
   }
 }

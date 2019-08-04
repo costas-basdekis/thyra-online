@@ -20,23 +20,24 @@ class Game {
   static MOVE_TYPE_BUILD_AROUND_SECOND_WORKER = 'build-around-second-worker';
 
   constructor(cells, status) {
-    if (cells && !status) {
-      throw new Error("You need to pass initial status when passing initial Cells");
-    }
-
     this.rows = Array.from({length: 5}, (value, index) => index);
     this.columns = Array.from({length: 5}, (value, index) => index);
 
-    this.cells = this.getInitialCells();
+    if (cells && !status) {
+      throw new Error("You need to pass initial status when passing initial cells");
+    } else if (!cells && status) {
+      throw new Error("You need to pass initial cells when passing initial status");
+    } else if (!cells && !status) {
+      cells = this.getInitialCells();
+      status = this.getInitialStatus();
+    }
+    this.cells = cells;
     this.rowsAndColumns = this.rows.map(y => ({
       y,
-      cells: this.columns.map(x => ({
-        x, y,
-        cell: this.cells[y][x],
-      })),
+      cells: this.columns.map(x => this.cells[y][x]),
     }));
 
-    const {nextPlayer, moveType, finished, winner, availableMoves} = status || this.getInitialStatus();
+    const {nextPlayer, moveType, finished, winner, availableMoves} = status;
     this.nextPlayer = nextPlayer;
     this.moveType = moveType;
     this.finished = finished;
@@ -122,11 +123,8 @@ class Game {
         ...this.cells[y],
         [x]: {
           ...this.cells[y][x],
-          cell: {
-            ...this.cells[y][x].cell,
-            player: this.nextPlayer,
-            worker: this.constructor.WORKER_FIRST,
-          },
+          player: this.nextPlayer,
+          worker: this.constructor.WORKER_FIRST,
         },
       },
     }, {
@@ -147,11 +145,8 @@ class Game {
         ...this.cells[y],
         [x]: {
           ...this.cells[y][x],
-          cell: {
-            ...this.cells[y][x].cell,
-            player: this.nextPlayer,
-            worker: this.constructor.WORKER_SECOND,
-          },
+          player: this.nextPlayer,
+          worker: this.constructor.WORKER_SECOND,
         },
       },
     }, {

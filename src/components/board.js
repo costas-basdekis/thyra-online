@@ -21,6 +21,10 @@ class Board extends Component {
                 className={classNames({cell: true, available: game.availableMoves[cell.y][cell.x]})}
                 onClick={this.props.makeMove ? () => this.makeMove(cell) : null}
               >
+                {cell.player ? (
+                  <div className={classNames("worker", `player-${cell.player}`)}>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

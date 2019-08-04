@@ -29,3 +29,19 @@ div#root {
 .cell.available:hover {
     background-color: magenta;
 }
+
+.cell .worker {
+    display: block;
+    width: 75%;
+    height: 75%;
+    border-radius: 50%;
+    margin: 12.5%;
+}
+
+.cell .worker.player-player-a {
+    background-color: grey;
+}
+
+.cell .worker.player-player-b {
+    background-color: lightgrey;
+}

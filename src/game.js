@@ -59,8 +59,15 @@ class Game {
     this.moveType = moveType;
     this.availableMoves = availableMoves;
 
-    this.finished = !this.availableMoves.length || this.allCells.find(cell => cell.player && cell.level === 3);
-    this.winner = this.finished ? this.constructor.OTHER_PLAYER[this.nextPlayer] : null;
+    this.winner = this.getWinner();
+    if (this.winner) {
+      this.finished = true;
+    } else if (!this.hasAvailableMove(this.availableMoves)) {
+      this.finished = true;
+      this.winner = this.constructor.OTHER_PLAYER[this.nextPlayer];
+    } else {
+      this.finished = false;
+    }
 
     if (this.finished) {
       this.availableMoves = this.constructor.noMovesAreAvailable();
@@ -103,6 +110,27 @@ class Game {
     }
   }
 
+  getAvailableCoordinates(availableMoves = this.availableMoves) {
+    return availableMoves
+      .map((row, y) => row
+        .map((available, x) => available ? {x, y} : null)
+        .filter(coordinates => coordinates))
+      .reduce((total, current) => total.concat(current));
+  }
+
+  hasAvailableMove(availableMoves = this.availableMoves) {
+    return this.getAvailableCoordinates(availableMoves).length > 0;
+  }
+
+  getWinner() {
+    const winningCell = this.allCells.find(cell => cell.player && cell.level === 3);
+    if (!winningCell) {
+      return null;
+    }
+
+    return winningCell.player;
+  }
+
   static allMovesAreAvailable() {
     return this.ROWS.map(() => this.COLUMNS.map(() => true));
   }
@@ -121,7 +149,7 @@ class Game {
         return false;
       }
 
-      return this.getMovableAvailableMoves(cells, {x, y}).filter(row => row.filter(Boolean).length).length;
+      return this.hasAvailableMove(this.getMovableAvailableMoves(cells, {x, y}));
     }));
   }
 

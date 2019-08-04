@@ -1,6 +1,6 @@
 .background {
     display: inline-block;
-    border: 5px white;
+    border: 5px solid black;
     background: limegreen;
     height: 100%;
 }
@@ -81,4 +81,37 @@
 {
     border-color: transparent;
     background-color: transparent;
+}
+
+@media all and (min-width: 601px) {
+    .cell {
+        width: 100px;
+        height: 100px;
+    }
+
+    .level {
+        border-width: 7px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .cell {
+        width: 80px;
+        height: 80px;
+    }
+
+    .level {
+        border-width: 5px;
+    }
+}
+
+@media all and (max-width: 500px) {
+    .cell {
+        width: 60px;
+        height: 60px;
+    }
+
+    .level {
+        border-width: 5px;
+    }
 }

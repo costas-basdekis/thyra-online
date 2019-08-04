@@ -12,6 +12,7 @@ class Board extends Component {
     let {game} = this.props;
 
     return (
+      //<div className={"background-container"}>
       <div className={"background"}>
         {game.rowsAndColumns.map(row => (
           <div key={`row-${row.y}`} className={"row"}>
@@ -40,6 +41,7 @@ class Board extends Component {
           </div>
         ))}
       </div>
+      //</div>
     );
   }
 }

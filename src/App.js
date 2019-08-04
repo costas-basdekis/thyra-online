@@ -11,14 +11,18 @@ class App extends Component {
   static MOVE_TYPE_NAMES = {
     [Game.MOVE_TYPE_PLACE_FIRST_WORKER]: "Place your first worker",
     [Game.MOVE_TYPE_PLACE_SECOND_WORKER]: "Place your second worker",
+    [Game.MOVE_TYPE_MOVE_WORKER]: "Move one of your workers",
   };
 
   state = {
     game: new Game(),
   };
 
-  render() {
+  makeMove = newGame => {
+    this.setState({game: newGame});
+  };
 
+  render() {
     const {game} = this.state;
     return (
       <Fragment>
@@ -35,7 +39,7 @@ class App extends Component {
             </Fragment>
           )}
         </div>
-        <Board game={game} />
+        <Board game={game} makeMove={this.makeMove} />
       </Fragment>
     );
   }

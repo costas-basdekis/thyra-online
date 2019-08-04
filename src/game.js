@@ -116,7 +116,13 @@ class Game {
   }
 
   getPlayerAvailableMoves(cells, player) {
-    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => cells[y][x].player === player));
+    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => {
+      if (cells[y][x].player !== player) {
+        return false;
+      }
+
+      return this.getMovableAvailableMoves(cells, {x, y}).filter(row => row.filter(Boolean).length).length;
+    }));
   }
 
   getMovableAvailableMoves(cells, coordinates) {

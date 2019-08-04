@@ -10,35 +10,30 @@ class Board extends Component {
 
   render() {
     let {game} = this.props;
-    console.log("game", game);
 
     return (
       <div className={"background"}>
         {game.rowsAndColumns.map(row => (
           <div key={`row-${row.y}`} className={"row"}>
             {row.cells.map(cell => {
-              const playerNode = cell.player ? (
-                <div className={classNames("worker", `player-${cell.player}`)}>
-                </div>
-              ) : null;
-              let levelAndPlayerNode = null;
-              if (cell.level === 1) {
-                levelAndPlayerNode = (
-                  <div className={classNames("level", "level-1")}>
-                    {playerNode}
-                  </div>
-                );
-              } else {
-                levelAndPlayerNode = playerNode;
-              }
               const available = game.availableMoves[cell.y][cell.x];
               return (
                 <div
                   key={`row-${cell.x}-${cell.y}`}
-                  className={classNames({cell: true, available})}
+                  className={classNames("cell", `level-${cell.level}`, {available})}
                   onClick={this.props.makeMove && available ? () => this.makeMove(cell) : null}
                 >
-                  {levelAndPlayerNode}
+                  <div className={classNames("level", "level-1")}>
+                    <div className={classNames("level", "level-2")}>
+                      <div className={classNames("level", "level-3")}>
+                        {cell.player ? (
+                          <div className={classNames("worker", `player-${cell.player}`)} />
+                        ) : cell.level === 4 ? (
+                          <div className={classNames("level", "level-4")} />
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}

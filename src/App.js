@@ -11,8 +11,10 @@ class App extends Component {
   static MOVE_TYPE_NAMES = {
     [Game.MOVE_TYPE_PLACE_FIRST_WORKER]: "Place your first worker",
     [Game.MOVE_TYPE_PLACE_SECOND_WORKER]: "Place your second worker",
+    [Game.MOVE_TYPE_SELECT_WORKER_TO_MOVE]: "Select a worker to move",
     [Game.MOVE_TYPE_MOVE_FIRST_WORKER]: "Move one of your workers",
     [Game.MOVE_TYPE_MOVE_SECOND_WORKER]: "Move one of your workers",
+    [Game.MOVE_TYPE_BUILD_AROUND_WORKER]: "Build around the moved worker",
   };
 
   state = {

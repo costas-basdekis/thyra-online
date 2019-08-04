@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "6897601cf9396f038b1bd8f8d0a5ca50",
+    "revision": "27441ec99bd483202c86f8c3b65b39ef",
     "url": "/thyra-online/index.html"
   },
   {

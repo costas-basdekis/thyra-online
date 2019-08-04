@@ -22,7 +22,7 @@ div#root {
 }
 
 .cell.available {
-    border-color: aquamarine;
+    border-color: blue;
     cursor: pointer;
 }
 
@@ -42,7 +42,7 @@ div#root {
 }
 
 .cell .worker.player-player-b {
-    background-color: lightgrey;
+    background-color: cyan;
 }
 
 .level {
@@ -55,19 +55,21 @@ div#root {
 
 .level.level-1 {
     border-color: #EEE;
+    background-color: white;
 }
 
 .level.level-2 {
     border-color: #DDD;
+    background-color: yellow;
 }
 
 .level.level-3 {
     border-color: #CCC;
+    background-color: red;
 }
 
 .level.level-4 {
     border-color: darkblue;
-    border-radius: 50%;
     background-color: darkblue;
 }
 

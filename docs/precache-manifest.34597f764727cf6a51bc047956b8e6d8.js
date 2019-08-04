@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "107b2f2f71775d879454240962ca6176",
+    "revision": "6945e75aff29d28e81c7d34034b345cf",
     "url": "/thyra-online/index.html"
   },
   {
-    "revision": "b51be0d2b7b714f7494f",
+    "revision": "ea1aa14aead46522c4a9",
     "url": "/thyra-online/static/css/2.15a7df79.chunk.css"
   },
   {
-    "revision": "06ec9a878505a55c8774",
+    "revision": "ccc179aad4f7f80fd81b",
     "url": "/thyra-online/static/css/main.4397bfd0.chunk.css"
   },
   {
-    "revision": "b51be0d2b7b714f7494f",
-    "url": "/thyra-online/static/js/2.e78dc919.chunk.js"
+    "revision": "ea1aa14aead46522c4a9",
+    "url": "/thyra-online/static/js/2.dfa1a0a4.chunk.js"
   },
   {
-    "revision": "06ec9a878505a55c8774",
-    "url": "/thyra-online/static/js/main.eb1abb47.chunk.js"
+    "revision": "ccc179aad4f7f80fd81b",
+    "url": "/thyra-online/static/js/main.4857d25f.chunk.js"
   },
   {
     "revision": "7ea70767fbbb7c2259ba",

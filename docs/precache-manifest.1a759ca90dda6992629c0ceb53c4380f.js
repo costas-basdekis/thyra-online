@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "3a3cba320418bf93a886f43cb7bd837a",
+    "revision": "385ed590672366355e51227ccf98e204",
     "url": "/thyra-online/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/thyra-online/static/css/2.15a7df79.chunk.css"
   },
   {
-    "revision": "41e50e6fdf0e82c30a56",
+    "revision": "8cd57b537fa002142a51",
     "url": "/thyra-online/static/css/main.9e603fd1.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/thyra-online/static/js/2.48f2391d.chunk.js"
   },
   {
-    "revision": "41e50e6fdf0e82c30a56",
-    "url": "/thyra-online/static/js/main.b8b0187e.chunk.js"
+    "revision": "8cd57b537fa002142a51",
+    "url": "/thyra-online/static/js/main.a4e0542b.chunk.js"
   },
   {
     "revision": "7ea70767fbbb7c2259ba",

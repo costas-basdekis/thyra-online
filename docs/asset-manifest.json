@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/thyra-online/static/css/main.9e603fd1.chunk.css",
-    "main.js": "/thyra-online/static/js/main.b8b0187e.chunk.js",
-    "main.js.map": "/thyra-online/static/js/main.b8b0187e.chunk.js.map",
+    "main.js": "/thyra-online/static/js/main.a4e0542b.chunk.js",
+    "main.js.map": "/thyra-online/static/js/main.a4e0542b.chunk.js.map",
     "runtime~main.js": "/thyra-online/static/js/runtime~main.966bc443.js",
     "runtime~main.js.map": "/thyra-online/static/js/runtime~main.966bc443.js.map",
     "static/css/2.15a7df79.chunk.css": "/thyra-online/static/css/2.15a7df79.chunk.css",
     "static/js/2.48f2391d.chunk.js": "/thyra-online/static/js/2.48f2391d.chunk.js",
     "static/js/2.48f2391d.chunk.js.map": "/thyra-online/static/js/2.48f2391d.chunk.js.map",
     "index.html": "/thyra-online/index.html",
-    "precache-manifest.51e25e287f62e8f7f75e1161cd72684a.js": "/thyra-online/precache-manifest.51e25e287f62e8f7f75e1161cd72684a.js",
+    "precache-manifest.1a759ca90dda6992629c0ceb53c4380f.js": "/thyra-online/precache-manifest.1a759ca90dda6992629c0ceb53c4380f.js",
     "service-worker.js": "/thyra-online/service-worker.js",
     "static/css/2.15a7df79.chunk.css.map": "/thyra-online/static/css/2.15a7df79.chunk.css.map",
     "static/css/main.9e603fd1.chunk.css.map": "/thyra-online/static/css/main.9e603fd1.chunk.css.map",

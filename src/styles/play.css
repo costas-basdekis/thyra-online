@@ -1,0 +1,84 @@
+.background {
+    display: inline-block;
+    border: 5px white;
+    background: limegreen;
+    height: 100%;
+}
+
+.row {
+    display: flex;
+}
+
+.cell {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    border: 5px solid white;
+}
+
+.cell.available {
+    border-color: blue;
+    cursor: pointer;
+}
+
+.cell.available:hover {
+    border-color: black;
+}
+
+.cell .worker {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.cell .worker.player-player-a {
+    background-color: grey;
+}
+
+.cell .worker.player-player-b {
+    background-color: cyan;
+}
+
+.level {
+    display: block;
+    width: calc(100% - 14px);
+    height: calc(100% - 14px);
+    background-color: white;
+    border: 7px solid white;
+}
+
+.level.level-1 {
+    border-color: #EEE;
+    background-color: white;
+}
+
+.level.level-2 {
+    border-color: #DDD;
+    background-color: yellow;
+}
+
+.level.level-3 {
+    border-color: #CCC;
+    background-color: red;
+}
+
+.level.level-4 {
+    border-color: darkblue;
+    background-color: darkblue;
+}
+
+.cell.level-0 .level.level-4,
+.cell.level-1 .level.level-4,
+.cell.level-2 .level.level-4,
+.cell.level-3 .level.level-4,
+.cell.level-0 .level.level-3,
+.cell.level-1 .level.level-3,
+.cell.level-2 .level.level-3,
+.cell.level-0 .level.level-2,
+.cell.level-1 .level.level-2,
+.cell.level-0 .level.level-1
+{
+    border-color: transparent;
+    background-color: transparent;
+}

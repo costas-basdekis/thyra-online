@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Game from "../game";
+import Game from "../game/game";
 
 class Board extends Component {
   makeMove = (cell) => {

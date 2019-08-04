@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/thyra-online/static/css/main.d34ce524.chunk.css",
-    "main.js": "/thyra-online/static/js/main.be31dfff.chunk.js",
-    "main.js.map": "/thyra-online/static/js/main.be31dfff.chunk.js.map",
+    "main.css": "/thyra-online/static/css/main.bc4bb5f1.chunk.css",
+    "main.js": "/thyra-online/static/js/main.878066b7.chunk.js",
+    "main.js.map": "/thyra-online/static/js/main.878066b7.chunk.js.map",
     "runtime~main.js": "/thyra-online/static/js/runtime~main.966bc443.js",
     "runtime~main.js.map": "/thyra-online/static/js/runtime~main.966bc443.js.map",
     "static/css/2.15a7df79.chunk.css": "/thyra-online/static/css/2.15a7df79.chunk.css",
-    "static/js/2.8eaff85a.chunk.js": "/thyra-online/static/js/2.8eaff85a.chunk.js",
-    "static/js/2.8eaff85a.chunk.js.map": "/thyra-online/static/js/2.8eaff85a.chunk.js.map",
+    "static/js/2.e40ddc74.chunk.js": "/thyra-online/static/js/2.e40ddc74.chunk.js",
+    "static/js/2.e40ddc74.chunk.js.map": "/thyra-online/static/js/2.e40ddc74.chunk.js.map",
     "index.html": "/thyra-online/index.html",
-    "precache-manifest.fbccdc9b4244b7d51a3780e40166dcd1.js": "/thyra-online/precache-manifest.fbccdc9b4244b7d51a3780e40166dcd1.js",
+    "precache-manifest.44b2a5fcd5a83e82e4c23cbbc9821216.js": "/thyra-online/precache-manifest.44b2a5fcd5a83e82e4c23cbbc9821216.js",
     "service-worker.js": "/thyra-online/service-worker.js",
     "static/css/2.15a7df79.chunk.css.map": "/thyra-online/static/css/2.15a7df79.chunk.css.map",
-    "static/css/main.d34ce524.chunk.css.map": "/thyra-online/static/css/main.d34ce524.chunk.css.map",
+    "static/css/main.bc4bb5f1.chunk.css.map": "/thyra-online/static/css/main.bc4bb5f1.chunk.css.map",
     "static/media/semantic.css": "/thyra-online/static/media/outline-icons.fc9c63c8.eot"
   }
 }

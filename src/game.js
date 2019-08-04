@@ -54,10 +54,11 @@ class Game {
       cells: this.constructor.COLUMNS.map(x => this.cells[y][x]),
     }));
 
-    const {nextPlayer, moveType, availableMoves} = status;
+    const {nextPlayer, moveType, availableMoves, canUndo} = status;
     this.nextPlayer = nextPlayer;
     this.moveType = moveType;
     this.availableMoves = availableMoves;
+    this.canUndo = canUndo;
 
     this.winner = this.getWinner();
     if (this.winner) {
@@ -98,6 +99,7 @@ class Game {
       finished: false,
       winner: null,
       availableMoves: this.allMovesAreAvailable(),
+      canUndo: false,
     };
   }
 
@@ -206,6 +208,14 @@ class Game {
     return makeMoveMethod.bind(this)(coordinates);
   }
 
+  undo() {
+    if (!this.canUndo) {
+      throw new Error("Cannot undo");
+    }
+
+    return this.previous;
+  }
+
   placeFirstWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER, {x, y});
 
@@ -224,6 +234,7 @@ class Game {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
       availableMoves: this.getEmptyCellsAvailableMoves(cells),
+      canUndo: true,
     });
   }
 
@@ -250,6 +261,7 @@ class Game {
       availableMoves: nextPlayer === this.constructor.PLAYER_A
         ? this.getPlayerAvailableMoves(cells, nextPlayer)
         : this.getEmptyCellsAvailableMoves(cells),
+      canUndo: false,
     });
   }
 
@@ -263,6 +275,7 @@ class Game {
         ? this.constructor.MOVE_TYPE_MOVE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
       availableMoves: this.getMovableAvailableMoves(this.cells, {x, y}),
+      canUndo: true,
     });
   }
 
@@ -295,6 +308,7 @@ class Game {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
       availableMoves: this.getBuildableAvailableMoves(cells, to),
+      canUndo: true,
     });
   }
 
@@ -328,6 +342,7 @@ class Game {
       nextPlayer: nextPlayer,
       moveType: this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
       availableMoves: this.getPlayerAvailableMoves(cells, nextPlayer),
+      canUndo: false,
     });
   }
 }

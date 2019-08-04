@@ -23,6 +23,10 @@ class App extends Component {
     this.setState({game: newGame});
   };
 
+  undo = () => {
+    this.setState(state => ({game: state.game.undo()}));
+  };
+
   render() {
     const {game} = this.state;
     return (
@@ -39,6 +43,9 @@ class App extends Component {
               Next player: {this.constructor.PLAYER_NAMES[game.nextPlayer]}
               <br />
               {this.constructor.MOVE_TYPE_NAMES[game.moveType]}
+              {game.canUndo ? (
+                <button onClick={this.undo}>Undo</button>
+              ) : null}
             </Fragment>
           )}
         </div>

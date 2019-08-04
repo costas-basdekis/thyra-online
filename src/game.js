@@ -85,11 +85,8 @@ class Game {
     return this.rows.map(() => this.columns.map(() => true));
   }
 
-  removeAvailableMove(coordinates) {
-    this.checkCoordinatesAreValid(coordinates);
-    return this.availableMoves.map((row, y) => row.map((available, x) => (
-      available && (coordinates.x !== x || coordinates.y !== y)
-    )));
+  getEmptyCellsAvailableMoves(cells) {
+    return this.rows.map(y => this.columns.map(x => !cells[y][x].player));
   }
 
   checkCanMakeMove(expectedMoveType, coordinates) {
@@ -117,7 +114,7 @@ class Game {
   placeFirstWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER, {x, y});
 
-    return new this.constructor({
+    const cells = {
       ...this.cells,
       [y]: {
         ...this.cells[y],
@@ -127,19 +124,20 @@ class Game {
           worker: this.constructor.WORKER_FIRST,
         },
       },
-    }, {
+    };
+    return new this.constructor(cells, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
       finished: this.finished,
       winner: this.winner,
-      availableMoves: this.removeAvailableMove({x, y}),
+      availableMoves: this.getEmptyCellsAvailableMoves(cells),
     });
   }
 
   placeSecondWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER, {x, y});
 
-    return new this.constructor({
+    const cells = {
       ...this.cells,
       [y]: {
         ...this.cells[y],
@@ -149,14 +147,15 @@ class Game {
           worker: this.constructor.WORKER_SECOND,
         },
       },
-    }, {
+    };
+    return new this.constructor(cells, {
       nextPlayer: this.constructor.OTHER_PLAYER[this.nextPlayer],
       moveType: this.nextPlayer === this.constructor.PLAYER_A
         ? this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_WORKER,
       finished: this.finished,
       winner: this.winner,
-      availableMoves: this.removeAvailableMove({x, y}),
+      availableMoves: this.getEmptyCellsAvailableMoves(cells),
     });
   }
 }

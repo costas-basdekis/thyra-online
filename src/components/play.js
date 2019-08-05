@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./board";
-import {Button, Divider, Header, Message, Segment, Statistic} from "semantic-ui-react";
+import {Button, Header, Segment, Statistic} from "semantic-ui-react";
 
 class Play extends Component {
   static PLAYER_NAMES = {
@@ -110,7 +110,7 @@ class Play extends Component {
         <Segment>
           <div>
             {[...game.history].reverse().map(previousGame => (
-              <Board game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} />
+              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} />
             ))}
           </div>
         </Segment>

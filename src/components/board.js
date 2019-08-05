@@ -8,12 +8,18 @@ class Board extends Component {
     this.props.makeMove(this.props.game.makeMove({x: cell.x, y: cell.y}));
   };
 
+  onSelect = () => {
+    this.props.onSelect(this.props.game);
+  };
+
   render() {
-    let {game} = this.props;
+    let {game, small, makeMove, onSelect, selected} = this.props;
 
     return (
-      //<div className={"background-container"}>
-      <div className={"background"}>
+      <div
+        className={classNames("background", {small, editable: !!makeMove, selectable: !!onSelect, selected})}
+        onClick={onSelect ? this.onSelect : null}
+      >
         {game.rowsAndColumns.map(row => (
           <div key={`row-${row.y}`} className={"row"}>
             {row.cells.map(cell => {
@@ -41,7 +47,6 @@ class Board extends Component {
           </div>
         ))}
       </div>
-      //</div>
     );
   }
 }
@@ -49,6 +54,12 @@ class Board extends Component {
 Board.propTypes = {
   game: PropTypes.instanceOf(Game).isRequired,
   makeMove: PropTypes.func,
+  small: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func,
+};
+
+Board.defaultProps = {
+  small: false,
 };
 
 export default Board;

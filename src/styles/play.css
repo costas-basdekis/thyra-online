@@ -2,7 +2,15 @@
     display: inline-block;
     border: 5px solid black;
     background: limegreen;
-    height: 100%;
+}
+.background.selectable {
+    cursor: pointer;
+}
+.background.selectable:hover {
+    border-color: red;
+}
+.background.selectable.selected {
+    border-color: yellow;
 }
 
 .row {
@@ -18,6 +26,8 @@
 
 .cell.available {
     border-color: blue;
+}
+.background.editable .cell.available {
     cursor: pointer;
 }
 
@@ -114,4 +124,16 @@
     .level {
         border-width: 5px;
     }
+}
+
+.background.small {
+    border-width: 1px;
+}
+.background.small .cell {
+    width: 10px;
+    height: 10px;
+    border-width: 1px;
+}
+.background.small .level {
+    border-width: 1px;
 }

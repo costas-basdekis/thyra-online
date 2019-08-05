@@ -26,7 +26,7 @@ class Game {
   static create() {
     const cells = this.getInitialCells();
     const status = this.getInitialStatus();
-    return new this(cells, status, null, false);
+    return new this(cells, status, null, false, true);
   }
 
   createStep(cells, status) {
@@ -42,6 +42,9 @@ class Game {
       throw new Error("You need to pass cells, status, and previous game");
     }
     this.previous = previous;
+    this.history = (this.previous ? this.previous.history : [])
+      .filter(game => !game.canUndo)
+      .concat([this]);
     this.moveCount = this.previous ? (isNextMove ? this.previous.moveCount + 1 : this.previous.moveCount) : 1;
     this.chainCount = this.previous ? this.previous.chainCount + 1 : 0;
 
@@ -235,7 +238,7 @@ class Game {
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
       availableMoves: this.getEmptyCellsAvailableMoves(cells),
       canUndo: true,
-    });
+    }, false);
   }
 
   placeSecondWorker({x, y}) {
@@ -262,7 +265,7 @@ class Game {
         ? this.getPlayerAvailableMoves(cells, nextPlayer)
         : this.getEmptyCellsAvailableMoves(cells),
       canUndo: false,
-    });
+    }, nextPlayer === this.constructor.PLAYER_A);
   }
 
   selectWorkerToMove({x, y}) {
@@ -276,7 +279,7 @@ class Game {
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
       availableMoves: this.getMovableAvailableMoves(this.cells, {x, y}),
       canUndo: true,
-    });
+    }, false);
   }
 
   moveWorker(to, worker) {
@@ -309,7 +312,7 @@ class Game {
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
       availableMoves: this.getBuildableAvailableMoves(cells, to),
       canUndo: true,
-    });
+    }, false);
   }
 
   moveFirstWorker({x, y}) {

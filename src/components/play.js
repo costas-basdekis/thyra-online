@@ -82,7 +82,7 @@ class Play extends Component {
             {game.finished ? (
               <Statistic value={<Button negative onClick={this.newGame} disabled={!game.previous}>New Game</Button>} />
             ) : (
-              <Statistic value={<Button negative onClick={this.undo} disabled={!!displayGame || !game.canUndo}>Undo</Button>} />
+              <Statistic value={<Button negative onClick={this.undo} disabled={!!selectedGame || !game.canUndo}>Undo</Button>} />
             )}
           </Statistic.Group>
         </Segment>

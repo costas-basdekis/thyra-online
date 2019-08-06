@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import 'fomantic-ui-css/semantic.css';
-import {Button, Checkbox, Container, Header, Icon, Input, Label, List, Segment, Tab} from 'semantic-ui-react';
+import {Button, Checkbox, Container, Header, Icon, Input, Label, List, Statistic, Segment, Tab} from 'semantic-ui-react';
 import './styles/App.css';
 import Game from "./game/game";
 import Play from "./components/play";
@@ -14,6 +14,7 @@ class App extends Component {
     users: client.users,
     usersById: client.usersById,
     games: client.games,
+    liveGame: null,
   };
 
   componentDidMount() {
@@ -56,15 +57,19 @@ class App extends Component {
     client.changeReadyToPlay(checked);
   };
 
+  selectLiveGame = game => {
+    this.setState({liveGame: game});
+  };
+
   render() {
-    const {game, user, username, users, usersById, games} = this.state;
+    const {game, user, username, users, usersById, games, liveGame} = this.state;
     return (
       <Container text>
         <Segment textAlign={"center"}>
           <Header as={"h1"}>Thyra Online</Header>
         </Segment>
         <Tab menu={{pointing: true}} panes={[
-          { menuItem: 'Live Play', render: () => (
+          { menuItem: 'Lobby', render: () => (
             <Tab.Pane attached={false}>
               {user ? (
                 <Fragment>
@@ -86,21 +91,50 @@ class App extends Component {
                       </List>
                     )},
                     {menuItem: `${games.length} games`, render: () => (
-                        <List bulleted>
-                          {games.map(game => (
-                            <List.Item key={game.id}>
-                              {usersById[game.userIds[0]].name} {usersById[game.userIds[0]].id === user.id ? <Label><Icon name={"user"} />Me</Label> : null}
+                      <List bulleted>
+                        {games.map(otherGame => {
+                          const playerA = usersById[otherGame.userIds[0]];
+                          const playerB = usersById[otherGame.userIds[1]];
+                          const isUserPlayerA = playerA.id === user.id;
+                          const isUserPlayerB = playerB.id === user.id;
+                          const isMyGame = isUserPlayerA || isUserPlayerB;
+                          return (
+                            <List.Item key={otherGame.id}>
+                              {playerA.name} {isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
                               {" vs "}
-                              {usersById[game.userIds[1]].name}
+                              {playerB.name} {isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
+                              <Button onClick={() => this.selectLiveGame(otherGame)}>{isMyGame ? "Play" : "Spectate"}</Button>
                             </List.Item>
-                          ))}
-                        </List>
+                          );
+                        })}
+                      </List>
                     )}
                   ]} />
                 </Fragment>
               ) : "Connecting to server..."}
             </Tab.Pane>
           ) },
+          {menuItem: liveGame ? (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate') : 'Live Play/Spectate', render: () => {
+            if (!liveGame) {
+              return <Segment>"Choose a game from the lobby"</Segment>;
+            }
+            const playerA = usersById[liveGame.userIds[0]];
+            const playerB = usersById[liveGame.userIds[1]];
+            const isUserPlayerA = playerA.id === user.id;
+            const isUserPlayerB = playerB.id === user.id;
+            return (
+              <Fragment>
+                <Segment>
+                  <Statistic.Group widths={"three"} size={"tiny"}>
+                    <Statistic value={playerA.name} label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null} color={isUserPlayerA ? "green" : undefined}/>
+                    <Statistic label={"vs"}/>
+                    <Statistic value={playerB.name} label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null} color={isUserPlayerB ? "green" : undefined}/>
+                  </Statistic.Group>
+                </Segment>
+                <Play game={Game.deserialize(liveGame.game)} makeMove={this.makeMove} names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}} allowTotalControl={false} />
+              </Fragment>
+            );
+          }},
           { menuItem: 'Hotseat', render: () => <Tab.Pane attached={false}><Play game={game} makeMove={this.makeMove} /></Tab.Pane> },
         ]} />
       </Container>

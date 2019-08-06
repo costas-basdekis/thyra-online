@@ -6,10 +6,6 @@ import Board from "./board";
 import {Button, Header, Segment, Statistic} from "semantic-ui-react";
 
 class Play extends Component {
-  static PLAYER_NAMES = {
-    [Game.PLAYER_A]: "Player A",
-    [Game.PLAYER_B]: "Player B",
-  };
   static MOVE_TYPE_NAMES = {
     [Game.MOVE_TYPE_PLACE_FIRST_WORKER]: "Place a worker",
     [Game.MOVE_TYPE_PLACE_SECOND_WORKER]: "Place a worker",
@@ -66,17 +62,17 @@ class Play extends Component {
   }
 
   render() {
-    const {game} = this.props;
+    const {game, names, allowTotalControl} = this.props;
     const {selectedGame} = this.state;
     const displayGame = selectedGame || game;
     return (
       <Fragment>
         <Segment>
-          <Statistic.Group widths={"three"} size={"small"}>
+          <Statistic.Group widths={"three"} size={"tiny"}>
             {game.finished ? (
-              <Statistic color={"green"} value={this.constructor.PLAYER_NAMES[game.winner]} label={"Won!"} />
+              <Statistic color={"green"} value={names[game.winner]} label={"Won!"} />
             ) : (
-              <Statistic value={this.constructor.PLAYER_NAMES[game.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[game.moveType]} />
+              <Statistic value={names[game.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[game.moveType]} />
             )}
             <Statistic value={game.moveCount} label={"Move"} />
             {game.finished ? (
@@ -91,9 +87,9 @@ class Play extends Component {
             <Header as={"h2"}>Reviewing previous move</Header>
             <Statistic.Group widths={"three"} size={"small"}>
               {selectedGame.finished ? (
-                <Statistic color={"green"} value={this.constructor.PLAYER_NAMES[selectedGame.winner]} label={"Won!"} />
+                <Statistic color={"green"} value={names[selectedGame.winner]} label={"Won!"} />
               ) : (
-                <Statistic value={this.constructor.PLAYER_NAMES[selectedGame.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[selectedGame.moveType]} />
+                <Statistic value={names[selectedGame.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[selectedGame.moveType]} />
               )}
               <Statistic value={selectedGame.moveCount} label={"Move"} />
               <Statistic value={<Button negative onClick={this.undoToSelected} disabled={!selectedGame.canUndo}>Undo</Button>} />
@@ -114,12 +110,14 @@ class Play extends Component {
             ))}
           </div>
         </Segment>
-        <Segment>
-          <Statistic.Group widths={"two"} size={"small"}>
-            <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
-            <Statistic value={<Button negative onClick={this.newGame} disabled={!!selectedGame || !game.previous}>New Game</Button>} />
-          </Statistic.Group>
-        </Segment>
+        {allowTotalControl ? (
+          <Segment>
+            <Statistic.Group widths={"two"} size={"small"}>
+              <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
+              <Statistic value={<Button negative onClick={this.newGame} disabled={!!selectedGame || !game.previous}>New Game</Button>} />
+            </Statistic.Group>
+          </Segment>
+        ) : null}
       </Fragment>
     );
   }
@@ -128,6 +126,16 @@ class Play extends Component {
 Play.propTypes = {
   game: PropTypes.instanceOf(Game).isRequired,
   makeMove: PropTypes.func.isRequired,
+  names: PropTypes.object.isRequired,
+  allowTotalControl: PropTypes.bool.isRequired,
+};
+
+Play.defaultProps = {
+  names: {
+    [Game.PLAYER_A]: "Player A",
+    [Game.PLAYER_B]: "Player B",
+  },
+  allowTotalControl: true,
 };
 
 export default Play;

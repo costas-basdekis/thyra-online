@@ -45,6 +45,7 @@ class Game {
     this.history = (this.previous ? this.previous.history : [])
       .filter(game => !game.canUndo)
       .concat([this]);
+    this.isNextMove = isNextMove;
     this.moveCount = this.previous ? (isNextMove ? this.previous.moveCount + 1 : this.previous.moveCount) : 1;
     this.chainCount = this.previous ? this.previous.chainCount + 1 : 0;
 
@@ -76,6 +77,27 @@ class Game {
     if (this.finished) {
       this.availableMoves = this.constructor.noMovesAreAvailable();
     }
+  }
+
+  serialize() {
+    return {
+      cells: this.cells,
+      status: {
+        nextPlayer: this.nextPlayer,
+        moveType: this.moveType,
+        availableMoves: this.availableMoves,
+        canUndo: this.canUndo,
+      },
+      previous: this.previous ? this.previous.serialize() : null,
+      isNextMove: this.isNextMove,
+    };
+  }
+
+  static deserialize({cells, status, previous, isNextMove}) {
+    if (previous) {
+      previous = this.deserialize(previous);
+    }
+    return new this(cells, status, previous, isNextMove);
   }
 
   static getInitialCells() {

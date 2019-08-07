@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./board";
-import {Button, Header, Segment, Statistic} from "semantic-ui-react";
+import {Button, Header, Modal, Segment, Statistic} from "semantic-ui-react";
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -16,19 +16,24 @@ class Play extends Component {
   };
 
   state = {
-    selectedGame: null
+    selectedGame: null,
+    game: this.props.game,
   };
 
   makeMove = game => {
-    this.props.makeMove(game);
+    if (this.props.submit) {
+      this.setState({game})
+    } else {
+      this.props.makeMove(game);
+    }
   };
 
   takeMoveBack = () => {
-    this.makeMove(this.props.game.previous);
+    this.makeMove(this.state.game.previous);
   };
 
   undo = () => {
-    this.makeMove(this.props.game.undo());
+    this.makeMove(this.state.game.undo());
   };
 
   newGame = () => {
@@ -36,7 +41,7 @@ class Play extends Component {
   };
 
   selectGame = game => {
-    this.setState({selectedGame: game === this.props.game ? null : game});
+    this.setState({selectedGame: game === this.state.game ? null : game});
   };
 
   makeMoveToSelected = game => {
@@ -55,16 +60,30 @@ class Play extends Component {
     this.selectGame(null);
   };
 
+  submit = () => {
+    const history = this.state.game.fullHistory;
+    const propsGameIndex = history.findIndex(game => game === this.props.game);
+    const newHistory = history.slice(propsGameIndex + 1);
+    const moves = newHistory.map(game => game.lastMove);
+    console.log('Submitting moves', {history, propsGameIndex, newHistory, moves});
+    this.props.submit(moves);
+  };
+
+  resign = () => {
+    this.props.submit("resign");
+  };
+
   componentDidUpdate(prevProps) {
     if (this.props.game !== prevProps.game) {
-      this.setState({selectedGame: null});
+      this.setState({selectedGame: null, game: this.props.game, resigning: false});
     }
   }
 
   render() {
-    const {game, names, allowTotalControl} = this.props;
-    const {selectedGame} = this.state;
+    const {names, allowControl} = this.props;
+    const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
+    const isMyGame = allowControl.length > 0;
     return (
       <Fragment>
         <Segment>
@@ -75,12 +94,41 @@ class Play extends Component {
               <Statistic value={names[game.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[game.moveType]} />
             )}
             <Statistic value={game.moveCount} label={"Move"} />
-            {game.finished ? (
-              <Statistic value={<Button negative onClick={this.newGame} disabled={!game.previous}>New Game</Button>} />
+            {this.props.game.finished ? (
+              !this.props.submit ? (
+                <Statistic value={<Button negative onClick={this.newGame} disabled={!game.previous}>New Game</Button>} />
+              ) : null
             ) : (
-              <Statistic value={<Button negative onClick={this.undo} disabled={!!selectedGame || !game.canUndo}>Undo</Button>} />
+              this.props.submit
+                ? <Statistic value={<Button positive onClick={this.submit} disabled={!!selectedGame || game === this.props.game || (game.nextPlayer === this.props.game.nextPlayer && !game.finished)}>Submit</Button>}/>
+                : <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
             )}
           </Statistic.Group>
+        </Segment>
+        {this.props.submit && isMyGame ? (
+          <Segment>
+            <Statistic.Group widths={"two"} size={"tiny"}>
+              <Statistic value={
+                <Modal
+                  trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>Resign</Button>}
+                  header='Resign?'
+                  content='Are you sure you want to forfeit?'
+                  actions={[{key: 'resign', content: 'Resign', negative: true, onClick: this.resign}, { key: 'continue', content: 'Continue', positive: true }]}
+                />
+              } />
+              <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
+            </Statistic.Group>
+          </Segment>
+        ) : null}
+        <Segment style={{textAlign: "center"}}>
+          <Board game={displayGame} makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove} allowControl={allowControl} />
+        </Segment>
+        <Segment>
+          <div>
+            {[...game.history].reverse().map(previousGame => (
+              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} />
+            ))}
+          </div>
         </Segment>
         {selectedGame ? (
           <Segment textAlign={"center"}>
@@ -100,17 +148,7 @@ class Play extends Component {
             </Statistic.Group>
           </Segment>
         ) : null}
-        <Segment style={{textAlign: "center"}}>
-          <Board game={displayGame} makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove} />
-        </Segment>
-        <Segment>
-          <div>
-            {[...game.history].reverse().map(previousGame => (
-              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} />
-            ))}
-          </div>
-        </Segment>
-        {allowTotalControl ? (
+        {!this.props.submit ? (
           <Segment>
             <Statistic.Group widths={"two"} size={"small"}>
               <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
@@ -125,9 +163,10 @@ class Play extends Component {
 
 Play.propTypes = {
   game: PropTypes.instanceOf(Game).isRequired,
-  makeMove: PropTypes.func.isRequired,
+  makeMove: PropTypes.func,
+  submit: PropTypes.func,
   names: PropTypes.object.isRequired,
-  allowTotalControl: PropTypes.bool.isRequired,
+  allowControl: PropTypes.array.isRequired,
 };
 
 Play.defaultProps = {
@@ -135,7 +174,7 @@ Play.defaultProps = {
     [Game.PLAYER_A]: "Player A",
     [Game.PLAYER_B]: "Player B",
   },
-  allowTotalControl: true,
+  allowControl: [Game.PLAYER_A, Game.PLAYER_B],
 };
 
 export default Play;

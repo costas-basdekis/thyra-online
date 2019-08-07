@@ -69,6 +69,10 @@ class Client {
       this.onGames(games);
     }
   };
+
+  submitGameMove(game, moves) {
+    this.socket.emit("submit-game-moves", {id: game.id, moves});
+  }
 }
 
 export const client = new Client();

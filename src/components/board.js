@@ -13,11 +13,12 @@ class Board extends Component {
   };
 
   render() {
-    let {game, small, makeMove, onSelect, selected} = this.props;
+    let {game, small, makeMove, onSelect, selected, allowControl} = this.props;
+    const clickable = allowControl.includes(game.nextPlayer);
 
     return (
       <div
-        className={classNames("background", {small, editable: !!makeMove, selectable: !!onSelect, selected})}
+        className={classNames("background", {small, editable: !!makeMove && clickable, selectable: !!onSelect, selected})}
         onClick={onSelect ? this.onSelect : null}
       >
         {game.rowsAndColumns.map(row => (
@@ -28,7 +29,7 @@ class Board extends Component {
                 <div
                   key={`row-${cell.x}-${cell.y}`}
                   className={classNames("cell", `level-${cell.level}`, {available})}
-                  onClick={this.props.makeMove && available ? () => this.makeMove(cell) : null}
+                  onClick={this.props.makeMove && available && clickable ? () => this.makeMove(cell) : null}
                 >
                   <div className={classNames("level", "level-1")}>
                     <div className={classNames("level", "level-2")}>
@@ -56,10 +57,14 @@ Board.propTypes = {
   makeMove: PropTypes.func,
   small: PropTypes.bool.isRequired,
   onSelect: PropTypes.func,
+  selected: PropTypes.bool.isRequired,
+  allowControl: PropTypes.array.isRequired,
 };
 
 Board.defaultProps = {
   small: false,
+  selected: false,
+  allowControl: [Game.PLAYER_A, Game.PLAYER_B],
 };
 
 export default Board;

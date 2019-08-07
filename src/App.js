@@ -15,11 +15,15 @@ class App extends Component {
     usersById: client.usersById,
     games: client.games,
     liveGame: null,
+    liveGameGame: null,
   };
 
   componentDidMount() {
     client.onUser = user => {
       this.setState({user, username: user ? user.name : null});
+      if (!user) {
+        this.setState({users: [], usersById: {}, games: [], liveGame: null, liveGameGame: null});
+      }
     };
     client.onUsers = (users, usersById) => {
       if (this.state.user) {
@@ -32,6 +36,15 @@ class App extends Component {
     };
     client.onGames = games => {
       this.setState({games});
+      if (this.state.liveGame) {
+        const newLiveGame = this.state.games.find(game => game.id === this.state.liveGame.id);
+        console.log('got games', this.state.liveGame, newLiveGame);
+        if (!newLiveGame) {
+          this.setState({liveGame: null, liveGameGame: null});
+        } else if (newLiveGame.chainCount !== this.state.liveGame.chainCount || newLiveGame.finished !== this.state.liveGame.finished) {
+          this.setState({liveGame: newLiveGame, liveGameGame: Game.deserialize(newLiveGame.game)});
+        }
+      }
     };
   }
 
@@ -58,11 +71,18 @@ class App extends Component {
   };
 
   selectLiveGame = game => {
-    this.setState({liveGame: game});
+    this.setState({liveGame: game, liveGameGame: Game.deserialize(game.game)});
+  };
+
+  submit = moves => {
+    client.submitGameMove(this.state.liveGame, moves);
   };
 
   render() {
-    const {game, user, username, users, usersById, games, liveGame} = this.state;
+    const {game, user, username, users, usersById, games, liveGame, liveGameGame} = this.state;
+    const onlineUsers = users.filter(user => user.online);
+    const liveGames = games.filter(game => !game.finished);
+    const pastGames = games.filter(game => game.finished);
     return (
       <Container text>
         <Segment textAlign={"center"}>
@@ -79,9 +99,9 @@ class App extends Component {
                   <br />
                   <Checkbox label={"Ready to play?"} checked={user.readyToPlay} onChange={this.changeReadyToPlay} />
                   <Tab menu={{pointing: true}} panes={[
-                    {menuItem: `${users.length} users`, render: () => (
+                    {menuItem: `${onlineUsers.length} users online`, render: () => (
                       <List bulleted>
-                        {users.map(otherUser => (
+                        {onlineUsers.map(otherUser => (
                           <List.Item key={otherUser.id}>
                             {otherUser.name}
                             {otherUser.id === user.id ? <Label><Icon name={"user"} />Me</Label> : null}
@@ -90,9 +110,9 @@ class App extends Component {
                         ))}
                       </List>
                     )},
-                    {menuItem: `${games.length} games`, render: () => (
+                    {menuItem: `${liveGames.length} live games`, render: () => (
                       <List bulleted>
-                        {games.map(otherGame => {
+                        {liveGames.map(otherGame => {
                           const playerA = usersById[otherGame.userIds[0]];
                           const playerB = usersById[otherGame.userIds[1]];
                           const isUserPlayerA = playerA.id === user.id;
@@ -108,20 +128,43 @@ class App extends Component {
                           );
                         })}
                       </List>
-                    )}
+                    )},
+                    {menuItem: `${pastGames.length} past games`, render: () => (
+                      <List bulleted>
+                        {pastGames.map(otherGame => {
+                          const playerA = usersById[otherGame.userIds[0]];
+                          const playerB = usersById[otherGame.userIds[1]];
+                          const isUserPlayerA = playerA.id === user.id;
+                          const isUserPlayerB = playerB.id === user.id;
+                          return (
+                            <List.Item key={otherGame.id}>
+                              {playerA.name}
+                              {isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
+                              {otherGame.finished && isUserPlayerA && otherGame.winnerUserId === user.id ? <Label><Icon name={"trophy"} />Winner</Label> : null}
+                              {" vs "}
+                              {playerB.name}
+                              {isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
+                              {otherGame.finished && isUserPlayerA && otherGame.winnerUserId === user.id ? <Label><Icon name={"trophy"} />Winner</Label> : null}
+                              <Button onClick={() => this.selectLiveGame(otherGame)}>Review</Button>
+                            </List.Item>
+                          );
+                        })}
+                      </List>
+                    )},
                   ]} />
                 </Fragment>
               ) : "Connecting to server..."}
             </Tab.Pane>
           ) },
-          {menuItem: liveGame ? (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate') : 'Live Play/Spectate', render: () => {
-            if (!liveGame) {
-              return <Segment>"Choose a game from the lobby"</Segment>;
+          {menuItem: liveGame ? (liveGame.finished ? 'Review' : (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate')) : 'Live Play/Spectate/Review', render: () => {
+            if (!liveGame || !user) {
+              return <Segment>Choose a game from the lobby</Segment>;
             }
             const playerA = usersById[liveGame.userIds[0]];
             const playerB = usersById[liveGame.userIds[1]];
             const isUserPlayerA = playerA.id === user.id;
             const isUserPlayerB = playerB.id === user.id;
+            const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
             return (
               <Fragment>
                 <Segment>
@@ -131,7 +174,12 @@ class App extends Component {
                     <Statistic value={playerB.name} label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null} color={isUserPlayerB ? "green" : undefined}/>
                   </Statistic.Group>
                 </Segment>
-                <Play game={Game.deserialize(liveGame.game)} makeMove={this.makeMove} names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}} allowTotalControl={false} />
+                <Play
+                  game={liveGameGame}
+                  names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}}
+                  allowControl={[userPlayer].filter(player => player)}
+                  submit={this.submit}
+                />
               </Fragment>
             );
           }},

@@ -9,7 +9,7 @@ class Client {
         unavailable: true,
       });
     }
-    this.socket = window.io(window.location.hostname === 'localhost' ? "http://localhost:4000" : "http://thyra.basdekis.io");
+    this.socket = window.io(window.location.hostname === 'localhost' ? "http://localhost:4000" : "https://thyra.basdekis.io");
     this.available = !this.socket.unavailable;
     this.socket.on('connect', () => {
       this.getUser();

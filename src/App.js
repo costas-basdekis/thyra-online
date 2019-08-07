@@ -89,7 +89,7 @@ class App extends Component {
           <Header as={"h1"}>Thyra Online</Header>
         </Segment>
         <Tab menu={{pointing: true}} panes={[
-          { menuItem: 'Lobby', render: () => (
+          client.available ? { menuItem: 'Lobby', render: () => (
             <Tab.Pane attached={false}>
               {user ? (
                 <Fragment>
@@ -155,8 +155,8 @@ class App extends Component {
                 </Fragment>
               ) : "Connecting to server..."}
             </Tab.Pane>
-          ) },
-          {menuItem: liveGame ? (liveGame.finished ? 'Review' : (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate')) : 'Live Play/Spectate/Review', render: () => {
+          ) } : null,
+          client.available ? {menuItem: liveGame ? (liveGame.finished ? 'Review' : (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate')) : 'Live Play/Spectate/Review', render: () => {
             if (!liveGame || !user) {
               return <Segment>Choose a game from the lobby</Segment>;
             }
@@ -182,9 +182,9 @@ class App extends Component {
                 />
               </Fragment>
             );
-          }},
+          }} : null,
           { menuItem: 'Hotseat', render: () => <Tab.Pane attached={false}><Play game={game} makeMove={this.makeMove} /></Tab.Pane> },
-        ]} />
+        ].filter(pane => pane)} />
       </Container>
     );
   }

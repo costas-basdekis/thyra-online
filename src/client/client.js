@@ -2,7 +2,15 @@ class Client {
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
     this.password = localStorage.getItem('user-password') || null;
-    this.socket = window.io("http://localhost:4000");
+    if (!window.io) {
+      window.io = () => ({
+        on: () => console.warn("Socket script was missing"),
+        emit: () => console.warn("Socket script was missing"),
+        unavailable: true,
+      });
+    }
+    this.socket = window.io(window.location.hostname === 'localhost' ? "http://localhost:4000" : "http://thyra.basdekis.io");
+    this.available = !this.socket.unavailable;
     this.socket.on('connect', () => {
       this.getUser();
     });

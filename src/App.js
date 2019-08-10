@@ -16,16 +16,19 @@ class App extends Component {
   };
 
   selectLiveGame = liveGame => {
+    let gameUrl;
+    if (liveGame) {
+      gameUrl = `/game/${liveGame.id}`;
+    } else {
+      gameUrl = '/game';
+    }
+    if (gameUrl !== this.props.location.pathname) {
+      this.props.history.push(gameUrl);
+    }
     if (this.state.liveGame === liveGame) {
       return;
     }
     this.setState({liveGame});
-    if (liveGame) {
-      const gameUrl = `/game/${liveGame.id}`;
-      if (gameUrl !== this.props.location.pathname) {
-        this.props.history.push(gameUrl);
-      }
-    }
   };
 
   render() {

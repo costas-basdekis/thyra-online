@@ -1,12 +1,13 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Icon, Label, Segment, Statistic} from "semantic-ui-react";
+import {Button, Grid, Icon, Label, Modal, Segment, Statistic} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
 import Play from "./Play";
 import {Route, Switch, withRouter} from "react-router-dom";
+import * as utils from "../utils";
 
 class ChosenOnlineGame extends Component {
   gameSelector = createSelector([
@@ -18,6 +19,28 @@ class ChosenOnlineGame extends Component {
     return this.gameSelector(this.props);
   }
 
+  playersInfoSelector = createSelector([
+    props => props.user,
+    props => props.usersInfo,
+    () => this.game,
+  ], (user, {byId: usersById}, game) => {
+    const playerA = usersById[game.userIds[0]];
+    const playerB = usersById[game.userIds[1]];
+    const isUserPlayerA = user ? playerA.id === user.id : false;
+    const isUserPlayerB = user ? playerB.id === user.id : false;
+    const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
+
+    return {
+      playerA, playerB,
+      isUserPlayerA, isUserPlayerB,
+      userPlayer,
+    };
+  });
+
+  get playersInfo() {
+    return this.playersInfoSelector(this.props);
+  }
+
   gameGameSelector = createSelector([
     () => this.game,
   ], game => game ? Game.deserialize(game.game) : null);
@@ -25,6 +48,10 @@ class ChosenOnlineGame extends Component {
   get gameGame() {
     return this.gameGameSelector(this.props);
   }
+
+  dismissUrlGameError = () => {
+    this.props.selectLiveGame(null);
+  };
 
   submit = moves => {
     this.props.client.submitGameMove(this.props.game, moves);
@@ -44,19 +71,51 @@ class ChosenOnlineGame extends Component {
     }
   }
 
+  close = () => {
+    this.props.selectLiveGame(null);
+  };
+
+  share = e => {
+    const url = this.props.location.pathname;
+    if (navigator.share) {
+      const game = this.game;
+      const {playerA, playerB} = this.playersInfo;
+      navigator.share({
+        title: `Thyra Online - ${game.finished ? 'Review' : 'Live'} ${playerA.name} vs ${playerB.name}`,
+        text: `${game.finished? 'Review finished': 'Watch live'} Santorini game between ${playerA.name} and ${playerB.name}`,
+        url,
+      }).catch(() => {
+        utils.copyToClipboard(url);
+        alert('Link copied to clipboard');
+      });
+    } else {
+      utils.copyToClipboard(url);
+      alert('Link copied to clipboard');
+    }
+    e.preventDefault();
+  };
+
   render() {
-    const {user, usersInfo: {byId: usersById}} = this.props;
-    const {game, gameGame} = this;
+    const {location} = this.props;
+    const {gameGame} = this;
 
     if (!gameGame) {
-      return "This game cannot be found";
+      return (
+        <Fragment>
+          <Modal
+            open={true}
+            size={'mini'}
+            onClose={this.dismissUrlGameError}
+            header={'Could not find game'}
+            content={'This game cannot be found. Please check that you copied the full URL'}
+            actions={[{key: 'ok', content: 'OK', positive: true}]}
+          />
+          Could not find game
+        </Fragment>
+      );
     }
 
-    const playerA = usersById[game.userIds[0]];
-    const playerB = usersById[game.userIds[1]];
-    const isUserPlayerA = user ? playerA.id === user.id : false;
-    const isUserPlayerB = user ? playerB.id === user.id : false;
-    const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
+    const {playerA, playerB, isUserPlayerA, isUserPlayerB, userPlayer} = this.playersInfo;
     return (
       <Fragment>
         <Segment>
@@ -73,6 +132,22 @@ class ChosenOnlineGame extends Component {
               color={isUserPlayerB ? "green" : undefined}
             />
           </Statistic.Group>
+          <Grid columns={'equal'}>
+            <Grid.Column textAlign={'left'}><Button negative onClick={this.close}>Close</Button></Grid.Column>
+            <Grid.Column>
+              <Button
+                positive
+                icon
+                onClick={this.share}
+                style={{width: '100%'}}
+                as={'a'}
+                href={location.pathname}
+                title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
+              >
+                <Icon name={'share'}/> Share
+              </Button>
+            </Grid.Column>
+          </Grid>
         </Segment>
         <Play
           game={gameGame}
@@ -87,6 +162,7 @@ class ChosenOnlineGame extends Component {
 
 ChosenOnlineGame.propTypes = {
   match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   client: PropTypes.object.isRequired,
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,

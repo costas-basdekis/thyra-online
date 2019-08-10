@@ -143,3 +143,21 @@
 .background.small-board .level {
     border-width: 1px;
 }
+
+.ui.image.text-sized {
+    width: 1em;
+}
+
+@keyframes shadow-pulse
+{
+  0% {
+    box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
+  }
+}
+
+.attention {
+    animation: shadow-pulse 1s infinite;
+}

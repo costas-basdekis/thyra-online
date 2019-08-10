@@ -4,6 +4,7 @@ import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./Board";
 import {Button, Header, Modal, Segment, Statistic} from "semantic-ui-react";
+import classNames from 'classnames';
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -84,6 +85,13 @@ class Play extends Component {
     const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
+    const canSubmit = (
+      !!this.props.submit
+      && !selectedGame
+      && game !== this.props.game
+      && !game.finished
+      && game.nextPlayer !== this.props.game.nextPlayer
+    );
     return (
       <Fragment>
         <Segment>
@@ -100,7 +108,7 @@ class Play extends Component {
               ) : null
             ) : (
               this.props.submit
-                ? <Statistic value={<Button positive onClick={this.submit} disabled={!!selectedGame || game === this.props.game || (game.nextPlayer === this.props.game.nextPlayer && !game.finished)}>Submit</Button>}/>
+                ? <Statistic value={<Button positive onClick={this.submit} className={classNames({attention: canSubmit})} disabled={!canSubmit}>Submit</Button>}/>
                 : <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
             )}
           </Statistic.Group>

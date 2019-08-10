@@ -8,6 +8,7 @@ import Game from "../game/game";
 import Play from "./Play";
 import {Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
+import HashedIcon from "./HashedIcon";
 
 class ChosenOnlineGame extends Component {
   gameSelector = createSelector([
@@ -121,13 +122,13 @@ class ChosenOnlineGame extends Component {
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
-              value={playerA.name}
+              value={<Statistic.Value>{playerA.name}<HashedIcon floated={'right'} size={'mini'} hash={playerA.id} /></Statistic.Value>}
               label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerA ? "green" : undefined}
             />
             <Statistic label={"vs"}/>
             <Statistic
-              value={playerB.name}
+              value={<Statistic.Value>{playerB.name}<HashedIcon floated={'right'} size={'mini'} hash={playerB.id} /></Statistic.Value>}
               label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerB ? "green" : undefined}
             />

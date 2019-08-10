@@ -9,6 +9,7 @@ import {withRouter} from "react-router-dom";
 import Hotseat from "./components/Hotseat";
 import Lobby from "./components/Lobby";
 import OnlineGame from "./components/OnlineGame";
+import {withClient} from "./client/withClient";
 
 class App extends Component {
   state = {
@@ -20,7 +21,7 @@ class App extends Component {
     if (liveGame) {
       gameUrl = `/game/${liveGame.id}`;
     } else {
-      gameUrl = '/game';
+      gameUrl = '/lobby';
     }
     if (gameUrl !== this.props.location.pathname) {
       this.props.history.push(gameUrl);
@@ -32,16 +33,22 @@ class App extends Component {
   };
 
   render() {
-    const {user, liveGame} = this.state;
+    const {liveGame} = this.state;
+    const {user, usersInfo: {byId: usersById}} = this.props;
+    const playerA = liveGame ? usersById[liveGame.userIds[0]] : null;
+    const playerB = liveGame ? usersById[liveGame.userIds[1]] : null;
+    const isUserPlayerA = (user && playerA) ? playerA.id === user.id : false;
+    const isUserPlayerB = (user && playerB) ? playerB.id === user.id : false;
+    const isMyGame = isUserPlayerA || isUserPlayerB;
     const onlineGameLabel = liveGame
       ? (liveGame.finished
-        ? 'Review'
-        : (user && liveGame.userIds.includes(user.id)
-          ? 'Live Play'
-          : 'Spectate'))
+        ? `Review ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`
+        : (isMyGame
+          ? `Live Play ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`
+          : `Spectate ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`))
       : 'Live Play/Spectate/Review';
     return (
-      <Container text>
+      <Container>
         <Segment textAlign={"center"}>
           <Header as={"h1"}>Thyra Online</Header>
         </Segment>
@@ -64,6 +71,8 @@ class App extends Component {
 App.propTypes = {
   location: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
+  user: PropTypes.object,
+  usersInfo: PropTypes.object.isRequired,
 };
 
-export default withRouter(App);
+export default withRouter(withClient(App));

@@ -1,74 +1,19 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Tab, Button, Checkbox, Icon, Input, Label, Card} from "semantic-ui-react";
+import {Tab, Button, Icon, Input, Label, Card, Segment, Modal} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
-import jdenticon from "jdenticon";
 import Board from "./Board";
-import classNames from "classnames";
-
-class HashedIcon extends Component {
-  ref = React.createRef();
-
-  componentDidMount() {
-    this.updateIcon();
-  }
-
-  updateIcon() {
-    if (this.ref.current) {
-      jdenticon.update(this.ref.current);
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.hash !== this.props) {
-      this.updateIcon();
-    }
-  }
-
-  render() {
-    const {hash, floated, size} = this.props;
-    return (
-      <svg
-        ref={this.ref}
-        className={classNames(["ui", "mini", "right", "floated", "image"], {floated: !!floated, [floated]: !!floated, [size]: !!size})}
-        data-jdenticon-value={hash}
-      />
-    );
-  }
-}
-
-HashedIcon.propTypes = {
-  hash: PropTypes.string.isRequired,
-  floated: PropTypes.oneOf(['left', 'right']),
-  size: PropTypes.oneOf(['mini', 'tiny', 'small', 'medium', 'large', 'big', 'huge', 'massive']),
-};
+import HashedIcon from "./HashedIcon";
 
 class UserList extends Component {
   render() {
     const {user, users} = this.props;
     return (
-      <Card.Group>
+      <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
         {users.map(otherUser => (
-          <Card key={otherUser.id}>
-            <Card.Content>
-              <HashedIcon floated={'right'} size={'mini'} hash={otherUser.id} />
-              <Card.Header>
-                {otherUser.name}
-              </Card.Header>
-              <Card.Meta>
-                {user && otherUser.id === user.id ? <Label><Icon name={"user"} color={"green"} />Me</Label> : null}
-                {" "}
-                {otherUser.readyToPlay ? <Label><Icon name={"checkmark"} color={"green"} />Ready to play</Label> : null}
-                {" "}
-                {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
-              </Card.Meta>
-              <Card.Description>
-
-              </Card.Description>
-            </Card.Content>
-          </Card>
+          <UserCard key={otherUser.id} user={user} otherUser={otherUser} />
         ))}
       </Card.Group>
     );
@@ -80,20 +25,122 @@ UserList.propTypes = {
   users: PropTypes.array.isRequired,
 };
 
+class UserCard extends Component {
+  changeReadyToPlay = () => {
+    this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
+  };
+
+  render() {
+    const {client, user, otherUser} = this.props;
+
+    return (
+      <Card>
+        <Card.Content>
+          <HashedIcon floated={'right'} size={'mini'} hash={otherUser.id} />
+          <Card.Header>
+            {otherUser.name}
+            {" "}
+            {client && user && user.id === otherUser.id ? (
+              <EditUserName client={client} user={user} trigger={<Label as={'a'} icon={'edit'} content={'Rename'}/>} />
+            ) : null}
+          </Card.Header>
+          <Card.Meta>
+            {user && otherUser.id === user.id ? <Label><Icon name={"user"} color={"green"} />Me</Label> : null}
+            {" "}
+            {otherUser.readyToPlay ? <Label><Icon loading name={"circle notch"} color={"green"} />Ready</Label> : null}
+            {" "}
+            {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
+          </Card.Meta>
+        </Card.Content>
+        {client && user && user.id === otherUser.id ? (
+          <Card.Content extra>
+            <div className='ui two buttons'>
+              <Button color={user.readyToPlay ? 'green' : 'yellow'} onClick={this.changeReadyToPlay}>
+                <Icon loading={user.readyToPlay} name={user.readyToPlay ? 'circle notch' : 'play'} />
+                {user.readyToPlay ? 'Waiting for opponent' : 'Play'}
+              </Button>
+            </div>
+          </Card.Content>
+        ) : null}
+      </Card>
+    );
+  }
+}
+
+UserCard.propTypes = {
+  client: PropTypes.object,
+  user: PropTypes.object,
+  otherUser: PropTypes.object.isRequired,
+};
+
+class EditUserName extends Component {
+  state = {
+    user: this.props.user,
+    username: this.props.user.name,
+  };
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.user !== state.user) {
+      return {
+        user: props.user,
+        username: props.user ? props.user.name : null,
+      };
+    }
+
+    return null;
+  }
+
+  changeUsername = ({target: {value}}) => {
+    this.setState({username: value});
+  };
+
+  updateUsername = () => {
+    this.props.client.changeUsername(this.state.username);
+  };
+
+  render() {
+    const {username} = this.state;
+    const {trigger} = this.props;
+
+    return (
+      <Modal
+        trigger={trigger}
+        size={'mini'}
+        header={'Change name'}
+        content={(
+          <Segment>
+            <Input label={'Name'} value={username} onChange={this.changeUsername} />
+          </Segment>
+        )}
+        actions={[
+          {key: 'cancel', negative: true, content: 'Cancel'},
+          {key: 'change', positive: true, content: 'Change', onClick: this.updateUsername},
+        ]}
+      />
+    );
+  }
+}
+
+EditUserName.propTypes = {
+  client: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
+  trigger: PropTypes.node.isRequired,
+};
+
 class GameList extends Component {
   render() {
     const {user, usersById, games} = this.props;
     return (
-      <Card.Group>
+      <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
         {games.map(game => {
+          const gameGame = Game.deserialize(game.game);
           const playerA = usersById[game.userIds[0]];
           const playerB = usersById[game.userIds[1]];
-          const nextPlayerUser = game.nextPlayer === Game.PLAYER_A ? playerA : playerB;
+          const nextPlayerUser = gameGame.nextPlayer === Game.PLAYER_A ? playerA : playerB;
           const isUserPlayerA = user ? playerA.id === user.id : false;
           const isUserPlayerB = user ? playerB.id === user.id : false;
           const winnerUser = game.finished ? (game.winner === Game.PLAYER_A ? playerA : playerB) : null;
           const isMyGame = isUserPlayerA || isUserPlayerB;
-          const gameGame = Game.deserialize(game.game);
 
           return (
             <Card key={game.id} onClick={() => this.props.selectLiveGame(game)}>
@@ -105,12 +152,14 @@ class GameList extends Component {
                     {winnerUser === playerA ? <Icon name={'trophy'}/> : null}
                     {nextPlayerUser === playerA ? <Icon name={'caret right'}/> : null}
                     {playerA.name}
+                    <HashedIcon floated={'right'} size={'mini'} textSized hash={playerA.id} />
                   </Label>
                   {" vs "}
                   <Label color={winnerUser === playerB ? 'green' : undefined} >
                     {winnerUser === playerB ? <Icon name={'trophy'}/> : null}
                     {nextPlayerUser === playerB ? <Icon name={'caret right'} color={"green"}/> : null}
                     {playerB.name}
+                    <HashedIcon floated={'right'} size={'mini'} textSized hash={playerB.id} />
                   </Label>
                 </Card.Header>
                 <Card.Meta>
@@ -137,64 +186,64 @@ GameList.propTypes = {
 };
 
 class Lobby extends Component {
-  state = {
-    user: null,
-    username: null,
-  };
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.user !== state.user) {
-      return {
-        user: props.user,
-        username: props.user ? props.user.name : null,
-      };
-    }
-
-    return null;
-  }
-
-  changeUsername = ({target: {value}}) => {
-    this.setState({username: value});
-  };
-
-  updateUsername = () => {
-    this.props.client.changeUsername(this.state.username);
-  };
-
-  changeReadyToPlay = (e, {checked}) => {
-    this.props.client.changeReadyToPlay(checked);
+  changeReadyToPlay = () => {
+    this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
   };
 
   render() {
-    const {username} = this.state;
-    const {user, usersInfo: {byId: usersById, online, offline}, gamesInfo: {live, finished}, selectLiveGame} = this.props;
+    const {client, user, usersInfo: {byId: usersById, online, offline}, gamesInfo: {live, finished}, selectLiveGame} = this.props;
 
     if (!user) {
       return <Tab.Pane>Connecting to server...</Tab.Pane>;
     }
 
     return (
-      <Tab.Pane>
-        Welcome
-        <Input value={username} onChange={this.changeUsername} />
-        <Button onClick={this.updateUsername}>Change</Button>
-        <br />
-        <Checkbox label={"Ready to play?"} checked={user.readyToPlay} onChange={this.changeReadyToPlay} />
-        <Tab menu={{pointing: true}} panes={[
-          {menuItem: `${online.length} users online`, render: () => (
-            <UserList users={online} user={user}/>
-          )},
-          {menuItem: `${offline.length} users offline`, render: () => (
-            <UserList users={offline} user={user}/>
-          )},
-          {menuItem: `${live.length} live games`, render: () => (
-            <GameList user={user} usersById={usersById} games={live} selectLiveGame={selectLiveGame} />
-          )},
-          {menuItem: `${finished.length} past games`, render: () => (
-            <GameList user={user} usersById={usersById} games={finished} selectLiveGame={selectLiveGame} />
-          )},
-        ]} />
-      </Tab.Pane>
+      <Fragment>
+        <Card.Group centered>
+          {user ? <UserCard client={client} otherUser={user} user={user} /> : null}
+          {/*{"Welcome "}*/}
+          {/*<Modal*/}
+            {/*trigger={<Label as={'a'} content={user.name} icon={'edit'} />}*/}
+            {/*size={'mini'}*/}
+            {/*header={'Change name'}*/}
+            {/*content={(*/}
+              {/*<Segment>*/}
+                {/*<Input label={'Name'} value={username} onChange={this.changeUsername} />*/}
+              {/*</Segment>*/}
+            {/*)}*/}
+            {/*actions={[*/}
+              {/*{key: 'cancel', negative: true, content: 'Cancel'},*/}
+              {/*{key: 'change', positive: true, content: 'Change', onClick: this.updateUsername},*/}
+            {/*]}*/}
+          {/*/>*/}
+          {/*<br />*/}
+          {/*<br />*/}
+          {/*<Button color={user.readyToPlay ? 'green' : 'yellow'} onClick={this.changeReadyToPlay}>*/}
+            {/*<Icon loading={user.readyToPlay} name={user.readyToPlay ? 'circle notch' : 'play'} />*/}
+            {/*{user.readyToPlay ? 'Waiting for opponent' : 'Play'}*/}
+          {/*</Button>*/}
+        </Card.Group>
+        <Segment>
+          <Tab menu={{pointing: true}} panes={[
+            {menuItem: `${live.length} live games`, render: () => (
+              <GameList user={user} usersById={usersById} games={live} selectLiveGame={selectLiveGame} />
+            )},
+            {menuItem: `${finished.length} past games`, render: () => (
+              <GameList user={user} usersById={usersById} games={finished} selectLiveGame={selectLiveGame} />
+            )},
+          ]} />
+        </Segment>
+        <Segment>
+          <Tab menu={{pointing: true}} panes={[
+            {menuItem: `${online.length} users online`, render: () => (
+              <UserList users={online} user={user}/>
+            )},
+            {menuItem: `${offline.length} users offline`, render: () => (
+              <UserList users={offline} user={user}/>
+            )},
+          ]} />
+        </Segment>
+      </Fragment>
     );
   }
 }

@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const appVersion = 1;
 
 class Client {
@@ -23,19 +25,36 @@ class Client {
     this.socket.on("reload", this.reload);
 
     this.user = null;
-    this.onUser = null;
+    this.onUser = [];
     this.socket.on("user", this.gotUser);
 
-    this.users = [];
-    this.usersById = {};
-    this.onUsers = null;
+    this.usersInfo = this.prepareUsers([]);
+    this.onUsers = [];
     this.socket.on("users", this.gotUsers);
 
-    this.games = [];
-    this.onGames = null;
+    this.gamesInfo = this.prepareGames([]);
+    this.onGames = [];
     this.socket.on("games", this.gotGames);
 
     this.getUser();
+  }
+
+  subscribe(callbacks) {
+    for (const name of ['onUser', 'onUsers', 'onGames']) {
+      const callback = callbacks[name];
+      if (callback) {
+        this[name].push(callback);
+      }
+    }
+  }
+
+  unsubscribe(callbacks) {
+    for (const name of ['onUser', 'onUsers', 'onGames']) {
+      const callback = callbacks[name];
+      if (callback) {
+        _.pull(this[name], callback);
+      }
+    }
   }
 
   getUser() {
@@ -54,9 +73,8 @@ class Client {
       localStorage.setItem('user-password', this.password);
     }
     this.user = user;
-    if (this.onUser) {
-      this.onUser(user);
-    }
+    this.onUser.map(callback => callback(user));
+    this.gotUsers(this.usersInfo.users);
   };
 
   changeUsername(name) {
@@ -68,22 +86,45 @@ class Client {
   }
 
   gotUsers = users => {
-    this.users = users;
-    this.usersById = {};
-    for (const user of this.users) {
-      this.usersById[user.id] = user;
-    }
-    if (this.onUsers) {
-      this.onUsers(users, this.usersById);
-    }
+    this.usersInfo = this.prepareUsers(users);
+    this.onUsers.map(callback => callback(this.usersInfo));
   };
 
-  gotGames = games => {
-    this.games = games;
-    if (this.onGames) {
-      this.onGames(games);
+  prepareUsers(users) {
+    let otherUsers;
+    if (this.user) {
+      const myIndex = users.findIndex(user => user.id === this.user.id);
+      if (myIndex >= 0) {
+        otherUsers = users.slice(0, myIndex).concat(users.slice(myIndex + 1));
+        users = [users[myIndex], ...otherUsers];
+      } else {
+        otherUsers = users;
+      }
+    } else {
+      otherUsers = users;
     }
+    return {
+      users,
+      byId: _.fromPairs(users.map(user => [user.id, user])),
+      other: otherUsers,
+      online: users.filter(user => user.online),
+    };
+  }
+
+  gotGames = games => {
+    this.gamesInfo = this.prepareGames(games);
+    this.onGames.map(callback => callback(this.gamesInfo));
   };
+
+  prepareGames(games) {
+    return {
+      games,
+      byId: _.fromPairs(games.map(game => [game.id, game])),
+      live: games.filter(game => !game.finished),
+      finished: games.filter(game => game.finished),
+      mine: this.user ? games.filter(game => game.userIds.includes(this.user.id)) : [],
+    };
+  }
 
   submitGameMove(game, moves) {
     this.socket.emit("submit-game-moves", {id: game.id, moves});

@@ -1,3 +1,5 @@
+const appVersion = 1;
+
 class Client {
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
@@ -18,6 +20,7 @@ class Client {
       this.gotUser(null);
       this.gotUsers([]);
     });
+    this.socket.on("reload", this.reload);
 
     this.user = null;
     this.onUser = null;
@@ -36,8 +39,12 @@ class Client {
   }
 
   getUser() {
-    this.socket.emit("create-user", {id: this.id, password: this.password});
+    this.socket.emit("create-user", {appVersion, id: this.id, password: this.password});
   }
+
+  reload = () => {
+    window.location.reload(true);
+  };
 
   gotUser = user => {
     if (user) {

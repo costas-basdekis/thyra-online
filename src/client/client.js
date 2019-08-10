@@ -108,6 +108,7 @@ class Client {
       byId: _.fromPairs(users.map(user => [user.id, user])),
       other: otherUsers,
       online: users.filter(user => user.online),
+      offline: users.filter(user => !user.online),
     };
   }
 

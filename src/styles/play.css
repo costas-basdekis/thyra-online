@@ -3,6 +3,9 @@
     border: 5px solid black;
     background: limegreen;
 }
+.background.ui.image {
+    background: limegreen;
+}
 .background.selectable {
     cursor: pointer;
 }
@@ -126,14 +129,17 @@
     }
 }
 
-.background.small {
+.background.small-board {
     border-width: 1px;
 }
-.background.small .cell {
+.background.small-board.mini {
+    width: 52px;
+}
+.background.small-board .cell {
     width: 10px;
     height: 10px;
     border-width: 1px;
 }
-.background.small .level {
+.background.small-board .level {
     border-width: 1px;
 }

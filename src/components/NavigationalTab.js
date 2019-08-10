@@ -9,6 +9,11 @@ import {
 import { Menu, Tab } from 'semantic-ui-react';
 
 class NavigationalTab extends Component {
+  constructUrl(path) {
+    const {match} = this.props;
+    return `${match.url === '/' ? '' : match.url}${path ? `/${path}` : ''}`;
+  }
+
   getPreparedPanesDefaultToAndActiveIndex() {
     const {panes, defaultIndex, match, location} = this.props;
     let defaultTo = null;
@@ -21,11 +26,12 @@ class NavigationalTab extends Component {
           return null;
         }
 
-        const to = `${match.url === '/' ? '' : match.url}${pane.path ? `/${pane.path}` : ''}`;
+        const to = this.constructUrl(pane.path);
         if (index === defaultIndex) {
           defaultTo = to;
         }
-        if (to === location.pathname) {
+        const navigate = pane.navigate !== undefined ? this.constructUrl(pane.navigate) : to;
+        if (location.pathname.startsWith(navigate)) {
           activeIndex = index;
           activeTo = to;
         }
@@ -42,7 +48,7 @@ class NavigationalTab extends Component {
             <Menu.Item
               key={pane.path}
               as={NavLink}
-              to={to}
+              to={navigate}
               {...menuItem}
               icon={pane.icon || menuItem.icon}
             />
@@ -86,6 +92,7 @@ NavigationalTab.propTypes = {
     menuItem: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   })).isRequired,
   match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   tab: PropTypes.object,
   menu: PropTypes.object,
   renderActiveOnly: PropTypes.bool.isRequired,

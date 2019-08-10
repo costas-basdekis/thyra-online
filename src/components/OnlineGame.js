@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Tab, Icon, Label, Segment, Statistic} from "semantic-ui-react";
+import {Icon, Label, Segment, Statistic} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
-import Play from "./play";
+import Play from "./Play";
 
 class OnlineGame extends Component {
   gameSelector = createSelector([
@@ -24,7 +24,7 @@ class OnlineGame extends Component {
     const {user, game, usersInfo: {byId: usersById}} = this.props;
     const gameGame = this.game;
     if (!gameGame) {
-      return <Tab.Pane>Choose a game from the lobby</Tab.Pane>;
+      return "Choose a game from the lobby";
     }
 
     const playerA = usersById[game.userIds[0]];
@@ -33,7 +33,7 @@ class OnlineGame extends Component {
     const isUserPlayerB = user ? playerB.id === user.id : false;
     const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
     return (
-      <Tab.Pane>
+      <Fragment>
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
@@ -55,7 +55,7 @@ class OnlineGame extends Component {
           allowControl={[userPlayer].filter(player => player)}
           submit={this.submit}
         />
-      </Tab.Pane>
+      </Fragment>
     );
   }
 }

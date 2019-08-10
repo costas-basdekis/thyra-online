@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Play from "./play";
+import Play from "./Play";
 import Game from "../game/game";
 
 class Hotseat extends Component {

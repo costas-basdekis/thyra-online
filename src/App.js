@@ -1,10 +1,12 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import 'fomantic-ui-css/semantic.css';
 import {Button, Checkbox, Container, Header, Icon, Input, Label, List, Statistic, Segment, Tab} from 'semantic-ui-react';
 import './styles/App.css';
 import Game from "./game/game";
 import Play from "./components/play";
 import {client} from "./client/client";
+import NavigationalTab from "./components/NavigationalTab";
+import {Route, BrowserRouter, Switch} from "react-router-dom";
 
 class App extends Component {
   state = {
@@ -88,11 +90,13 @@ class App extends Component {
         <Segment textAlign={"center"}>
           <Header as={"h1"}>Thyra Online</Header>
         </Segment>
-        <Tab menu={{pointing: true}} panes={[
-          client.available ? { menuItem: 'Lobby', render: () => (
-            <Tab.Pane attached={false}>
-              {user ? (
-                <Fragment>
+        <BrowserRouter>
+          <Switch>
+            <Route path={''}>
+        <NavigationalTab menu={{pointing: true, attached: false}} panes={[
+          client.available ? { menuItem: 'Lobby', path: 'lobby', render: () => (
+              user ? (
+                <Tab.Pane>
                   Welcome
                   <Input value={username} onChange={this.changeUsername} />
                   <Button onClick={this.updateUsername}>Change</Button>
@@ -152,13 +156,12 @@ class App extends Component {
                       </List>
                     )},
                   ]} />
-                </Fragment>
-              ) : "Connecting to server..."}
-            </Tab.Pane>
+                </Tab.Pane>
+              ) : <Tab.Pane>Connecting to server...</Tab.Pane>
           ) } : null,
-          client.available ? {menuItem: liveGame ? (liveGame.finished ? 'Review' : (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate')) : 'Live Play/Spectate/Review', render: () => {
+          client.available ? {menuItem: liveGame ? (liveGame.finished ? 'Review' : (user && liveGame.userIds.includes(user.id) ? 'Live Play' : 'Spectate')) : 'Live Play/Spectate/Review', path: 'live-game', render: () => {
             if (!liveGame || !user) {
-              return <Segment>Choose a game from the lobby</Segment>;
+              return <Tab.Pane>Choose a game from the lobby</Tab.Pane>;
             }
             const playerA = usersById[liveGame.userIds[0]];
             const playerB = usersById[liveGame.userIds[1]];
@@ -166,7 +169,7 @@ class App extends Component {
             const isUserPlayerB = playerB.id === user.id;
             const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
             return (
-              <Fragment>
+              <Tab.Pane>
                 <Segment>
                   <Statistic.Group widths={"three"} size={"tiny"}>
                     <Statistic value={playerA.name} label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null} color={isUserPlayerA ? "green" : undefined}/>
@@ -180,11 +183,18 @@ class App extends Component {
                   allowControl={[userPlayer].filter(player => player)}
                   submit={this.submit}
                 />
-              </Fragment>
+              </Tab.Pane>
             );
           }} : null,
-          { menuItem: 'Hotseat', render: () => <Tab.Pane attached={false}><Play game={game} makeMove={this.makeMove} /></Tab.Pane> },
-        ].filter(pane => pane)} />
+          {menuItem: 'Hotseat', path: 'hotseat', render: () => (
+            <Tab.Pane>
+              <Play game={game} makeMove={this.makeMove} />
+            </Tab.Pane>
+          )},
+        ]} />
+            </Route>
+          </Switch>
+        </BrowserRouter>
       </Container>
     );
   }

@@ -8,7 +8,7 @@ import {BrowserRouter, Route, Switch} from "react-router-dom";
 ReactDOM.render((
   <BrowserRouter>
     <Switch>
-      <Route path={''}>
+      <Route path={process.env.REACT_APP_PAGE_BASE_PATH}>
         <App />
       </Route>
     </Switch>

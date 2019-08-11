@@ -11,7 +11,7 @@ import { Menu, Tab } from 'semantic-ui-react';
 class NavigationalTab extends Component {
   constructUrl(path) {
     const {match} = this.props;
-    return `${match.url === '/' ? '' : match.url}${path ? `/${path}` : ''}`;
+    return `${match.url.endsWith('/') ? match.url.slice(0, -1) : match.url}${path ? `/${path}` : ''}`;
   }
 
   getPreparedPanesDefaultToAndActiveIndex() {

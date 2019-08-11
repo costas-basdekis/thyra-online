@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "classnames": "^2.2.6",
+    "env-cmd": "^9.0.3",
     "fomantic-ui-css": "^2.7.7",
     "jdenticon": "^2.2.0",
     "lodash": "^4.17.15",
@@ -16,9 +17,9 @@
     "semantic-ui-react": "^0.87.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "build-gh": "react-scripts build && rm -r docs/ && mv build/ docs/",
+    "start": "env-cmd -f ./.env.development react-scripts start",
+    "build": "env-cmd -f ./.env react-scripts build",
+    "build-gh": "env-cmd -f ./.env react-scripts build && rm -r docs/ && mv build/ docs/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

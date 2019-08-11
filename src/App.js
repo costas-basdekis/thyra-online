@@ -80,6 +80,7 @@ class App extends Component {
               <Tab.Pane><Hotseat /></Tab.Pane>
             )},
           ]} />
+          <Header as={"h6"} style={{color: '#dddddd'}}>{process.env.REACT_APP_VERSION || '?'}</Header>
       </Container>
     );
   }

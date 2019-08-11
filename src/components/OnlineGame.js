@@ -9,6 +9,7 @@ import Play from "./Play";
 import {Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
+import Settings from "./Settings";
 
 class ChosenOnlineGame extends Component {
   gameSelector = createSelector([
@@ -55,7 +56,7 @@ class ChosenOnlineGame extends Component {
   };
 
   submit = moves => {
-    this.props.client.submitGameMove(this.props.game, moves);
+    this.props.client.submitGameMove(this.game, moves);
   };
 
   componentDidMount() {
@@ -74,6 +75,10 @@ class ChosenOnlineGame extends Component {
 
   close = () => {
     this.props.selectLiveGame(null);
+  };
+
+  changeSettings = settings => {
+    this.props.client.updateSettings(settings);
   };
 
   share = e => {
@@ -97,7 +102,7 @@ class ChosenOnlineGame extends Component {
   };
 
   render() {
-    const {location} = this.props;
+    const {location, user} = this.props;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -119,6 +124,7 @@ class ChosenOnlineGame extends Component {
     const {playerA, playerB, isUserPlayerA, isUserPlayerB, userPlayer} = this.playersInfo;
     return (
       <Fragment>
+        <Settings/>
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
@@ -151,6 +157,8 @@ class ChosenOnlineGame extends Component {
           </Grid>
         </Segment>
         <Play
+          user={user}
+          changeSettings={this.changeSettings}
           game={gameGame}
           names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}}
           allowControl={[userPlayer].filter(player => player)}

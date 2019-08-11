@@ -81,6 +81,10 @@ class Client {
     this.socket.emit("change-username", name);
   }
 
+  updateSettings(settings) {
+    this.socket.emit("update-settings", settings);
+  }
+
   changeReadyToPlay(checked) {
     this.socket.emit("change-ready-to-play", !!checked);
   }

@@ -1,8 +1,11 @@
 import React, {Component, Fragment} from 'react';
+import PropTypes from 'prop-types';
 import Play from "./Play";
 import Game from "../game/game";
 import {Button, Icon, Grid, Modal} from "semantic-ui-react";
 import * as utils from "../utils";
+import Settings from "./Settings";
+import {withClient} from "../client/withClient";
 
 class Hotseat extends Component {
   state = {
@@ -61,6 +64,7 @@ class Hotseat extends Component {
 
   render() {
     const {game, error} = this.state;
+    const {user} = this.props;
 
     return (
       <Fragment>
@@ -73,7 +77,12 @@ class Hotseat extends Component {
           actions={[{content: 'OK', positive: true}]}
         />
         <Grid columns={'equal'}>
-          <Grid.Column />
+          <Grid.Column>
+            <Grid columns={'equal'}>
+              <Grid.Column><Settings/></Grid.Column>
+              <Grid.Column />
+            </Grid>
+          </Grid.Column>
           <Grid.Column>
             <Button
               positive
@@ -88,10 +97,14 @@ class Hotseat extends Component {
             </Button>
           </Grid.Column>
         </Grid>
-        <Play game={game} makeMove={this.makeMove} />
+        <Play user={user} game={game} makeMove={this.makeMove} />
       </Fragment>
     );
   }
 }
 
-export default Hotseat;
+Hotseat.propTypes = {
+  user: PropTypes.object,
+};
+
+export default withClient(Hotseat);

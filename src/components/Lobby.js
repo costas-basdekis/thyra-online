@@ -6,6 +6,7 @@ import {withClient} from "../client/withClient";
 import Game from "../game/game";
 import Board from "./Board";
 import HashedIcon from "./HashedIcon";
+import Settings from "./Settings";
 
 class UserList extends Component {
   render() {
@@ -145,7 +146,7 @@ class GameList extends Component {
           return (
             <Card key={game.id} onClick={() => this.props.selectLiveGame(game)}>
               <Card.Content>
-                <Board className={'ui image floated right mini'} game={gameGame} small />
+                <Board className={'ui image floated right mini'} game={gameGame} small settings={user ? user.settings : undefined} />
                 {/*<Image floated='right' size='mini' src='/images/avatar/large/steve.jpg' />*/}
                 <Card.Header>
                   <Label color={winnerUser === playerA ? 'green' : undefined} >
@@ -199,29 +200,9 @@ class Lobby extends Component {
 
     return (
       <Fragment>
+        <Settings/>
         <Card.Group centered>
           {user ? <UserCard client={client} otherUser={user} user={user} /> : null}
-          {/*{"Welcome "}*/}
-          {/*<Modal*/}
-            {/*trigger={<Label as={'a'} content={user.name} icon={'edit'} />}*/}
-            {/*size={'mini'}*/}
-            {/*header={'Change name'}*/}
-            {/*content={(*/}
-              {/*<Segment>*/}
-                {/*<Input label={'Name'} value={username} onChange={this.changeUsername} />*/}
-              {/*</Segment>*/}
-            {/*)}*/}
-            {/*actions={[*/}
-              {/*{key: 'cancel', negative: true, content: 'Cancel'},*/}
-              {/*{key: 'change', positive: true, content: 'Change', onClick: this.updateUsername},*/}
-            {/*]}*/}
-          {/*/>*/}
-          {/*<br />*/}
-          {/*<br />*/}
-          {/*<Button color={user.readyToPlay ? 'green' : 'yellow'} onClick={this.changeReadyToPlay}>*/}
-            {/*<Icon loading={user.readyToPlay} name={user.readyToPlay ? 'circle notch' : 'play'} />*/}
-            {/*{user.readyToPlay ? 'Waiting for opponent' : 'Play'}*/}
-          {/*</Button>*/}
         </Card.Group>
         <Segment>
           <Tab menu={{pointing: true}} panes={[

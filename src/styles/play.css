@@ -81,19 +81,137 @@
     background-color: darkblue;
 }
 
-.cell.level-0 .level.level-4,
-.cell.level-1 .level.level-4,
-.cell.level-2 .level.level-4,
-.cell.level-3 .level.level-4,
-.cell.level-0 .level.level-3,
-.cell.level-1 .level.level-3,
-.cell.level-2 .level.level-3,
-.cell.level-0 .level.level-2,
-.cell.level-1 .level.level-2,
-.cell.level-0 .level.level-1
+.background.theme-subtle .cell:not(.available) {
+    border-color: #eeeeee;
+}
+.background.theme-subtle .cell {
+    background-color: #ffffff;
+}
+.background.theme-subtle .cell .level.level-1 {
+    border-color: #cccccc;
+    background-color: #cccccc;
+}
+.background.theme-subtle .cell .level.level-2 {
+    border-color: #999999;
+    background-color: #999999;
+}
+.background.theme-subtle .cell .level.level-3 {
+    border-color: #666666;
+    background-color: #666666;
+}
+.background.theme-subtle .cell .level.level-4 {
+    border-color: #0c1a3e;
+    background-color: #0c1a3e;
+}
+.background.theme-subtle .cell .worker.player-player-a {
+    background-color: #ffd700;
+}
+.background.theme-subtle .cell .worker.player-player-b {
+    background-color: #800000;
+}
+
+.background.theme-pastel .cell {
+    background-color: #a5f69d;
+}
+.background.theme-pastel .cell .level.level-1 {
+    background-color: #e7f695;
+}
+.background.theme-pastel .cell .level.level-2 {
+    background-color: #d99efb;
+}
+.background.theme-pastel .cell .level.level-3 {
+    background-color: #fd8c8c;
+}
+.background.theme-pastel .cell .level.level-4 {
+    background-color: #90e1f9;
+}
+.background.theme-pastel .cell .worker.player-player-a {
+    background-color: #333333;
+}
+.background.theme-pastel .cell .worker.player-player-b {
+    background-color: #770000;
+}
+
+.background.theme-green .cell {
+    background-color: #dddddd;
+}
+.background.theme-green .cell .level.level-1 {
+    background-color: #88a974;
+}
+.background.theme-green .cell .level.level-2 {
+    background-color: #85d33b;
+}
+.background.theme-green .cell .level.level-3 {
+    background-color: #81fd02;
+}
+.background.theme-green .cell .level.level-4 {
+    background-color: #8f55e5;
+}
+.background.theme-green .cell .worker.player-player-a {
+    background-color: #333333;
+}
+.background.theme-green .cell .worker.player-player-b {
+    background-color: #770000;
+}
+
+.background .cell.level-0 .level.level-4,
+.background .cell.level-1 .level.level-4,
+.background .cell.level-2 .level.level-4,
+.background .cell.level-3 .level.level-4,
+.background .cell.level-0 .level.level-3,
+.background .cell.level-1 .level.level-3,
+.background .cell.level-2 .level.level-3,
+.background .cell.level-0 .level.level-2,
+.background .cell.level-1 .level.level-2,
+.background .cell.level-0 .level.level-1
 {
     border-color: transparent;
     background-color: transparent;
+}
+
+.cell .level.level-3 {
+    color: transparent;
+    font-size: 0;
+}
+.background.numbered-levels .cell .level.level-3 {
+    color: black;
+}
+.background.numbered-levels.obvious-levels .cell .level.level-3 {
+    font-size: 45px;
+    line-height: 100%;
+}
+.background.numbered-levels.subtle-levels .cell .level.level-3 {
+    font-size: 20px;
+    line-height: 50%;
+    text-align: left;
+}
+.background.numbered-levels.very-subtle-levels .cell .level.level-3 {
+    font-size: 10px;
+    line-height: 25%;
+    text-align: left;
+}
+
+.background.theme-rotated .cell .level.level-2 {
+    transform: rotate(45deg) scale(0.7);
+}
+.background.theme-rotated .cell .level.level-3 {
+    transform: rotate(-45deg) scale(0.7);
+}
+
+.background.theme-rounded .cell {
+    border-radius: 20%;
+}
+.background.theme-rounded .cell .level.level-1 {
+    border-radius: 20%;
+}
+.background.theme-rounded .cell .level.level-2 {
+    border-radius: 20%;
+}
+.background.theme-rounded .cell .level.level-3 {
+    border-radius: 20%;
+}
+.background.theme-rounded .cell .level.level-4 {
+    border-radius: 20%;
 }
 
 @media all and (min-width: 601px) {
@@ -142,6 +260,24 @@
 }
 .background.small-board .level {
     border-width: 1px;
+}
+.background.small-board.numbered-levels .cell .level.level-3 {
+    font-size: 0px;
+}
+
+.background.medium-board {
+    border-width: 1px;
+}
+.background.medium-board .cell {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+}
+.background.medium-board .level {
+    border-width: 1px;
+}
+.background.medium-board.numbered-levels.obvious-levels .cell .level.level-3 {
+    font-size: 30px;
 }
 
 .ui.image.text-sized {

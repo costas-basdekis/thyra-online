@@ -66,7 +66,6 @@ class Play extends Component {
     const propsGameIndex = history.findIndex(game => game === this.props.game);
     const newHistory = history.slice(propsGameIndex + 1);
     const moves = newHistory.map(game => game.lastMove);
-    console.log('Submitting moves', {history, propsGameIndex, newHistory, moves});
     this.props.submit(moves);
   };
 
@@ -74,24 +73,39 @@ class Play extends Component {
     this.props.submit("resign");
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.game !== prevProps.game) {
       this.setState({selectedGame: null, game: this.props.game, resigning: false});
     }
+    if (this.props.user && this.props.user.settings.autoSubmitMoves) {
+      if (!this.canSubmit(prevProps, prevState) && this.canSubmit()) {
+        this.submit();
+      }
+    }
+  }
+
+  changeAutoSubmitMoves = () => {
+    this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: !this.props.user.settings.autoSubmitMoves});
+  };
+
+  canSubmit(props = this.props, state = this.state) {
+    const {submit} = props;
+    const {selectedGame, game} = state;
+    return (
+      !!submit
+      && !selectedGame
+      && game !== props.game
+      && !game.finished
+      && game.nextPlayer !== props.game.nextPlayer
+    );
   }
 
   render() {
-    const {names, allowControl} = this.props;
+    const {user, changeSettings, names, allowControl} = this.props;
     const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
-    const canSubmit = (
-      !!this.props.submit
-      && !selectedGame
-      && game !== this.props.game
-      && !game.finished
-      && game.nextPlayer !== this.props.game.nextPlayer
-    );
+    const canSubmit = this.canSubmit();
     return (
       <Fragment>
         <Segment>
@@ -108,7 +122,12 @@ class Play extends Component {
               ) : null
             ) : (
               this.props.submit
-                ? <Statistic value={<Button positive onClick={this.submit} className={classNames({attention: canSubmit})} disabled={!canSubmit}>Submit</Button>}/>
+                ? <Statistic value={(
+                  <Fragment>
+                    {!user || !user.settings.autoSubmitMoves ? <Button positive onClick={this.submit} className={classNames({attention: canSubmit})} disabled={!canSubmit}>Submit</Button> : null}
+                    {user && changeSettings ? <Button content={'Auto submit move'} color={user.settings.autoSubmitMoves ? 'green' : 'yellow'} onClick={this.changeAutoSubmitMoves} /> : null}
+                  </Fragment>
+                )}/>
                 : <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
             )}
           </Statistic.Group>
@@ -129,12 +148,12 @@ class Play extends Component {
           </Segment>
         ) : null}
         <Segment style={{textAlign: "center"}}>
-          <Board game={displayGame} makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove} allowControl={allowControl} />
+          <Board game={displayGame} makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove} allowControl={allowControl} settings={user ? user.settings : undefined} />
         </Segment>
         <Segment>
           <div>
             {[...game.history].reverse().map(previousGame => (
-              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} />
+              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} settings={user ? user.settings : undefined} />
             ))}
           </div>
         </Segment>
@@ -170,6 +189,9 @@ class Play extends Component {
 }
 
 Play.propTypes = {
+  user: PropTypes.object,
+  settings: PropTypes.object,
+  changeSettings: PropTypes.func,
   game: PropTypes.instanceOf(Game).isRequired,
   makeMove: PropTypes.func,
   submit: PropTypes.func,

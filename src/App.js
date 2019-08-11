@@ -30,7 +30,24 @@ class App extends Component {
       return;
     }
     this.setState({liveGame});
+    if (document.hidden) {
+      if (window.Notification && Notification.permission === "granted") {
+        try {
+          new Notification("New game ready");
+        } catch (e) {
+          console.error("Could not send notification", e);
+        }
+      }
+    }
   };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.user && !prevProps.user.readyToPlay && this.props.user && this.props.user.readyToPlay) {
+      if (window.Notification && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+      }
+    }
+  }
 
   render() {
     const {liveGame} = this.state;

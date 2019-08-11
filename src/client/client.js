@@ -122,10 +122,12 @@ class Client {
   };
 
   prepareGames(games) {
+    const live = games.filter(game => !game.finished);
     return {
       games,
       byId: _.fromPairs(games.map(game => [game.id, game])),
-      live: games.filter(game => !game.finished),
+      live,
+      myLive: this.user ? live.filter(game => game.userIds.includes(this.user.id)) : [],
       finished: games.filter(game => game.finished),
       mine: this.user ? games.filter(game => game.userIds.includes(this.user.id)) : [],
     };

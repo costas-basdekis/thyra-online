@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Tab, Button, Icon, Input, Label, Card, Segment, Modal} from "semantic-ui-react";
+import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
@@ -191,8 +191,20 @@ class Lobby extends Component {
     this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
   };
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.gamesInfo.myLive !== this.props.gamesInfo.myLive) {
+      const previousMyLiveGameIds = new Set(prevProps.gamesInfo.myLive.map(game => game.id));
+      const myLiveGameIds = this.props.gamesInfo.myLive.map(game => game.id);
+      const newMyLiveGameIds = myLiveGameIds.filter(id => !previousMyLiveGameIds.has(id));
+      if (newMyLiveGameIds.length === 1) {
+        const newGame = this.props.gamesInfo.byId[newMyLiveGameIds[0]];
+        this.props.selectLiveGame(newGame);
+      }
+    }
+  }
+
   render() {
-    const {client, user, usersInfo: {byId: usersById, online, offline}, gamesInfo: {live, finished}, selectLiveGame} = this.props;
+    const {client, user, usersInfo: {byId: usersById, online, offline}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
 
     if (!user) {
       return <Tab.Pane>Connecting to server...</Tab.Pane>;
@@ -204,6 +216,12 @@ class Lobby extends Component {
         <Card.Group centered>
           {user ? <UserCard client={client} otherUser={user} user={user} /> : null}
         </Card.Group>
+        {myLive.length ? (
+          <Segment>
+            <Header as={'h2'}>My live games ({myLive.length})</Header>
+            <GameList user={user} usersById={usersById} games={myLive} selectLiveGame={selectLiveGame} />
+          </Segment>
+        ) : null}
         <Segment>
           <Tab menu={{pointing: true}} panes={[
             {menuItem: `${live.length} live games`, render: () => (

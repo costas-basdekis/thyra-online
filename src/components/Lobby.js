@@ -131,6 +131,10 @@ EditUserName.propTypes = {
 class GameList extends Component {
   render() {
     const {user, usersById, games} = this.props;
+    if (!Object.values(usersById).length) {
+      return null;
+    }
+
     return (
       <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
         {games.map(game => {

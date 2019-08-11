@@ -122,6 +122,9 @@ class ChosenOnlineGame extends Component {
     }
 
     const {playerA, playerB, isUserPlayerA, isUserPlayerB, userPlayer} = this.playersInfo;
+    if (!playerA || !playerB) {
+      return null;
+    }
     return (
       <Fragment>
         <Settings/>
@@ -190,7 +193,10 @@ class OnlineGame extends Component {
   }
 
   render() {
-    const {selectLiveGame} = this.props;
+    const {selectLiveGame, usersInfo: {byId}} = this.props;
+    if (!Object.values(byId).length) {
+      return null;
+    }
     const gameGame = this.gameGame;
     return (
       <Switch>

@@ -19,9 +19,9 @@ class App extends Component {
   selectLiveGame = liveGame => {
     let gameUrl;
     if (liveGame) {
-      gameUrl = `/game/${liveGame.id}`;
+      gameUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/game/${liveGame.id}`;
     } else {
-      gameUrl = '/lobby';
+      gameUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/lobby`;
     }
     if (gameUrl !== this.props.location.pathname) {
       this.props.history.push(gameUrl);

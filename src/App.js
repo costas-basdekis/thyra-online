@@ -40,7 +40,7 @@ class App extends Component {
     const isUserPlayerA = (user && playerA) ? playerA.id === user.id : false;
     const isUserPlayerB = (user && playerB) ? playerB.id === user.id : false;
     const isMyGame = isUserPlayerA || isUserPlayerB;
-    const onlineGameLabel = liveGame
+    const onlineGameLabel = (liveGame && playerA && playerB)
       ? (liveGame.finished
         ? `Review ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`
         : (isMyGame

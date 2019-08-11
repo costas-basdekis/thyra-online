@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
@@ -10,11 +11,19 @@ import Settings from "./Settings";
 
 class UserList extends Component {
   render() {
-    const {user, users} = this.props;
+    const {client, user, users, challengedUser, readyToPlayUsers, readyToPlayMeUsers} = this.props;
     return (
       <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
         {users.map(otherUser => (
-          <UserCard key={otherUser.id} user={user} otherUser={otherUser} />
+          <UserCard
+            key={otherUser.id}
+            client={client}
+            user={user}
+            otherUser={otherUser}
+            challengedUser={challengedUser}
+            readyToPlayUsers={readyToPlayUsers}
+            readyToPlayMeUsers={readyToPlayMeUsers}
+          />
         ))}
       </Card.Group>
     );
@@ -22,8 +31,12 @@ class UserList extends Component {
 }
 
 UserList.propTypes = {
+  client: PropTypes.object,
   user: PropTypes.object,
   users: PropTypes.array.isRequired,
+  challengedUser: PropTypes.object,
+  readyToPlayUsers: PropTypes.array,
+  readyToPlayMeUsers: PropTypes.array,
 };
 
 class UserCard extends Component {
@@ -31,8 +44,65 @@ class UserCard extends Component {
     this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
   };
 
+  challengeUser = () => {
+    this.props.client.changeReadyToPlay(this.props.user.readyToPlay === this.props.otherUser.id ? false : this.props.otherUser.id);
+  };
+
   render() {
-    const {client, user, otherUser} = this.props;
+    const {client, user, otherUser, challengedUser, readyToPlayUsers, readyToPlayMeUsers} = this.props;
+    let playButtonColour, playButtonAttention, playButtonIcon, playButtonOnClick, playButtonLabel;
+    if (client && user) {
+      if (user.id === otherUser.id) {
+        playButtonOnClick = this.changeReadyToPlay;
+        if (user.readyToPlay) {
+          playButtonColour = 'green';
+          playButtonIcon = {loading: true, name: 'circle notch'};
+          if (challengedUser) {
+            playButtonLabel = `Waiting for ${challengedUser.name}...`;
+          } else {
+            playButtonLabel = 'Waiting for opponent...';
+          }
+        } else {
+          playButtonColour = 'yellow';
+          playButtonIcon = {name: 'play'};
+          if (readyToPlayMeUsers && readyToPlayMeUsers.length) {
+            if (readyToPlayMeUsers.length === 1) {
+              playButtonLabel = `${readyToPlayMeUsers[0].name} has challenged you`;
+              playButtonAttention = true;
+            } else {
+              playButtonLabel = `${readyToPlayMeUsers.length} users have challenged you`;
+              playButtonAttention = true;
+            }
+          } else if (readyToPlayUsers && readyToPlayUsers.length) {
+            if (readyToPlayUsers.length === 1) {
+              playButtonLabel = `Play ${readyToPlayUsers[0].name}`;
+            } else {
+              playButtonLabel = `${readyToPlayUsers.length} users ready to play`;
+            }
+          } else {
+            playButtonLabel = 'Play';
+          }
+        }
+      } else {
+        playButtonOnClick = this.challengeUser;
+        if (challengedUser && challengedUser.id === otherUser.id) {
+          playButtonColour = 'green';
+          playButtonIcon = {loading: true, name: 'circle notch'};
+          playButtonLabel = `Waiting for ${otherUser.name}...`;
+        } else {
+          playButtonColour = 'yellow';
+          playButtonIcon = {name: 'play'};
+          if (otherUser.readyToPlay === user.id) {
+            playButtonLabel = `${otherUser.name} has challenged you`;
+            playButtonAttention = true;
+          } else if (otherUser.readyToPlay === true) {
+            playButtonLabel = `${otherUser.name} is ready to Play`;
+          } else {
+            playButtonLabel = `Challenge ${otherUser.name}`;
+          }
+        }
+      }
+    }
 
     return (
       <Card>
@@ -53,16 +123,14 @@ class UserCard extends Component {
             {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
           </Card.Meta>
         </Card.Content>
-        {client && user && user.id === otherUser.id ? (
-          <Card.Content extra>
-            <div className='ui two buttons'>
-              <Button color={user.readyToPlay ? 'green' : 'yellow'} onClick={this.changeReadyToPlay}>
-                <Icon loading={user.readyToPlay} name={user.readyToPlay ? 'circle notch' : 'play'} />
-                {user.readyToPlay ? 'Waiting for opponent' : 'Play'}
-              </Button>
-            </div>
-          </Card.Content>
-        ) : null}
+        {playButtonLabel ? <Card.Content extra>
+          <div className='ui two buttons'>
+            <Button className={classNames({attention: playButtonAttention})} color={playButtonColour} onClick={playButtonOnClick}>
+              <Icon {...playButtonIcon} />
+              {playButtonLabel}
+            </Button>
+          </div>
+        </Card.Content> : null}
       </Card>
     );
   }
@@ -72,6 +140,10 @@ UserCard.propTypes = {
   client: PropTypes.object,
   user: PropTypes.object,
   otherUser: PropTypes.object.isRequired,
+  changeReadyToPlay: PropTypes.func,
+  challengedUser: PropTypes.object,
+  readyToPlayUsers: PropTypes.array,
+  readyToPlayMeUsers: PropTypes.array,
 };
 
 class EditUserName extends Component {
@@ -208,7 +280,7 @@ class Lobby extends Component {
   }
 
   render() {
-    const {client, user, usersInfo: {byId: usersById, online, offline}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
+    const {client, user, usersInfo: {byId: usersById, online, offline, challengedUser, readyToPlay, readyToPlayMe}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
 
     if (!user) {
       return <Tab.Pane>Connecting to server...</Tab.Pane>;
@@ -218,7 +290,16 @@ class Lobby extends Component {
       <Fragment>
         <Settings/>
         <Card.Group centered>
-          {user ? <UserCard client={client} otherUser={user} user={user} /> : null}
+          {user ? (
+            <UserCard
+              client={client}
+              otherUser={user}
+              user={user}
+              challengedUser={challengedUser}
+              readyToPlayUsers={readyToPlay}
+              readyToPlayMeUsers={readyToPlayMe}
+            />
+          ) : null}
         </Card.Group>
         {myLive.length ? (
           <Segment>
@@ -239,10 +320,17 @@ class Lobby extends Component {
         <Segment>
           <Tab menu={{pointing: true}} panes={[
             {menuItem: `${online.length} users online`, render: () => (
-              <UserList users={online} user={user}/>
+              <UserList
+                client={client}
+                users={online}
+                user={user}
+                challengedUser={challengedUser}
+                readyToPlayUsers={readyToPlay}
+                readyToPlayMeUsers={readyToPlayMe}
+              />
             )},
             {menuItem: `${offline.length} users offline`, render: () => (
-              <UserList users={offline} user={user}/>
+              <UserList users={offline} user={user} challengedUser={challengedUser} />
             )},
           ]} />
         </Segment>

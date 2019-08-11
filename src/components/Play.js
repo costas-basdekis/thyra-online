@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./Board";
-import {Button, Header, Modal, Segment, Statistic} from "semantic-ui-react";
+import {Button, Header, Icon, Modal, Segment, Statistic} from "semantic-ui-react";
 import classNames from 'classnames';
 
 class Play extends Component {
@@ -101,7 +101,7 @@ class Play extends Component {
   }
 
   render() {
-    const {user, changeSettings, names, allowControl} = this.props;
+    const {user, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names, allowControl} = this.props;
     const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
@@ -117,9 +117,21 @@ class Play extends Component {
             )}
             <Statistic value={game.moveCount} label={"Move"} />
             {this.props.game.finished ? (
-              !this.props.submit ? (
+              this.props.submit ? (
+                (isMyGame && challengeUser) ? (
+                  challengedUser ? (
+                    <Statistic value={<Button color={'green'} onClick={stopChallengeUser}><Icon loading name={'circle notch'} />Waiting for {challengedUser.name}...</Button>} />
+                  ) : (
+                    otherUser && otherUser.readyToPlay === user.id ? (
+                      <Statistic value={<Button className={'attention'} color={'yellow'} icon={'play'} onClick={challengeUser} content={'Accept challenge'} />} />
+                    ) : (
+                      <Statistic value={<Button color={'yellow'} icon={'play'} onClick={challengeUser} content={'Challenge user'} />} />
+                    )
+                  )
+                ) : null
+              ) : (
                 <Statistic value={<Button negative onClick={this.newGame} disabled={!game.previous}>New Game</Button>} />
-              ) : null
+              )
             ) : (
               this.props.submit
                 ? <Statistic value={(
@@ -190,11 +202,15 @@ class Play extends Component {
 
 Play.propTypes = {
   user: PropTypes.object,
+  otherUser: PropTypes.object,
   settings: PropTypes.object,
   changeSettings: PropTypes.func,
   game: PropTypes.instanceOf(Game).isRequired,
   makeMove: PropTypes.func,
   submit: PropTypes.func,
+  challengeUser: PropTypes.func,
+  stopChallengeUser: PropTypes.func,
+  challengedUser: PropTypes.object,
   names: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
 };

@@ -85,8 +85,8 @@ class Client {
     this.socket.emit("update-settings", settings);
   }
 
-  changeReadyToPlay(checked) {
-    this.socket.emit("change-ready-to-play", !!checked);
+  changeReadyToPlay(readyToPlay) {
+    this.socket.emit("change-ready-to-play", readyToPlay);
   }
 
   gotUsers = users => {
@@ -107,12 +107,18 @@ class Client {
     } else {
       otherUsers = users;
     }
+    const byId = _.fromPairs(users.map(user => [user.id, user]));
+    const online = users.filter(user => user.online);
+    const readyToPlay = online.filter(user => [true, this.user ? this.user.id : true].includes(user.readyToPlay));
     return {
       users,
-      byId: _.fromPairs(users.map(user => [user.id, user])),
+      byId,
       other: otherUsers,
-      online: users.filter(user => user.online),
+      online,
       offline: users.filter(user => !user.online),
+      readyToPlay,
+      readyToPlayMe: readyToPlay.filter(user => this.user && this.user.id === user.readyToPlay),
+      challengedUser: this.user ? (byId[this.user.readyToPlay] || null ): null,
     };
   }
 

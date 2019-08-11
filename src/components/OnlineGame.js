@@ -31,11 +31,12 @@ class ChosenOnlineGame extends Component {
     const isUserPlayerA = user ? playerA.id === user.id : false;
     const isUserPlayerB = user ? playerB.id === user.id : false;
     const userPlayer = isUserPlayerA ? Game.PLAYER_A : isUserPlayerB ? Game.PLAYER_B : null;
+    const otherUser = isUserPlayerA ? playerB : isUserPlayerB ? playerA : null;
 
     return {
       playerA, playerB,
       isUserPlayerA, isUserPlayerB,
-      userPlayer,
+      userPlayer, otherUser,
     };
   });
 
@@ -101,8 +102,19 @@ class ChosenOnlineGame extends Component {
     e.preventDefault();
   };
 
+  challengeUser = () => {
+    const {otherUser} = this.playersInfo;
+    if (otherUser) {
+      this.props.client.changeReadyToPlay(otherUser.id);
+    }
+  };
+
+  stopChallengeUser = () => {
+    this.props.client.changeReadyToPlay(false);
+  };
+
   render() {
-    const {location, user} = this.props;
+    const {location, user, usersInfo: {challengedUser}} = this.props;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -121,7 +133,7 @@ class ChosenOnlineGame extends Component {
       );
     }
 
-    const {playerA, playerB, isUserPlayerA, isUserPlayerB, userPlayer} = this.playersInfo;
+    const {otherUser, playerA, playerB, isUserPlayerA, isUserPlayerB, userPlayer} = this.playersInfo;
     if (!playerA || !playerB) {
       return null;
     }
@@ -161,11 +173,15 @@ class ChosenOnlineGame extends Component {
         </Segment>
         <Play
           user={user}
+          otherUser={otherUser}
           changeSettings={this.changeSettings}
           game={gameGame}
           names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}}
           allowControl={[userPlayer].filter(player => player)}
           submit={this.submit}
+          challengeUser={this.challengeUser}
+          stopChallengeUser={this.stopChallengeUser}
+          challengedUser={challengedUser}
         />
       </Fragment>
     );

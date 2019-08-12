@@ -90,7 +90,7 @@ class Hotseat extends Component {
               onClick={this.share}
               style={{width: '100%'}}
               as={'a'}
-              href={`/hotseat?position=${game.compressedFullNotation}`}
+              href={`?position=${game.compressedFullNotation}`}
               title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
             >
               <Icon name={'share'}/> Share position

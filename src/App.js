@@ -10,16 +10,21 @@ import Hotseat from "./components/Hotseat";
 import Lobby from "./components/Lobby";
 import OnlineGame from "./components/OnlineGame";
 import {withClient} from "./client/withClient";
+import services from "./services";
 
 class App extends Component {
   state = {
     liveGame: null,
   };
 
+  getLiveGameUrl(game) {
+    return `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/game/${game.id}`;
+  }
+
   selectLiveGame = liveGame => {
     let gameUrl;
     if (liveGame) {
-      gameUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/game/${liveGame.id}`;
+      gameUrl = this.getLiveGameUrl(liveGame);
     } else {
       gameUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/lobby`;
     }
@@ -30,23 +35,70 @@ class App extends Component {
       return;
     }
     this.setState({liveGame});
-    if (document.hidden) {
-      if (window.Notification && Notification.permission === "granted") {
-        try {
-          new Notification("New game ready");
-        } catch (e) {
-          console.error("Could not send notification", e);
-        }
-      }
-    }
   };
 
   componentDidUpdate(prevProps) {
-    if (prevProps.user && !prevProps.user.readyToPlay && this.props.user && this.props.user.readyToPlay) {
-      if (window.Notification && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-      }
+    this.askForNotificationPermissionOnWaitForGame(prevProps);
+    this.navigateToMyNewGame(prevProps);
+    this.notifyAboutMyMove(prevProps);
+  }
+
+  askForNotificationPermissionOnWaitForGame(prevProps) {
+    const user = this.props.user;
+    if ((!prevProps.user || !prevProps.user.readyToPlay) && (user && user.readyToPlay) && user.settings.enableNotifications) {
+      services.notifications.requestPermission();
     }
+  }
+
+  navigateToMyNewGame(prevProps) {
+    if (prevProps.gamesInfo.myLive === this.props.gamesInfo.myLive) {
+      return;
+    }
+
+    const previousMyLiveGameIds = new Set(prevProps.gamesInfo.myLive.map(game => game.id));
+    const myLiveGameIds = this.props.gamesInfo.myLive.map(game => game.id);
+    const newMyLiveGameIds = myLiveGameIds.filter(id => !previousMyLiveGameIds.has(id));
+    if (newMyLiveGameIds.length !== 1) {
+      return;
+    }
+
+    const newGame = this.props.gamesInfo.byId[newMyLiveGameIds[0]];
+    if (newGame.move === 1) {
+      const user = this.props.user;
+      const otherUserId = newGame.userIds[0] === user.id ? newGame.userIds[1] : (newGame.userIds[1] === user.id ? newGame.userIds[0] : null);
+      const otherUser = this.props.usersInfo.byId[otherUserId];
+      services.notifications.notify(otherUser ? `New game vs ${otherUser.name} started` : `New game started`);
+    }
+    if (!this.state.liveGame || !this.state.liveGame.finished || newGame.move === 1) {
+      this.selectLiveGame(newGame);
+    }
+  }
+
+  notifyAboutMyMove(prevProps) {
+    const user = this.props.user;
+    if (!this.props.gamesInfo.myLive.length) {
+      return;
+    }
+    const gamesThatChangedToMyTurn = this.props.gamesInfo.myLive
+      .filter(game => game.nextUserId === user.id)
+      .filter(game => {
+        const prevGame = prevProps.gamesInfo.byId[game.id];
+        return prevGame && prevGame.nextUserId !== user.id;
+      });
+    if (!gamesThatChangedToMyTurn.length) {
+      return;
+    }
+
+    const otherUsers = gamesThatChangedToMyTurn.map(game => {
+      const otherUserId = game.userIds[0] === user.id ? game.userIds[1] : (game.userIds[1] === user.id ? game.userIds[0] : null);
+      const otherUser = this.props.usersInfo.byId[otherUserId];
+      return otherUser;
+    });
+    const otherUser = otherUsers.length === 1 ? otherUsers[0] : null;
+    services.notifications.notify(otherUser ? `Your turn at game vs ${otherUser.name}` : `It's your turn to play in ${gamesThatChangedToMyTurn.length}`, {
+      tag: 'your-turn',
+      body: `It's your turn to play in ${gamesThatChangedToMyTurn.length} games`,
+    });
   }
 
   render() {

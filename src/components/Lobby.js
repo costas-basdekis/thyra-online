@@ -267,18 +267,6 @@ class Lobby extends Component {
     this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
   };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.gamesInfo.myLive !== this.props.gamesInfo.myLive) {
-      const previousMyLiveGameIds = new Set(prevProps.gamesInfo.myLive.map(game => game.id));
-      const myLiveGameIds = this.props.gamesInfo.myLive.map(game => game.id);
-      const newMyLiveGameIds = myLiveGameIds.filter(id => !previousMyLiveGameIds.has(id));
-      if (newMyLiveGameIds.length === 1) {
-        const newGame = this.props.gamesInfo.byId[newMyLiveGameIds[0]];
-        this.props.selectLiveGame(newGame);
-      }
-    }
-  }
-
   render() {
     const {client, user, usersInfo: {byId: usersById, online, offline, challengedUser, readyToPlay, readyToPlayMe}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
 

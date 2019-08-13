@@ -22,6 +22,10 @@ class SettingsContent extends Component {
     this.props.updateSettings({autoSubmitMoves: checked});
   };
 
+  updateEnableNotifications = (e, {checked}) => {
+    this.props.updateSettings({enableNotifications: checked});
+  };
+
   updateThemeRotated = (e, {checked}) => {
     this.props.updateSettings({theme: {rotated: checked}});
   };
@@ -39,7 +43,7 @@ class SettingsContent extends Component {
   };
 
   render() {
-    const {settings: {autoSubmitMoves, theme: {scheme, rotated, rounded, numbers}}} = this.props;
+    const {settings: {autoSubmitMoves, enableNotifications, theme: {scheme, rotated, rounded, numbers}}} = this.props;
 
     return (
       <Tab menu={{pointing: true, attached: false}} panes={[
@@ -52,6 +56,14 @@ class SettingsContent extends Component {
                   name={'autoSubmitMoves'}
                   checked={autoSubmitMoves}
                   onChange={this.updateAutoSubmitMove}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Checkbox
+                  label={'Enable notifications'}
+                  name={'enableNotifications'}
+                  checked={enableNotifications}
+                  onChange={this.updateEnableNotifications}
                 />
               </Form.Group>
             </Form>

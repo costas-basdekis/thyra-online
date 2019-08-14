@@ -85,7 +85,11 @@ class Play extends Component {
   }
 
   changeAutoSubmitMoves = () => {
-    this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: !this.props.user.settings.autoSubmitMoves});
+    const autoSubmitMoves = !this.props.user.settings.autoSubmitMoves;
+    this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: autoSubmitMoves});
+    if (autoSubmitMoves && this.canSubmit()) {
+      this.submit();
+    }
   };
 
   canSubmit(props = this.props, state = this.state) {

@@ -45,12 +45,20 @@ class App extends Component {
 
   askForNotificationPermissionOnWaitForGame(prevProps) {
     const user = this.props.user;
+    if (!user) {
+      return;
+    }
     if ((!prevProps.user || !prevProps.user.readyToPlay) && (user && user.readyToPlay) && user.settings.enableNotifications) {
       services.notifications.requestPermission();
     }
   }
 
   navigateToMyNewGame(prevProps) {
+    const user = this.props.user;
+    if (!user) {
+      return
+    }
+
     if (prevProps.gamesInfo.myLive === this.props.gamesInfo.myLive) {
       return;
     }
@@ -64,7 +72,6 @@ class App extends Component {
 
     const newGame = this.props.gamesInfo.byId[newMyLiveGameIds[0]];
     if (newGame.move === 1) {
-      const user = this.props.user;
       const otherUserId = newGame.userIds[0] === user.id ? newGame.userIds[1] : (newGame.userIds[1] === user.id ? newGame.userIds[0] : null);
       const otherUser = this.props.usersInfo.byId[otherUserId];
       services.notifications.notify(otherUser ? `New game vs ${otherUser.name} started` : `New game started`);
@@ -76,6 +83,9 @@ class App extends Component {
 
   notifyAboutMyMove(prevProps) {
     const user = this.props.user;
+    if (!user) {
+      return;
+    }
     if (!this.props.gamesInfo.myLive.length) {
       return;
     }

@@ -13,6 +13,7 @@ class ClientWatcher extends Component {
   }
 
   state = {
+    connected: client.connected,
     user: client.user,
     username: client.user ? client.user.name : null,
     usersInfo: client.usersInfo,
@@ -21,6 +22,8 @@ class ClientWatcher extends Component {
 
   componentDidMount() {
     client.subscribe({
+      onConnect: this.connectionChanged,
+      onDisconnect: this.connectionChanged,
       onUser: this.gotUser,
       onUsers: this.gotUsers,
       onGames: this.gotGames,
@@ -35,6 +38,10 @@ class ClientWatcher extends Component {
     });
   }
 
+  connectionChanged = connected => {
+    this.setState({connected});
+  };
+
   gotUser = user => {
     this.setState({user});
   };
@@ -48,11 +55,12 @@ class ClientWatcher extends Component {
   };
 
   render() {
-    const {user, usersInfo, gamesInfo} = this.state;
+    const {connected, user, usersInfo, gamesInfo} = this.state;
     const SubComponent = this.constructor.SubComponent;
     return (
       <SubComponent
         {...this.props}
+        connected={connected}
         client={client}
         user={user}
         usersInfo={usersInfo}

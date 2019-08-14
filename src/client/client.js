@@ -15,13 +15,11 @@ class Client {
     }
     this.socket = window.io(process.env.REACT_APP_SERVER_URL);
     this.available = !this.socket.unavailable;
-    this.socket.on('connect', () => {
-      this.getUser();
-    });
-    this.socket.on('disconnect', () => {
-      this.gotUser(null);
-      this.gotUsers([]);
-    });
+    this.connected = false;
+    this.socket.on('connect', this.justConnected);
+    this.onConnect = [];
+    this.socket.on('disconnect', this.justDisconnected);
+    this.onDisconnect = [];
     this.socket.on("reload", this.reload);
 
     this.user = null;
@@ -40,7 +38,7 @@ class Client {
   }
 
   subscribe(callbacks) {
-    for (const name of ['onUser', 'onUsers', 'onGames']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames']) {
       const callback = callbacks[name];
       if (callback) {
         this[name].push(callback);
@@ -49,7 +47,7 @@ class Client {
   }
 
   unsubscribe(callbacks) {
-    for (const name of ['onUser', 'onUsers', 'onGames']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames']) {
       const callback = callbacks[name];
       if (callback) {
         _.pull(this[name], callback);
@@ -63,6 +61,17 @@ class Client {
 
   reload = () => {
     window.location.reload(true);
+  };
+
+  justConnected = () => {
+    this.getUser();
+    this.connected = true;
+    this.onConnect.map(callback => callback(this.connected));
+  };
+
+  justDisconnected = () => {
+    this.connected = false;
+    this.onDisconnect.map(callback => callback(this.connected));
   };
 
   gotUser = user => {

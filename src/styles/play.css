@@ -33,9 +33,18 @@
 .background.editable .cell.available {
     cursor: pointer;
 }
-
 .cell.available:hover {
     border-color: black;
+}
+
+.cell.undoable {
+    border-color: red;
+}
+.background.editable .cell.undoable {
+    cursor: pointer;
+}
+.cell.undoable:hover {
+    border-color: yellow;
 }
 
 .cell .worker {

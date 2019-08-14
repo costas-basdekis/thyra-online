@@ -30,7 +30,7 @@ class Play extends Component {
   };
 
   takeMoveBack = () => {
-    this.makeMove(this.state.game.previous);
+    this.makeMove(this.state.game.takeMoveBack());
   };
 
   undo = () => {
@@ -50,7 +50,7 @@ class Play extends Component {
   };
 
   takeMoveBackToSelected = () => {
-    this.selectGame(this.state.selectedGame.previous);
+    this.selectGame(this.state.selectedGame.takeMoveBack());
   };
 
   undoToSelected = () => {
@@ -173,7 +173,15 @@ class Play extends Component {
           </Segment>
         ) : null}
         <Segment style={{textAlign: "center"}}>
-          <Board game={displayGame} makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove} allowControl={allowControl} settings={user ? user.settings : undefined} />
+          <Board
+            game={displayGame}
+            makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
+            minChainCount={this.props.submit ? this.props.game.chainCount : (
+              this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
+            )}
+            allowControl={allowControl}
+            settings={user ? user.settings : undefined}
+          />
         </Segment>
         <Segment>
           <div>

@@ -5,13 +5,16 @@ import Game from "../game/game";
 
 class BoardBackground extends Component {
   render() {
-    let {className, clickable, isCellAvailable, small, medium, makeMove, onSelect, selected, allowControl, settings, children, rowsAndColumns} = this.props;
+    let {
+      className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
+      allowControl, settings, children, rowsAndColumns,
+    } = this.props;
     const {theme: {scheme, rotated, rounded, numbers}} = settings;
 
     className = classNames("background", {
       'small-board': small,
       'medium-board': medium,
-      editable: !!makeMove && clickable,
+      editable: !!makeMove && (clickable || undoable),
       selectable: !!onSelect,
       selected,
       'theme-subtle': scheme === 'subtle',
@@ -32,11 +35,13 @@ class BoardBackground extends Component {
               <BoardCell
                 key={`${cell.x}-${cell.y}`}
                 cell={cell}
-                clickable={clickable}
+                clickable={clickable || (undoable && isCellUndoable(cell))}
                 available={isCellAvailable(cell)}
+                undoable={isCellUndoable(cell)}
                 allowControl={allowControl}
                 settings={settings}
                 makeMove={this.props.makeMove}
+                undo={this.props.undo}
               />
             ))}
           </div>
@@ -54,12 +59,15 @@ BoardBackground.propTypes = {
   rowsAndColumns: PropTypes.array,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   makeMove: PropTypes.func,
+  undo: PropTypes.func,
   small: PropTypes.bool.isRequired,
   medium: PropTypes.bool.isRequired,
   clickable: PropTypes.bool.isRequired,
+  undoable: PropTypes.bool.isRequired,
   onSelect: PropTypes.func,
   selected: PropTypes.bool.isRequired,
   isCellAvailable: PropTypes.func.isRequired,
+  isCellUndoable: PropTypes.func.isRequired,
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
 };
@@ -74,8 +82,16 @@ BoardBackground.defaultProps = {
 };
 
 class BoardCell extends Component {
+  makeMove = () => {
+    if (this.props.available && this.props.makeMove) {
+      this.props.makeMove(this.props.cell);
+    } else if (this.props.undoable && this.props.undo) {
+      this.props.undo();
+    }
+  };
+
   render() {
-    let {cell, clickable, available, settings: {theme: {numbers}}, makeMove} = this.props;
+    let {cell, clickable, available, undoable, settings: {theme: {numbers}}, makeMove, undo} = this.props;
     const displayLevel = (
       ['obvious', 'subtle', 'very-subtle'].includes(numbers)
       && cell.level > 0
@@ -84,8 +100,8 @@ class BoardCell extends Component {
     return (
       <div
         key={`row-${cell.x}-${cell.y}`}
-        className={classNames("cell", `level-${cell.level}`, {available})}
-        onClick={makeMove && available && clickable ? () => makeMove(cell) : null}
+        className={classNames("cell", `level-${cell.level}`, {available, undoable})}
+        onClick={((makeMove && available) || (undo && undoable)) && clickable ? this.makeMove : null}
       >
         <div className={classNames("level", "level-1")}>
           <div className={classNames("level", "level-2")}>
@@ -109,13 +125,16 @@ BoardCell.propTypes = {
   cell: PropTypes.object.isRequired,
   clickable: PropTypes.bool.isRequired,
   available: PropTypes.bool.isRequired,
+  undoable: PropTypes.bool.isRequired,
   settings: PropTypes.object.isRequired,
   makeMove: PropTypes.func,
+  undo: PropTypes.func,
 };
 
 BoardCell.defaultProps = {
   clickable: false,
   available: false,
+  undoable: false,
 };
 
 class ThemeDemoBoard extends Component {
@@ -138,6 +157,10 @@ class ThemeDemoBoard extends Component {
     return false;
   };
 
+  isCellUndoable = () => {
+    return false;
+  };
+
   render() {
     const {small, medium, settings} = this.props;
     return (
@@ -147,6 +170,7 @@ class ThemeDemoBoard extends Component {
         allowControl={[Game.PLAYER_A, Game.PLAYER_B]}
         rowsAndColumns={this.constructor.demoRowsAndColumns}
         isCellAvailable={this.isCellAvailable}
+        isCellUndoable={this.isCellUndoable}
         settings={settings}
       />
     );
@@ -179,6 +203,10 @@ class Board extends Component {
     this.props.makeMove(this.props.game.makeMove({x: cell.x, y: cell.y}));
   };
 
+  undo = () => {
+    this.props.makeMove(this.props.game.canUndo ? this.props.game.undo() : this.props.game.takeMoveBack());
+  };
+
   onSelect = () => {
     this.props.onSelect(this.props.game);
   };
@@ -187,6 +215,27 @@ class Board extends Component {
     return this.props.game.availableMoves[cell.y][cell.x];
   };
 
+  isCellUndoable = cell => {
+    if (this.props.minChainCount === undefined || this.props.minChainCount === null) {
+      if (!this.props.game.canUndo) {
+        return false;
+      }
+    } else {
+      if (this.props.game.chainCount <= this.props.minChainCount) {
+        return false;
+      }
+    }
+    const lastMove = this.props.game.lastMove;
+    if (!lastMove) {
+      return false;
+    }
+    return lastMove.x === cell.x && lastMove.y === cell.y;
+  };
+
+  isGameUndoable() {
+    return !!this.props.game.rowsAndColumns.find(row => row.cells.find(cell => this.isCellUndoable(cell)));
+  }
+
   render() {
     let {game, allowControl, onSelect, makeMove} = this.props;
 
@@ -194,9 +243,12 @@ class Board extends Component {
       <BoardBackground
         {...this.props}
         isCellAvailable={this.isCellAvailable}
+        isCellUndoable={this.isCellUndoable}
         clickable={allowControl.includes(game.nextPlayer)}
+        undoable={this.isGameUndoable()}
         onSelect={onSelect ? this.onSelect : null}
         makeMove={makeMove ? this.makeMove : null}
+        undo={makeMove ? this.undo : null}
         rowsAndColumns={game.rowsAndColumns}
       />
     );
@@ -207,6 +259,7 @@ Board.propTypes = {
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   game: PropTypes.instanceOf(Game).isRequired,
   makeMove: PropTypes.func,
+  minChainCount: PropTypes.number,
   small: PropTypes.bool.isRequired,
   medium: PropTypes.bool.isRequired,
   onSelect: PropTypes.func,

@@ -75,7 +75,14 @@ class Play extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.game !== prevProps.game) {
-      this.setState({selectedGame: null, game: this.props.game, resigning: false});
+      const gameChanged = (
+        !this.props.game
+        || !prevProps.game
+        || this.props.game.compressedFullNotation !== prevProps.game.compressedFullNotation
+      );
+      if (gameChanged) {
+        this.setState({selectedGame: null, game: this.props.game, resigning: false});
+      }
     }
     if (this.props.user && this.props.user.settings.autoSubmitMoves) {
       if (!this.canSubmit(prevProps, prevState) && this.canSubmit()) {

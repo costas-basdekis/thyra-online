@@ -95,8 +95,10 @@ class Play extends Component {
       !!submit
       && !selectedGame
       && game !== props.game
-      && !game.finished
-      && game.nextPlayer !== props.game.nextPlayer
+      && (
+        game.finished
+        || game.nextPlayer !== props.game.nextPlayer
+      )
     );
   }
 

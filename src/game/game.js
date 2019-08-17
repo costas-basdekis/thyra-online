@@ -1,4 +1,7 @@
 import _ from "lodash";
+import chalk from 'chalk';
+
+class InvalidMoveError extends Error {}
 
 class Game {
   static PLAYER_A = 'player-a';
@@ -110,10 +113,10 @@ class Game {
       cells: this.constructor.COLUMNS.map(x => this.cells[y][x]),
     }));
 
-    const {nextPlayer, moveType, availableMoves, canUndo, resignedPlayer} = status;
+    const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer} = status;
     this.nextPlayer = nextPlayer;
     this.moveType = moveType;
-    this.availableMoves = availableMoves;
+    this.availableMovesMatrix = availableMovesMatrix;
     this.canUndo = canUndo;
     this.canTakeMoveBack = !!this.previous;
     this.resignedPlayer = resignedPlayer;
@@ -132,7 +135,7 @@ class Game {
     this.winner = this.getWinner();
     if (this.winner) {
       this.finished = true;
-    } else if (!this.hasAvailableMove(this.availableMoves)) {
+    } else if (!this.hasAvailableMove(this.availableMovesMatrix)) {
       this.finished = true;
       this.winner = this.constructor.OTHER_PLAYER[this.nextPlayer];
     } else {
@@ -140,8 +143,15 @@ class Game {
     }
 
     if (this.finished) {
-      this.availableMoves = this.constructor.noMovesAreAvailable();
+      this.availableMovesMatrix = this.constructor.noMovesAreAvailable();
     }
+  }
+
+  getAvailableMoves(availableMovesMatrix = this.availableMovesMatrix) {
+    return _.flatten(availableMovesMatrix
+      .map((row, y) => row
+        .map((available, x) => available ? {x, y} : null)))
+      .filter(move => move);
   }
 
   serialize() {
@@ -160,7 +170,7 @@ class Game {
       status: {
         nextPlayer: this.nextPlayer,
         moveType: this.moveType,
-        availableMoves: this.availableMoves,
+        availableMovesMatrix: this.availableMovesMatrix,
         canUndo: this.canUndo,
         resignedPlayer: this.resignedPlayer,
       },
@@ -212,30 +222,54 @@ class Game {
       moveType: this.MOVE_TYPE_PLACE_FIRST_WORKER,
       finished: false,
       winner: null,
-      availableMoves: this.allMovesAreAvailable(),
+      availableMovesMatrix: this.allMovesAreAvailableMatrix(),
       canUndo: false,
     };
   }
 
+  getPrintout() {
+    /* eslint-disable no-useless-computed-key */
+    const printMap = {
+      [Game.PLAYER_A]: {[0]: 'a', [1]: chalk.bgWhite('b'), [2]: chalk.bgYellow('c'), [3]: chalk.bgRed('d')},
+      [Game.PLAYER_B]: {[0]: 'w', [1]: chalk.bgWhite('x'), [2]: chalk.bgYellow('y'), [3]: chalk.bgRed('z')},
+      [null]: {[0]: ' ', [1]: chalk.bgWhite(' '), [2]: chalk.bgYellow(' '), [3]: chalk.bgRed(' '), [4]: chalk.bgBlue(' ')},
+    };
+    /* eslint-enable no-useless-computed-key */
+    const cellsPrintout = this.rowsAndColumns
+      .map(row => row.cells
+        .map(cell => printMap[cell.player][cell.level])
+        .join(''))
+      .join('\n');
+    const nextPlayerMap = {
+      [Game.PLAYER_A]: 'A', [Game.PLAYER_B]: 'B',
+    };
+    const nextPlayerPrintout = nextPlayerMap[this.nextPlayer];
+    const winnerMap = {
+      [Game.PLAYER_A]: 'A', [Game.PLAYER_B]: 'B', [null]: '+',
+    };
+    const winnerPrintout = winnerMap[this.winner];
+    return (
+      `${nextPlayerPrintout}-----${winnerPrintout}\n`
+      + cellsPrintout.split('\n').map(row => `|${chalk.black(row)}|`).join('\n')
+      + '\n+-----+'
+    );
+  }
+
   checkCoordinatesAreValid({x, y}) {
     if (Math.floor(x) !== x || Math.floor(y) !== y) {
-      throw new Error(`Coordinates '${JSON.stringify({x, y})}' are not valid`);
+      throw new InvalidMoveError(`Coordinates '${JSON.stringify({x, y})}' are not valid`);
     }
-    if (this.availableMoves[y] === undefined || this.availableMoves[y][x] === undefined) {
-      throw new Error(`Coordinates '${JSON.stringify({x, y})}' are out of bounds`);
+    if (this.availableMovesMatrix[y] === undefined || this.availableMovesMatrix[y][x] === undefined) {
+      throw new InvalidMoveError(`Coordinates '${JSON.stringify({x, y})}' are out of bounds`);
     }
   }
 
-  getAvailableCoordinates(availableMoves = this.availableMoves) {
-    return availableMoves
-      .map((row, y) => row
-        .map((available, x) => available ? {x, y} : null)
-        .filter(coordinates => coordinates))
-      .reduce((total, current) => total.concat(current));
+  hasAvailableMove(availableMovesMatrix = this.availableMovesMatrix) {
+    return this.getAvailableMoves(availableMovesMatrix).length > 0;
   }
 
-  hasAvailableMove(availableMoves = this.availableMoves) {
-    return this.getAvailableCoordinates(availableMoves).length > 0;
+  isMoveAvailable({x, y}) {
+    return this.availableMovesMatrix[y][x];
   }
 
   getWinner() {
@@ -251,7 +285,7 @@ class Game {
     return winningCell.player;
   }
 
-  static allMovesAreAvailable() {
+  static allMovesAreAvailableMatrix() {
     return this.ROWS.map(() => this.COLUMNS.map(() => true));
   }
 
@@ -259,21 +293,21 @@ class Game {
     return this.ROWS.map(() => this.COLUMNS.map(() => false));
   }
 
-  getEmptyCellsAvailableMoves(cells) {
+  getEmptyCellsAvailableMovesMatrix(cells) {
     return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => !cells[y][x].player));
   }
 
-  getPlayerAvailableMoves(cells, player) {
+  getPlayerAvailableMovesMatrix(cells, player) {
     return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => {
       if (cells[y][x].player !== player) {
         return false;
       }
 
-      return this.hasAvailableMove(this.getMovableAvailableMoves(cells, {x, y}));
+      return this.hasAvailableMove(this.getMovableAvailableMovesMatrix(cells, {x, y}));
     }));
   }
 
-  getMovableAvailableMoves(cells, coordinates) {
+  getMovableAvailableMovesMatrix(cells, coordinates) {
     const cell = cells[coordinates.y][coordinates.x];
     const maximumLevel = cell.level + 1;
     return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => (
@@ -285,7 +319,7 @@ class Game {
     )));
   }
 
-  getBuildableAvailableMoves(cells, coordinates) {
+  getBuildableAvailableMovesMatrix(cells, coordinates) {
     return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => (
       Math.abs(x - coordinates.x) <= 1
       && Math.abs(y - coordinates.y) <= 1
@@ -296,16 +330,16 @@ class Game {
 
   checkCanMakeMove(expectedMoveType, coordinates, targetCoordinates) {
     if (this.finished) {
-      throw new Error("The game has already finished");
+      throw new InvalidMoveError("The game has already finished");
     }
     if (this.moveType !== expectedMoveType) {
-      throw new Error(`You cannot perform move of type "${expectedMoveType}": you need to perform "${this.moveType}"`);
+      throw new InvalidMoveError(`You cannot perform move of type "${expectedMoveType}": you need to perform "${this.moveType}"`);
     }
     this.checkCoordinatesAreValid(coordinates);
     if (targetCoordinates) {
       this.checkCoordinatesAreValid(targetCoordinates);
     }
-    if (!this.availableMoves[coordinates.y][coordinates.x]) {
+    if (!this.availableMovesMatrix[coordinates.y][coordinates.x]) {
       throw new Error(`Move ${JSON.stringify(coordinates)} is not one of the available ones`);
     }
   }
@@ -314,7 +348,7 @@ class Game {
     return this.createStep(this.cells, {
       nextPlayer: this.nextPlayer,
       moveType: this.moveType,
-      availableMoves: this.availableMoves,
+      availableMovesMatrix: this.availableMovesMatrix,
       canUndo: false,
       resignedPlayer: player,
     }, {resign: player});
@@ -334,7 +368,7 @@ class Game {
     };
     const makeMoveMethod = makeMoveMethods[this.moveType];
     if (!makeMoveMethod) {
-      throw new Error(`Don't know how to perform move of type "${this.moveType}"`);
+      throw new InvalidMoveError(`Don't know how to perform move of type "${this.moveType}"`);
     }
     return makeMoveMethod.bind(this)(coordinates);
   }
@@ -372,7 +406,7 @@ class Game {
     return this.createStep(cells, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
-      availableMoves: this.getEmptyCellsAvailableMoves(cells),
+      availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(cells),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -398,9 +432,9 @@ class Game {
       moveType: nextPlayer === this.constructor.PLAYER_A
         ? this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE
         : this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER,
-      availableMoves: nextPlayer === this.constructor.PLAYER_A
-        ? this.getPlayerAvailableMoves(cells, nextPlayer)
-        : this.getEmptyCellsAvailableMoves(cells),
+      availableMovesMatrix: nextPlayer === this.constructor.PLAYER_A
+        ? this.getPlayerAvailableMovesMatrix(cells, nextPlayer)
+        : this.getEmptyCellsAvailableMovesMatrix(cells),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});
@@ -415,7 +449,7 @@ class Game {
       moveType: cell.worker === this.constructor.WORKER_FIRST
         ? this.constructor.MOVE_TYPE_MOVE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
-      availableMoves: this.getMovableAvailableMoves(this.cells, {x, y}),
+      availableMovesMatrix: this.getMovableAvailableMovesMatrix(this.cells, {x, y}),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -449,7 +483,7 @@ class Game {
     return this.createStep(cells, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
-      availableMoves: this.getBuildableAvailableMoves(cells, to),
+      availableMovesMatrix: this.getBuildableAvailableMovesMatrix(cells, to),
       canUndo: true,
       resignedPlayer: null,
     }, {x: to.x, y: to.y});
@@ -484,11 +518,15 @@ class Game {
     return this.createNext(cells, {
       nextPlayer: nextPlayer,
       moveType: this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-      availableMoves: this.getPlayerAvailableMoves(cells, nextPlayer),
+      availableMovesMatrix: this.getPlayerAvailableMovesMatrix(cells, nextPlayer),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});
   }
 }
+
+export {
+  InvalidMoveError,
+};
 
 export default Game;

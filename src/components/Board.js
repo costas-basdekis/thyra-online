@@ -212,7 +212,7 @@ class Board extends Component {
   };
 
   isCellAvailable = cell => {
-    return this.props.game.availableMoves[cell.y][cell.x];
+    return this.props.game.isMoveAvailable(cell);
   };
 
   isCellUndoable = cell => {

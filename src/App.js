@@ -63,6 +63,10 @@ class App extends Component {
       return;
     }
 
+    if (this.state.liveGame && !this.state.liveGame.finished) {
+      return;
+    }
+
     const previousMyLiveGameIds = new Set(prevProps.gamesInfo.myLive.map(game => game.id));
     const myLiveGameIds = this.props.gamesInfo.myLive.map(game => game.id);
     const newMyLiveGameIds = myLiveGameIds.filter(id => !previousMyLiveGameIds.has(id));
@@ -76,7 +80,7 @@ class App extends Component {
       const otherUser = this.props.usersInfo.byId[otherUserId];
       services.notifications.notify(otherUser ? `New game vs ${otherUser.name} started` : `New game started`);
     }
-    if (!this.state.liveGame || !this.state.liveGame.finished || newGame.move === 1) {
+    if (newGame.move === 1) {
       this.selectLiveGame(newGame);
     }
   }

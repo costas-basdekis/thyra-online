@@ -82,7 +82,7 @@ class ChosenOnlineGame extends Component {
     this.props.client.updateSettings(settings);
   };
 
-  share = e => {
+  shareGame = e => {
     const url = this.props.location.pathname;
     if (navigator.share) {
       const game = this.game;
@@ -160,13 +160,24 @@ class ChosenOnlineGame extends Component {
               <Button
                 positive
                 icon
-                onClick={this.share}
+                onClick={this.shareGame}
                 style={{width: '100%'}}
                 as={'a'}
                 href={location.pathname}
                 title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
               >
-                <Icon name={'share'}/> Share
+                <Icon name={'share'}/> Share Game
+              </Button>
+              <Button
+                positive
+                icon
+                style={{width: '100%'}}
+                as={'a'}
+                href={`${process.env.REACT_APP_PAGE_BASE_PATH}${process.env.REACT_APP_PAGE_BASE_PATH.endsWith('/') ? '' : '/'}hotseat?position=${gameGame.compressedFullNotation}`}
+                title={'Click to open hotseat with this game'}
+                target={'_blank'}
+              >
+                <Icon name={'share'}/> Edit position
               </Button>
             </Grid.Column>
           </Grid>

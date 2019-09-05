@@ -62,12 +62,27 @@ class Play extends Component {
   };
 
   submit = () => {
-    const history = this.state.game.fullHistory;
-    const propsGameIndex = history.findIndex(game => game === this.props.game);
+    const moves = this.getMovesToSubmit();
+    if (moves.length) {
+      this.props.submit(moves);
+    }
+  };
+
+  getMovesToSubmit() {
+    const {game: propsGame} = this.props;
+    const {game: stateGame} = this.state;
+    const history = stateGame.fullHistory;
+    const propsGameIndex = history.findIndex(
+      game => game.compressedFullNotation === propsGame.compressedFullNotation);
+    if (propsGameIndex < 0) {
+      console.error("Could not find live game in history");
+      return [];
+    }
     const newHistory = history.slice(propsGameIndex + 1);
     const moves = newHistory.map(game => game.lastMove);
-    this.props.submit(moves);
-  };
+
+    return moves;
+  }
 
   resign = () => {
     this.props.submit("resign");
@@ -106,6 +121,7 @@ class Play extends Component {
       !!submit
       && !selectedGame
       && game !== props.game
+      && this.getMovesToSubmit().length
       && (
         game.finished
         || game.nextPlayer !== props.game.nextPlayer

@@ -92,6 +92,10 @@ class Client {
     this.socket.emit("change-username", name);
   }
 
+  changePassword(password) {
+    this.socket.emit("change-password", password);
+  }
+
   updateSettings(settings) {
     this.socket.emit("update-settings", settings);
   }

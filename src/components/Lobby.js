@@ -112,7 +112,7 @@ class UserCard extends Component {
             {otherUser.name}
             {" "}
             {client && user && user.id === otherUser.id ? (
-              <EditUserName client={client} user={user} trigger={<Label as={'a'} icon={'edit'} content={'Rename'}/>} />
+              <EditUser client={client} user={user} trigger={<Label as={'a'} icon={'edit'} content={'Edit'}/>} />
             ) : null}
           </Card.Header>
           <Card.Meta>
@@ -146,10 +146,11 @@ UserCard.propTypes = {
   readyToPlayMeUsers: PropTypes.array,
 };
 
-class EditUserName extends Component {
+class EditUser extends Component {
   state = {
     user: this.props.user,
     username: this.props.user.name,
+    password: '',
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -167,34 +168,44 @@ class EditUserName extends Component {
     this.setState({username: value});
   };
 
+  changePassword = ({target: {value}}) => {
+    this.setState({password: value});
+  };
+
   updateUsername = () => {
     this.props.client.changeUsername(this.state.username);
   };
 
+  updatePassword = () => {
+    this.props.client.changePassword(this.state.password);
+    this.setState({password: ''});
+  };
+
   render() {
-    const {username} = this.state;
+    const {username, password} = this.state;
     const {trigger} = this.props;
 
     return (
       <Modal
         trigger={trigger}
-        size={'mini'}
-        header={'Change name'}
+        size={'small'}
+        header={'Edit user'}
         content={(
           <Segment>
-            <Input label={'Name'} value={username} onChange={this.changeUsername} />
+            <Input label={'Name'} value={username} onChange={this.changeUsername} action={{content: 'Change', onClick: this.updateUsername}} />
+            <br />
+            <Input label={'Password'} value={password} onChange={this.changePassword} action={{content: 'Change', onClick: this.updatePassword}} />
           </Segment>
         )}
         actions={[
           {key: 'cancel', negative: true, content: 'Cancel'},
-          {key: 'change', positive: true, content: 'Change', onClick: this.updateUsername},
         ]}
       />
     );
   }
 }
 
-EditUserName.propTypes = {
+EditUser.propTypes = {
   client: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
   trigger: PropTypes.node.isRequired,

@@ -5,7 +5,9 @@ const appVersion = 1;
 class Client {
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
-    this.password = localStorage.getItem('user-password') || null;
+    const password = localStorage.getItem('user-password') || null;
+    localStorage.removeItem('user-password');
+    this.token = localStorage.getItem('user-token') || password;
     if (!window.io) {
       window.io = () => ({
         on: () => console.warn("Socket script was missing"),
@@ -56,7 +58,7 @@ class Client {
   }
 
   getUser() {
-    this.socket.emit("create-user", {appVersion, id: this.id, password: this.password});
+    this.socket.emit("create-user", {appVersion, id: this.id, token: this.token});
   }
 
   reload = () => {
@@ -77,9 +79,9 @@ class Client {
   gotUser = user => {
     if (user) {
       this.id = user.id;
-      this.password = user.password;
+      this.token = user.token;
       localStorage.setItem('user-id', this.id);
-      localStorage.setItem('user-password', this.password);
+      localStorage.setItem('user-token', this.token);
     }
     this.user = user;
     this.onUser.map(callback => callback(user));

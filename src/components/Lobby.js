@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header} from "semantic-ui-react";
+import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header, Checkbox, Form} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
@@ -217,6 +217,7 @@ class LogIn extends Component {
   state = {
     username: '',
     password: '',
+    mergeUsers: false,
   };
 
   modal = node => console.log('log in', node);
@@ -229,13 +230,17 @@ class LogIn extends Component {
     this.setState({password: value});
   };
 
+  changeMergeUsers = ({target: {checked}}) => {
+    this.setState({mergeUsers: checked});
+  };
+
   logIn = () => {
-    this.props.client.logIn(this.state.username, this.state.password);
+    this.props.client.logIn(this.state.username, this.state.password, this.mergeUsers);
     this.setState({username: '', password: ''});
   };
 
   render() {
-    const {username, password} = this.state;
+    const {username, password, mergeUsers} = this.state;
 
     return (
       <Modal
@@ -248,6 +253,12 @@ class LogIn extends Component {
             <Input label={'Name'} value={username} onChange={this.changeUsername}/>
             <br />
             <Input label={'Password'} value={password} onChange={this.changePassword} />
+            <br />
+            <Checkbox
+              label={'Merge users'}
+              checked={mergeUsers}
+              onChange={this.changeMergeUsers}
+            />
           </Segment>
         )}
         actions={[

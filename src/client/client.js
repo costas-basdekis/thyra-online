@@ -62,8 +62,8 @@ class Client {
     this.socket.emit("create-user", {appVersion, id: this.id, name: this.username, token: this.token});
   }
 
-  logIn(name, password) {
-    this.socket.emit("log-in", {appVersion, name, password});
+  logIn(name, password, mergeUsers) {
+    this.socket.emit("log-in", {appVersion, name, password, mergeUsers});
   }
 
   reload = () => {

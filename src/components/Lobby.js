@@ -213,6 +213,56 @@ EditUser.propTypes = {
   trigger: PropTypes.node.isRequired,
 };
 
+class LogIn extends Component {
+  state = {
+    username: '',
+    password: '',
+  };
+
+  modal = node => console.log('log in', node);
+
+  changeUsername = ({target: {value}}) => {
+    this.setState({username: value});
+  };
+
+  changePassword = ({target: {value}}) => {
+    this.setState({password: value});
+  };
+
+  logIn = () => {
+    this.props.client.logIn(this.state.username, this.state.password);
+    this.setState({username: '', password: ''});
+  };
+
+  render() {
+    const {username, password} = this.state;
+
+    return (
+      <Modal
+        ref={this.modal}
+        trigger={<Label as={'a'} icon={'sign in'} content={'Log In'} />}
+        size={'small'}
+        header={'Log In'}
+        content={(
+          <Segment>
+            <Input label={'Name'} value={username} onChange={this.changeUsername}/>
+            <br />
+            <Input label={'Password'} value={password} onChange={this.changePassword} />
+          </Segment>
+        )}
+        actions={[
+          {key: 'cancel', negative: true, content: 'Cancel'},
+          {key: 'logIn', positive: true, content: 'Log In', onClick: this.logIn},
+        ]}
+      />
+    );
+  }
+}
+
+LogIn.propTypes = {
+  client: PropTypes.object.isRequired,
+};
+
 class GameList extends Component {
   render() {
     const {user, usersById, games} = this.props;
@@ -290,6 +340,7 @@ class Lobby extends Component {
     return (
       <Fragment>
         <Settings/>
+        <LogIn client={client} />
         <Card.Group centered>
           {user ? (
             <UserCard

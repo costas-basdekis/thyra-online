@@ -1,10 +1,11 @@
 import _ from "lodash";
 
-const appVersion = 1;
+const appVersion = 2;
 
 class Client {
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
+    this.username = localStorage.getItem('user-name') || null;
     const password = localStorage.getItem('user-password') || null;
     localStorage.removeItem('user-password');
     this.token = localStorage.getItem('user-token') || password;
@@ -58,7 +59,7 @@ class Client {
   }
 
   getUser() {
-    this.socket.emit("create-user", {appVersion, id: this.id, token: this.token});
+    this.socket.emit("create-user", {appVersion, id: this.id, name: this.username, token: this.token});
   }
 
   reload = () => {
@@ -79,8 +80,10 @@ class Client {
   gotUser = user => {
     if (user) {
       this.id = user.id;
+      this.username = user.name;
       this.token = user.token;
       localStorage.setItem('user-id', this.id);
+      localStorage.setItem('user-name', this.username);
       localStorage.setItem('user-token', this.token);
     }
     this.user = user;

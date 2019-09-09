@@ -118,6 +118,8 @@ class UserCard extends Component {
           <Card.Meta>
             {user && otherUser.id === user.id ? <Label><Icon name={"user"} color={"green"} />Me</Label> : null}
             {" "}
+            {user && otherUser.id === user.id ? <EditUser client={client} user={user} trigger={<Label as={'a'}><Icon name={"lock"} color={user.hasPassword ? "green" : "red"} />{user.hasPassword ? '' : 'No password'}</Label>} /> : null}
+            {" "}
             {otherUser.readyToPlay ? <Label><Icon loading name={"circle notch"} color={"green"} />Ready</Label> : null}
             {" "}
             {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
@@ -183,7 +185,7 @@ class EditUser extends Component {
 
   render() {
     const {username, password} = this.state;
-    const {trigger} = this.props;
+    const {user, trigger} = this.props;
 
     return (
       <Modal
@@ -194,7 +196,7 @@ class EditUser extends Component {
           <Segment>
             <Input label={'Name'} value={username} onChange={this.changeUsername} action={{content: 'Change', onClick: this.updateUsername}} />
             <br />
-            <Input label={'Password'} value={password} onChange={this.changePassword} action={{content: 'Change', onClick: this.updatePassword}} />
+            <Input label={{content: user.hasPassword ? 'Password is set' : 'Set a password', color: user.hasPassword ? 'green' : 'red'}} value={password} onChange={this.changePassword} action={{content: 'Change', color: user.hasPassword ? undefined : 'green', onClick: this.updatePassword}} />
           </Segment>
         )}
         actions={[

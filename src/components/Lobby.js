@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header, Checkbox, Form} from "semantic-ui-react";
+import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header, Checkbox} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
@@ -123,6 +123,8 @@ class UserCard extends Component {
             {otherUser.readyToPlay ? <Label><Icon loading name={"circle notch"} color={"green"} />Ready</Label> : null}
             {" "}
             {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
+            {" "}
+            <Label><Icon name={otherUser.isUserRatingProvisional ? "question" : "star outline"} color={otherUser.isUserRatingProvisional ? "orange" : undefined} />{otherUser.score}</Label>
           </Card.Meta>
         </Card.Content>
         {playButtonLabel ? <Card.Content extra>
@@ -219,8 +221,6 @@ class LogIn extends Component {
     password: '',
     mergeUsers: false,
   };
-
-  modal = node => console.log('log in', node);
 
   changeUsername = ({target: {value}}) => {
     this.setState({username: value});

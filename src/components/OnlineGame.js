@@ -114,7 +114,7 @@ class ChosenOnlineGame extends Component {
   };
 
   render() {
-    const {location, user, usersInfo: {challengedUser}} = this.props;
+    const {location, user, usersInfo: {challengedUser}, game} = this.props;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -143,13 +143,13 @@ class ChosenOnlineGame extends Component {
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
-              value={<Statistic.Value>{playerA.name}<HashedIcon floated={'right'} size={'mini'} hash={playerA.id} /></Statistic.Value>}
+              value={<Statistic.Value>{`${playerA.name} (${game ? game.resultingPlayerAScore || game.initialPlayerA.score : '?'})`}<HashedIcon floated={'right'} size={'mini'} hash={playerA.id} /></Statistic.Value>}
               label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerA ? "green" : undefined}
             />
             <Statistic label={"vs"}/>
             <Statistic
-              value={<Statistic.Value>{playerB.name}<HashedIcon floated={'right'} size={'mini'} hash={playerB.id} /></Statistic.Value>}
+              value={<Statistic.Value>{`${playerB.name} (${game ? game.resultingPlayerBScore || game.initialPlayerB.score : '?'})`}<HashedIcon floated={'right'} size={'mini'} hash={playerB.id} /></Statistic.Value>}
               label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerB ? "green" : undefined}
             />
@@ -206,6 +206,7 @@ ChosenOnlineGame.propTypes = {
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
+  game: PropTypes.object,
 };
 
 ChosenOnlineGame = withRouter(withClient(ChosenOnlineGame));
@@ -220,7 +221,7 @@ class OnlineGame extends Component {
   }
 
   render() {
-    const {selectLiveGame, usersInfo: {byId}} = this.props;
+    const {selectLiveGame, game, usersInfo: {byId}} = this.props;
     if (!Object.values(byId).length) {
       return null;
     }
@@ -228,7 +229,7 @@ class OnlineGame extends Component {
     return (
       <Switch>
         <Route exact path={this.props.match.path}>Choose a game from the lobby</Route>
-        <Route path={`${this.props.match.path}/:id`}><ChosenOnlineGame gameGame={gameGame} selectLiveGame={selectLiveGame} /></Route>
+        <Route path={`${this.props.match.path}/:id`}><ChosenOnlineGame game={game} gameGame={gameGame} selectLiveGame={selectLiveGame} /></Route>
       </Switch>
     );
   }

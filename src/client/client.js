@@ -160,6 +160,7 @@ class Client {
       byId: _.fromPairs(games.map(game => [game.id, game])),
       live,
       myLive: this.user ? live.filter(game => game.userIds.includes(this.user.id)) : [],
+      otherLive: this.user ? live.filter(game => !game.userIds.includes(this.user.id)) : live,
       finished: games.filter(game => game.finished),
       mine: this.user ? games.filter(game => game.userIds.includes(this.user.id)) : [],
     };

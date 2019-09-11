@@ -4,8 +4,6 @@ import classNames from 'classnames';
 import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header, Checkbox} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
-import Game from "../game/game";
-import Board from "./Board";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
 import GameList from "./GameList";

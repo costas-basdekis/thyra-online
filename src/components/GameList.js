@@ -5,57 +5,113 @@ import {Icon, Label, Card} from "semantic-ui-react";
 import Game from "../game/game";
 import Board from "./Board";
 import HashedIcon from "./HashedIcon";
+import classNames from "classnames";
+
+class GameCard extends Component {
+  selectLiveGame = () => {
+    this.props.selectLiveGame(this.props.game);
+  };
+
+  render() {
+    const {user, usersById, game, selectLiveGame, terse, live} = this.props;
+
+    const gameGame = Game.deserialize(game.game);
+    const playerA = usersById[game.userIds[0]];
+    const playerB = usersById[game.userIds[1]];
+    const nextPlayerUser = gameGame.nextPlayer === Game.PLAYER_A ? playerA : playerB;
+    const playerAToPlay = nextPlayerUser === playerA;
+    const playerBToPlay = nextPlayerUser === playerB;
+    const isUserPlayerA = user ? playerA.id === user.id : false;
+    const isUserPlayerB = user ? playerB.id === user.id : false;
+    const winnerUser = game.finished ? (game.winner === Game.PLAYER_A ? playerA : playerB) : null;
+    const isMyGame = isUserPlayerA || isUserPlayerB;
+    const isMyTurn = (isUserPlayerA && playerAToPlay) || (isUserPlayerB && playerBToPlay);
+    const showPlayerA = !terse || !isMyGame || isUserPlayerA;
+    const showPlayerB = !terse || !isMyGame || isUserPlayerB;
+
+    return (
+      <Card
+        onClick={this.selectLiveGame}
+        style={!terse ? undefined : {width: 'auto'}}
+        className={classNames({attention: isMyTurn})}
+      >
+        <Card.Content>
+          {!terse ? (
+            <Board
+              className={'ui image floated right mini'}
+              game={gameGame}
+              small
+              settings={user ? user.settings : undefined}
+            />
+          ) : null}
+          <Card.Header>
+            {showPlayerA ? (
+              <Label color={winnerUser === playerA || isMyTurn ? 'green' : undefined} >
+                {winnerUser === playerA ? <Icon name={'trophy'}/> : null}
+                {playerAToPlay ? <Icon name={'caret right'}/> : null}
+                {playerA.name}
+                <HashedIcon floated={'right'} size={'mini'} textSized hash={playerA.id} />
+              </Label>
+            ) : null}
+            {showPlayerA && showPlayerB ? " vs " : null}
+            {showPlayerB ? (
+              <Label color={winnerUser === playerB || isMyTurn ? 'green' : undefined} >
+                {winnerUser === playerB ? <Icon name={'trophy'}/> : null}
+                {playerBToPlay ? <Icon name={'caret right'} color={"green"}/> : null}
+                {playerB.name}
+                <HashedIcon floated={'right'} size={'mini'} textSized hash={playerB.id} />
+              </Label>
+            ) : null}
+          </Card.Header>
+          {!terse ? (
+            <Card.Meta>
+              {isMyGame ? <Label><Icon name={"user"} color={"green"} />My game</Label> : null}
+              {" "}
+              {!game.finished ? <Label><Icon name={"circle"} color={"green"} />Live</Label> : null}
+              {" "}
+              <Label content={`Move ${game.move}`} />
+            </Card.Meta>
+          ) : null}
+        </Card.Content>
+      </Card>
+    );
+  }
+}
+
+GameCard.propTypes = {
+  user: PropTypes.object,
+  usersById: PropTypes.object.isRequired,
+  game: PropTypes.object.isRequired,
+  selectLiveGame: PropTypes.func.isRequired,
+  terse: PropTypes.bool.isRequired,
+  live: PropTypes.bool.isRequired,
+};
+
+GameCard.defaultProps = {
+  terse: false,
+  live: false,
+};
 
 class GameList extends Component {
   render() {
-    const {user, usersById, games} = this.props;
+    const {user, usersById, games, terse, live, selectLiveGame} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
 
     return (
-      <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
-        {games.map(game => {
-          const gameGame = Game.deserialize(game.game);
-          const playerA = usersById[game.userIds[0]];
-          const playerB = usersById[game.userIds[1]];
-          const nextPlayerUser = gameGame.nextPlayer === Game.PLAYER_A ? playerA : playerB;
-          const isUserPlayerA = user ? playerA.id === user.id : false;
-          const isUserPlayerB = user ? playerB.id === user.id : false;
-          const winnerUser = game.finished ? (game.winner === Game.PLAYER_A ? playerA : playerB) : null;
-          const isMyGame = isUserPlayerA || isUserPlayerB;
-
-          return (
-            <Card key={game.id} onClick={() => this.props.selectLiveGame(game)}>
-              <Card.Content>
-                <Board className={'ui image floated right mini'} game={gameGame} small settings={user ? user.settings : undefined} />
-                {/*<Image floated='right' size='mini' src='/images/avatar/large/steve.jpg' />*/}
-                <Card.Header>
-                  <Label color={winnerUser === playerA ? 'green' : undefined} >
-                    {winnerUser === playerA ? <Icon name={'trophy'}/> : null}
-                    {nextPlayerUser === playerA ? <Icon name={'caret right'}/> : null}
-                    {playerA.name}
-                    <HashedIcon floated={'right'} size={'mini'} textSized hash={playerA.id} />
-                  </Label>
-                  {" vs "}
-                  <Label color={winnerUser === playerB ? 'green' : undefined} >
-                    {winnerUser === playerB ? <Icon name={'trophy'}/> : null}
-                    {nextPlayerUser === playerB ? <Icon name={'caret right'} color={"green"}/> : null}
-                    {playerB.name}
-                    <HashedIcon floated={'right'} size={'mini'} textSized hash={playerB.id} />
-                  </Label>
-                </Card.Header>
-                <Card.Meta>
-                  {isMyGame ? <Label><Icon name={"user"} color={"green"} />My game</Label> : null}
-                  {" "}
-                  {!game.finished ? <Label><Icon name={"circle"} color={"green"} />Live</Label> : null}
-                  {" "}
-                  <Label content={`Move ${game.move}`} />
-                </Card.Meta>
-              </Card.Content>
-            </Card>
-          );
-        })}
+      <Card.Group style={{maxHeight: '300px', overflowY: 'auto', flexWrap: !terse ? undefined : 'unset'}}>
+        {games.map(game => (
+          <GameCard
+            key={game.id}
+            user={user}
+            usersById={usersById}
+            game={game}
+            selectLiveGame={selectLiveGame}
+            terse={terse}
+            live={live}
+          />
+        ))}
       </Card.Group>
     );
   }
@@ -66,6 +122,13 @@ GameList.propTypes = {
   usersById: PropTypes.object.isRequired,
   games: PropTypes.array.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
+  terse: PropTypes.bool.isRequired,
+  live: false,
+};
+
+GameList.defaultProps = {
+  terse: false,
+  live: false,
 };
 
 export default GameList;

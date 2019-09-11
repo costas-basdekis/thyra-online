@@ -163,7 +163,7 @@ class ChosenOnlineGame extends Component {
   };
 
   render() {
-    const {location, user, usersInfo: {challengedUser}, game} = this.props;
+    const {location, user, usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames}, game, selectLiveGame} = this.props;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -231,6 +231,12 @@ class ChosenOnlineGame extends Component {
             </Grid.Column>
           </Grid>
         </Segment>
+        <Segment>
+          <GameList user={user} selectLiveGame={selectLiveGame} games={myLiveGames} usersById={usersById} terse live />
+          {otherLiveGames.length ? (
+            <GameList user={user} selectLiveGame={selectLiveGame} games={otherLiveGames} usersById={usersById} terse />
+          ) : null}
+        </Segment>
         <Play
           user={user}
           otherUser={otherUser}
@@ -254,6 +260,7 @@ ChosenOnlineGame.propTypes = {
   client: PropTypes.object.isRequired,
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
+  gamesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   game: PropTypes.object,
 };

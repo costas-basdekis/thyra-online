@@ -274,6 +274,22 @@ LogIn.propTypes = {
   client: PropTypes.object.isRequired,
 };
 
+class LogOut extends Component {
+  logOut = () => {
+    this.props.client.logOut();
+  };
+
+  render() {
+    return (
+      <Label as={'a'} icon={'log out'} content={'Log Out'} onClick={this.logOut} />
+    );
+  }
+}
+
+LogOut.propTypes = {
+  client: PropTypes.object.isRequired,
+};
+
 class GameList extends Component {
   render() {
     const {user, usersById, games} = this.props;
@@ -352,6 +368,7 @@ class Lobby extends Component {
       <Fragment>
         <Settings/>
         <LogIn client={client} />
+        <LogOut client={client} />
         <Card.Group centered>
           {user ? (
             <UserCard

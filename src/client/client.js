@@ -66,6 +66,10 @@ class Client {
     this.socket.emit("log-in", {appVersion, name, password, mergeUsers});
   }
 
+  logOut() {
+    this.socket.emit("log-out");
+  }
+
   reload = () => {
     window.location.reload(true);
   };

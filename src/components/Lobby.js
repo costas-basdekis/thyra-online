@@ -124,7 +124,15 @@ class UserCard extends Component {
             {" "}
             {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
             {" "}
-            <Label><Icon name={otherUser.isUserRatingProvisional ? "question" : "star outline"} color={otherUser.isUserRatingProvisional ? "orange" : undefined} />{otherUser.score}</Label>
+            <Label title={`${otherUser.isUserRatingProvisional ? 'Provisional - ' : ''}Won ${otherUser.winCount} out of ${otherUser.gameCount}`}>
+              <Icon
+                name={otherUser.isUserRatingProvisional ? "question" : "star outline"}
+                color={otherUser.isUserRatingProvisional ? "orange" : undefined}
+              />
+              {" "}{otherUser.score}
+            </Label>
+            {" "}
+            <Label icon={'trophy'} content={` ${otherUser.winCount}/${otherUser.gameCount}`} />
           </Card.Meta>
         </Card.Content>
         {playButtonLabel ? <Card.Content extra>

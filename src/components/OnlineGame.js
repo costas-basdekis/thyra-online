@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Button, Grid, Icon, Label, Modal, Segment, Statistic} from "semantic-ui-react";
+import {Button, Grid, Header, Icon, Label, Modal, Segment, Statistic} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
@@ -10,6 +10,7 @@ import {Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
+import GameList from "./GameList";
 
 class OnlineGamePlayer extends Component {
   render() {
@@ -269,15 +270,26 @@ class OnlineGame extends Component {
   }
 
   render() {
-    const {selectLiveGame, game, usersInfo: {byId}} = this.props;
+    const {selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {live, myLive}} = this.props;
     if (!Object.values(byId).length) {
       return null;
     }
     const gameGame = this.gameGame;
     return (
       <Switch>
-        <Route exact path={this.props.match.path}>Choose a game from the lobby</Route>
-        <Route path={`${this.props.match.path}/:id`}><ChosenOnlineGame game={game} gameGame={gameGame} selectLiveGame={selectLiveGame} /></Route>
+        <Route exact path={this.props.match.path}>
+          <Segment>
+            <Header as={'h2'}>My live games ({myLive.length})</Header>
+            <GameList user={user} usersById={byId} games={myLive} selectLiveGame={selectLiveGame} />
+          </Segment>
+          <Segment>
+            <Header as={'h2'}>Live games ({live.length})</Header>
+            <GameList user={user} usersById={byId} games={live} selectLiveGame={selectLiveGame} />
+          </Segment>
+        </Route>
+        <Route path={`${this.props.match.path}/:id`}>
+          <ChosenOnlineGame game={game} gameGame={gameGame} selectLiveGame={selectLiveGame} />
+        </Route>
       </Switch>
     );
   }
@@ -289,6 +301,7 @@ OnlineGame.propTypes = {
   client: PropTypes.object.isRequired,
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
+  gamesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
 };
 

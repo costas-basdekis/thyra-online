@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-const appVersion = 2;
+const appVersion = 3;
 
 class Client {
   constructor() {

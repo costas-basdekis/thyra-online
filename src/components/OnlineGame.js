@@ -11,6 +11,54 @@ import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
 
+class OnlineGamePlayer extends Component {
+  render() {
+    const {game, player} = this.props;
+    let initialPlayer, resultingPlayerScore;
+    if (game) {
+      if (game.initialPlayerA.id === player.id) {
+        initialPlayer = game.initialPlayerA;
+        resultingPlayerScore = game.resultingPlayerAScore;
+      } else if (game.initialPlayerB.id === player.id) {
+        initialPlayer = game.initialPlayerB;
+        resultingPlayerScore = game.resultingPlayerBScore;
+      } else {
+        initialPlayer = null;
+        resultingPlayerScore = null;
+      }
+    } else {
+      initialPlayer = null;
+      resultingPlayerScore = null;
+    }
+    const isWinner = game && game.winnerUserId === player.id;
+    return (
+      <Fragment>
+        {isWinner ? <Icon name={'trophy'} color={"green"} /> : null}{" "}
+        <span style={isWinner ? {color: '#21BA45'} : undefined}>
+          {player.name}
+          {initialPlayer ? (
+            <Fragment>
+              {" "}({resultingPlayerScore ? (
+                <Fragment>
+                  {resultingPlayerScore - initialPlayer.score}
+                  {" "}<Icon name={'long arrow alternate right'} />{" "}
+                  {resultingPlayerScore}
+                </Fragment>
+              ) : initialPlayer.score})
+            </Fragment>
+          ) : null}
+        </span>
+        <HashedIcon floated={'right'} size={'mini'} hash={player.id} />
+      </Fragment>
+    );
+  }
+}
+
+OnlineGamePlayer.propTypes = {
+  game: PropTypes.object,
+  player: PropTypes.object.isRequired,
+};
+
 class ChosenOnlineGame extends Component {
   gameSelector = createSelector([
     props => props.match.params.id,
@@ -143,13 +191,13 @@ class ChosenOnlineGame extends Component {
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
-              value={<Statistic.Value>{`${playerA.name} (${game ? game.resultingPlayerAScore || game.initialPlayerA.score : '?'})`}<HashedIcon floated={'right'} size={'mini'} hash={playerA.id} /></Statistic.Value>}
+              value={<Statistic.Value><OnlineGamePlayer game={game} player={playerA} /></Statistic.Value>}
               label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerA ? "green" : undefined}
             />
             <Statistic label={"vs"}/>
             <Statistic
-              value={<Statistic.Value>{`${playerB.name} (${game ? game.resultingPlayerBScore || game.initialPlayerB.score : '?'})`}<HashedIcon floated={'right'} size={'mini'} hash={playerB.id} /></Statistic.Value>}
+              value={<Statistic.Value><OnlineGamePlayer game={game} player={playerB} /></Statistic.Value>}
               label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
               color={isUserPlayerB ? "green" : undefined}
             />

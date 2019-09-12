@@ -124,7 +124,7 @@ GameList.propTypes = {
   games: PropTypes.array.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,
-  live: false,
+  live: PropTypes.bool.isRequired,
 };
 
 GameList.defaultProps = {

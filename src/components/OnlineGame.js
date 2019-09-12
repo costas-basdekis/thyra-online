@@ -232,9 +232,9 @@ class ChosenOnlineGame extends Component {
           </Grid>
         </Segment>
         <Segment>
-          <GameList user={user} selectLiveGame={selectLiveGame} games={myLiveGames} usersById={usersById} terse live />
+          <GameList user={user} selectLiveGame={selectLiveGame} games={myLiveGames} usersById={usersById} terse live currentGameId={game ? game.id : null} />
           {otherLiveGames.length ? (
-            <GameList user={user} selectLiveGame={selectLiveGame} games={otherLiveGames} usersById={usersById} terse />
+            <GameList user={user} selectLiveGame={selectLiveGame} games={otherLiveGames} usersById={usersById} terse live currentGameId={game ? game.id : null} />
           ) : null}
         </Segment>
         <Play

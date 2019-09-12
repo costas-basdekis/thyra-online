@@ -13,7 +13,7 @@ class GameCard extends Component {
   };
 
   render() {
-    const {user, usersById, game, terse, live} = this.props;
+    const {user, usersById, game, terse, live, currentGameId} = this.props;
 
     const gameGame = Game.deserialize(game.game);
     const playerA = usersById[game.userIds[0]];
@@ -32,7 +32,10 @@ class GameCard extends Component {
     return (
       <Card
         onClick={this.selectLiveGame}
-        style={!terse ? undefined : {width: 'auto'}}
+        style={{
+          ...(!terse ? {} : {width: 'auto'}),
+          ...(game.id === currentGameId ? {backgroundColor: 'lightgreen'} : {}),
+        }}
         className={classNames({attention: live && isMyTurn})}
       >
         <Card.Content>
@@ -86,6 +89,7 @@ GameCard.propTypes = {
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,
   live: PropTypes.bool.isRequired,
+  currentGameId: PropTypes.string,
 };
 
 GameCard.defaultProps = {
@@ -95,7 +99,7 @@ GameCard.defaultProps = {
 
 class GameList extends Component {
   render() {
-    const {user, usersById, games, terse, live, selectLiveGame} = this.props;
+    const {user, usersById, games, terse, live, selectLiveGame, currentGameId} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -111,6 +115,7 @@ class GameList extends Component {
             selectLiveGame={selectLiveGame}
             terse={terse}
             live={live}
+            currentGameId={currentGameId}
           />
         ))}
       </Card.Group>
@@ -125,6 +130,7 @@ GameList.propTypes = {
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,
   live: PropTypes.bool.isRequired,
+  currentGameId: PropTypes.string,
 };
 
 GameList.defaultProps = {

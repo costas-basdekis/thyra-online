@@ -13,7 +13,7 @@ class GameCard extends Component {
   };
 
   render() {
-    const {user, usersById, game, selectLiveGame, terse, live} = this.props;
+    const {user, usersById, game, terse, live} = this.props;
 
     const gameGame = Game.deserialize(game.game);
     const playerA = usersById[game.userIds[0]];
@@ -33,7 +33,7 @@ class GameCard extends Component {
       <Card
         onClick={this.selectLiveGame}
         style={!terse ? undefined : {width: 'auto'}}
-        className={classNames({attention: isMyTurn})}
+        className={classNames({attention: live && isMyTurn})}
       >
         <Card.Content>
           {!terse ? (

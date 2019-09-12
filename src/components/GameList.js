@@ -26,8 +26,8 @@ class GameCard extends Component {
     const winnerUser = game.finished ? (game.winner === Game.PLAYER_A ? playerA : playerB) : null;
     const isMyGame = isUserPlayerA || isUserPlayerB;
     const isMyTurn = (isUserPlayerA && playerAToPlay) || (isUserPlayerB && playerBToPlay);
-    const showPlayerA = !terse || !isMyGame || isUserPlayerA;
-    const showPlayerB = !terse || !isMyGame || isUserPlayerB;
+    const showPlayerA = !terse || !isMyGame || isUserPlayerB;
+    const showPlayerB = !terse || !isMyGame || isUserPlayerA;
 
     return (
       <Card
@@ -45,6 +45,7 @@ class GameCard extends Component {
             />
           ) : null}
           <Card.Header>
+            {!(showPlayerA && showPlayerB) ? " vs " : null}
             {showPlayerA ? (
               <Label color={winnerUser === playerA || isMyTurn ? 'green' : undefined} >
                 {winnerUser === playerA ? <Icon name={'trophy'}/> : null}

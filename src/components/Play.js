@@ -84,7 +84,7 @@ class Play extends Component {
     return moves;
   }
 
-  resign = () => {
+  resignOrAbort = () => {
     this.props.submit("resign");
   };
 
@@ -130,11 +130,12 @@ class Play extends Component {
   }
 
   render() {
-    const {user, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names, allowControl} = this.props;
+    const {user, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names, allowControl, matchGame} = this.props;
     const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
     const canSubmit = this.canSubmit();
+    const tooShortToResign = matchGame ? matchGame.tooShortToResign : false;
     return (
       <Fragment>
         <Segment>
@@ -178,10 +179,10 @@ class Play extends Component {
             <Statistic.Group widths={"two"} size={"tiny"}>
               <Statistic value={
                 <Modal
-                  trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>Resign</Button>}
-                  header='Resign?'
-                  content='Are you sure you want to forfeit?'
-                  actions={[{key: 'resign', content: 'Resign', negative: true, onClick: this.resign}, { key: 'continue', content: 'Continue', positive: true }]}
+                  trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>{tooShortToResign ? 'Abort' : 'Resign'}</Button>}
+                  header={matchGame.tooShortToResign ? 'Abort?' : 'Resign?'}
+                  content={`Are you sure you want to ${matchGame.tooShortToResign ? 'abort' : 'forfeit'}?${matchGame.tooShortToResign ? ' This game is too short to resign.' : ''}`}
+                  actions={[{key: 'resign', content: matchGame.tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', positive: true }]}
                 />
               } />
               <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
@@ -243,6 +244,7 @@ Play.propTypes = {
   settings: PropTypes.object,
   changeSettings: PropTypes.func,
   game: PropTypes.instanceOf(Game).isRequired,
+  matchGame: PropTypes.object,
   makeMove: PropTypes.func,
   submit: PropTypes.func,
   challengeUser: PropTypes.func,

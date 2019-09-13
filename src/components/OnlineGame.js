@@ -247,6 +247,7 @@ class ChosenOnlineGame extends Component {
           otherUser={otherUser}
           changeSettings={this.changeSettings}
           game={gameGame}
+          matchGame={game}
           names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}}
           allowControl={[userPlayer].filter(player => player)}
           submit={this.submit}

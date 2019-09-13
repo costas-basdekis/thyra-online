@@ -179,7 +179,7 @@ class ChosenOnlineGame extends Component {
             size={'mini'}
             onClose={this.dismissUrlGameError}
             header={'Could not find game'}
-            content={'This game cannot be found. Please check that you copied the full URL'}
+            content={'This game cannot be found. Please check that you copied the full URL, or perhaps the game was aborted'}
             actions={[{key: 'ok', content: 'OK', positive: true}]}
           />
           Could not find game

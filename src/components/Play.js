@@ -182,7 +182,7 @@ class Play extends Component {
                   trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>{tooShortToResign ? 'Abort' : 'Resign'}</Button>}
                   header={matchGame.tooShortToResign ? 'Abort?' : 'Resign?'}
                   content={`Are you sure you want to ${matchGame.tooShortToResign ? 'abort' : 'forfeit'}?${matchGame.tooShortToResign ? ' This game is too short to resign.' : ''}`}
-                  actions={[{key: 'resign', content: matchGame.tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', positive: true }]}
+                  actions={[{key: 'resign', content: matchGame.tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', inverted: true, secondary: true }]}
                 />
               } />
               <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />

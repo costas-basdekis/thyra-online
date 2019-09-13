@@ -88,6 +88,9 @@ class UserCard extends Component {
           playButtonColour = 'green';
           playButtonIcon = {loading: true, name: 'circle notch'};
           playButtonLabel = `Waiting for ${otherUser.name}...`;
+        } else if (!otherUser.online) {
+          playButtonLabel = null;
+          playButtonOnClick = null;
         } else {
           playButtonColour = 'yellow';
           playButtonIcon = {name: 'play'};
@@ -303,7 +306,7 @@ class Lobby extends Component {
   };
 
   render() {
-    const {client, user, usersInfo: {byId: usersById, online, offline, challengedUser, readyToPlay, readyToPlayMe}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
+    const {client, user, usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
 
     if (!user) {
       return <Tab.Pane>Connecting to server...</Tab.Pane>;
@@ -356,6 +359,16 @@ class Lobby extends Component {
             )},
             {menuItem: `${offline.length} users offline`, render: () => (
               <UserList users={offline} user={user} challengedUser={challengedUser} />
+            )},
+            {menuItem: `${users.length} users`, render: () => (
+              <UserList
+                client={client}
+                users={users}
+                user={user}
+                challengedUser={challengedUser}
+                readyToPlayUsers={readyToPlay}
+                readyToPlayMeUsers={readyToPlayMe}
+              />
             )},
           ]} />
         </Segment>

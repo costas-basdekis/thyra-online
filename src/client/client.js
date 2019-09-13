@@ -116,6 +116,7 @@ class Client {
   }
 
   gotUsers = users => {
+    users = _.orderBy(users, ['score', 'maxScore'], ['desc', 'desc']);
     this.usersInfo = this.prepareUsers(users);
     this.onUsers.map(callback => callback(this.usersInfo));
   };

@@ -126,7 +126,10 @@ class UserCard extends Component {
             {" "}
             {otherUser.online ? <Label><Icon name={"circle"} color={"green"} />Online</Label> : null}
             {" "}
-            <Label title={`${otherUser.isUserRatingProvisional ? 'Provisional - ' : ''}Won ${otherUser.winCount} out of ${otherUser.gameCount}`}>
+            <Label
+              title={`${otherUser.isUserRatingProvisional ? 'Provisional - ' : ''}Won ${otherUser.winCount} out of ${otherUser.gameCount}`}
+              color={{1: 'yellow', 2: 'grey', 3: 'brown'}[otherUser.rank]}
+            >
               <Icon
                 name={otherUser.isUserRatingProvisional ? "question" : "star outline"}
                 color={otherUser.isUserRatingProvisional ? "orange" : undefined}

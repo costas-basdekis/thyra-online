@@ -116,7 +116,10 @@ class Client {
   }
 
   gotUsers = users => {
-    users = _.orderBy(users, ['score', 'maxScore'], ['desc', 'desc']);
+    users = _.orderBy(users, [user => user.isUserRatingProvisional ? 1 : 0, 'score', 'maxScore'], ['asc', 'desc', 'desc']);
+    users.forEach((user, index) => {
+      user.rank = index + 1;
+    });
     this.usersInfo = this.prepareUsers(users);
     this.onUsers.map(callback => callback(this.usersInfo));
   };

@@ -45,7 +45,12 @@ class OnlineGamePlayer extends Component {
                   {" "}<Icon name={'long arrow alternate right'} />{" "}
                   {resultingPlayerScore}
                 </Fragment>
-              ) : initialPlayer.score})
+              ) : (
+                <Fragment>
+                  {initialPlayer.score}
+                  {" "}+{initialPlayer.winPoints}/{initialPlayer.losePoints}
+                </Fragment>
+              )})
             </Fragment>
           ) : null}
         </span>

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./Board";
-import {Button, Header, Icon, Modal, Segment, Statistic} from "semantic-ui-react";
+import {Button, Checkbox, Header, Icon, Modal, Segment, Statistic} from "semantic-ui-react";
 import classNames from 'classnames';
 
 class Play extends Component {
@@ -20,6 +20,8 @@ class Play extends Component {
     selectedGame: null,
     game: this.props.game,
   };
+
+  autoSubmitModal = React.createRef();
 
   makeMove = game => {
     if (this.props.submit) {
@@ -107,9 +109,16 @@ class Play extends Component {
   }
 
   changeAutoSubmitMoves = () => {
-    const autoSubmitMoves = !this.props.user.settings.autoSubmitMoves;
-    this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: autoSubmitMoves});
-    if (autoSubmitMoves && this.canSubmit()) {
+    if (!this.props.user.settings.autoSubmitMoves) {
+      this.autoSubmitModal.current.handleOpen();
+    } else {
+      this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: false});
+    }
+  };
+
+  doAutoSubmitMoves = () => {
+    this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: true});
+    if (this.canSubmit()) {
       this.submit();
     }
   };
@@ -167,7 +176,25 @@ class Play extends Component {
                 ? <Statistic value={(
                   <Fragment>
                     {!user || !user.settings.autoSubmitMoves ? <Button positive onClick={this.submit} className={classNames({attention: canSubmit})} disabled={!canSubmit}>Submit</Button> : null}
-                    {user && changeSettings ? <Button content={'Auto submit move'} color={user.settings.autoSubmitMoves ? 'green' : 'yellow'} onClick={this.changeAutoSubmitMoves} /> : null}
+                    {user && changeSettings ? (
+                      <Segment>
+                        <Checkbox
+                          label={'Auto submit moves'}
+                          toggle
+                          checked={user.settings.autoSubmitMoves}
+                          onChange={this.changeAutoSubmitMoves}
+                        />
+                        <Modal
+                          ref={this.autoSubmitModal}
+                          header={'Auto submit moves'}
+                          content={'Are you sure you want to be auto submitting your moves?'}
+                          actions={[
+                            {key: 'yes', content: 'Auto submit', onClick: this.doAutoSubmitMoves, primary: true},
+                            {key: 'no', content: 'No, manually submit moves', secondary: true},
+                          ]}
+                        />
+                      </Segment>
+                    ) : null}
                   </Fragment>
                 )}/>
                 : <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />

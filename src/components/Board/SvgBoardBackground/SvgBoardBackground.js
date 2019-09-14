@@ -59,7 +59,12 @@ class SvgBoardBackground extends PureComponent {
         {animated ? (
           <g data-key={'pieces'} style={{pointerEvents: 'none'}}>
             {pieces.map(cell => (
-              <SvgBoardPiece key={`${cell.player}-${cell.worker}`} cell={cell} theme={theme} />
+              <SvgBoardPiece
+                key={`${cell.player}-${cell.worker}`}
+                cell={cell}
+                theme={theme}
+                allowControl={allowControl}
+              />
             ))}
           </g>
         ) : null}
@@ -135,14 +140,16 @@ class SvgBoardPiece extends PureComponent {
   }
 
   render() {
-    const {cell, theme} = this.props;
+    const {cell, theme, allowControl} = this.props;
     const {previousPosition, position} = this.state;
+  	const isPlayerAOpponent = !allowControl.includes(Game.PLAYER_A) && allowControl.includes(Game.PLAYER_B);
+  	const isPlayerBOpponent = !isPlayerAOpponent;
     return (
       <g transform={`translate(${position.x * 100},${position.y * 100})`}>
         <Piece
           style={theme.pieces || 'king'}
           colour={cell.player === Game.PLAYER_A ? 'white' : 'black'}
-          rotated={cell.player === Game.PLAYER_B && theme.rotateOpponent}
+          rotated={theme.rotateOpponent && (cell.player === Game.PLAYER_A ? isPlayerAOpponent : isPlayerBOpponent)}
         />
         <animateTransform
           ref={this.animateTransform}
@@ -163,6 +170,7 @@ class SvgBoardPiece extends PureComponent {
 SvgBoardPiece.propTypes = {
   cell: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
+  allowControl: PropTypes.array.isRequired,
 };
 
 class SvgBoardCell extends PureComponent {

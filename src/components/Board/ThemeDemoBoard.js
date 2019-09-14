@@ -35,6 +35,7 @@ class ThemeDemoBoard extends Component {
         medium={medium}
         allowControl={[Game.PLAYER_A, Game.PLAYER_B]}
         rowsAndColumns={this.constructor.demoRowsAndColumns}
+        undoable={false}
         isCellAvailable={this.isCellAvailable}
         isCellUndoable={this.isCellUndoable}
         settings={settings}

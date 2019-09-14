@@ -11,6 +11,7 @@ import Lobby from "./components/Lobby";
 import OnlineGame from "./components/OnlineGame";
 import {withClient} from "./client/withClient";
 import services from "./services";
+import SvgBoardBackground from "./components/Board/SvgBoardBackground";
 
 class App extends Component {
   state = {
@@ -132,6 +133,7 @@ class App extends Component {
       : 'Live Play/Spectate/Review';
     return (
       <Container>
+        <SvgBoardBackground.Definitions />
         <Segment textAlign={"center"}>
           <Header as={"h1"}>Thyra Online</Header>
         </Segment>

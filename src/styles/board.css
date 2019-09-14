@@ -1,0 +1,13 @@
+.board {
+    display: inline-block;
+    border: 5px solid black;
+}
+.board.selectable {
+    cursor: pointer;
+}
+.board.selectable:hover {
+    border-color: red;
+}
+.board.selectable.selected {
+    border-color: yellow;
+}

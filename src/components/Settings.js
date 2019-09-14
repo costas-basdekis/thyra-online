@@ -11,6 +11,17 @@ class SettingsContent extends Component {
     {value: 'pastel', label: 'Pastel'},
     {value: 'green', label: 'Green'},
   ];
+  themePiecesOptions = [
+    {value: 'pawn', label: 'Pawn'},
+    {value: 'king', label: 'King'},
+    {value: 'circle', label: 'Circle'},
+    {value: 'certificate', label: 'Star'},
+    {value: 'sun', label: 'Sun'},
+    {value: 'rocket', label: 'Rocket'},
+    {value: 'bug', label: 'Bug'},
+    {value: 'eye', label: 'Eye'},
+    {value: 'user', label: 'User'},
+  ];
   themeNumbersOptions = [
     {value: '', label: 'None'},
     {value: 'obvious', label: 'Obvious'},
@@ -26,12 +37,8 @@ class SettingsContent extends Component {
     this.props.updateSettings({enableNotifications: checked});
   };
 
-  updateThemeRotated = (e, {checked}) => {
-    this.props.updateSettings({theme: {rotated: checked}});
-  };
-
-  updateThemeRounded = (e, {checked}) => {
-    this.props.updateSettings({theme: {rounded: checked}});
+  updateThemeRotateOpponent = (e, {checked}) => {
+    this.props.updateSettings({theme: {rotateOpponent: checked}});
   };
 
   updateThemeNumbers = (e, {value}) => {
@@ -42,8 +49,13 @@ class SettingsContent extends Component {
     this.props.updateSettings({theme: {scheme: value}});
   };
 
+  updateThemePieces = (e, {value}) => {
+    this.props.updateSettings({theme: {pieces: value}});
+  };
+
   render() {
-    const {settings: {autoSubmitMoves, enableNotifications, theme: {scheme, rotated, rounded, numbers}}} = this.props;
+    const {settings: {autoSubmitMoves, enableNotifications, theme}} = this.props;
+    const {pieces = 'king', scheme, rotateOpponent, numbers} = theme;
 
     return (
       <Tab menu={{pointing: true, attached: false}} panes={[
@@ -74,33 +86,20 @@ class SettingsContent extends Component {
             <Grid stackable columns={'equal'} verticalAlign={'middle'}>
               <Grid.Row>
                 <Grid.Column textAlign={'center'}>
-                  <ThemeDemoBoard medium settings={{theme: {scheme, rotated, rounded, numbers}}}/>
+                  <ThemeDemoBoard medium settings={{theme}}/>
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column width={4}>
                   <Checkbox
-                    label={'Rotated'}
-                    name={'theme.rotated'}
-                    checked={rotated}
-                    onChange={this.updateThemeRotated}
+                    label={'Rotate Opponent'}
+                    name={'theme.rotateOpponent'}
+                    checked={rotateOpponent}
+                    onChange={this.updateThemeRotateOpponent}
                   />
                 </Grid.Column>
                 <Grid.Column floated={'right'} textAlign={'right'}>
-                  <ThemeDemoBoard medium settings={{theme: {scheme, rotated: true, rounded, numbers}}}/>
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={4}>
-                  <Checkbox
-                    label={'Rounded'}
-                    name={'theme.rounded'}
-                    checked={rounded}
-                    onChange={this.updateThemeRounded}
-                  />
-                </Grid.Column>
-                <Grid.Column floated={'right'} textAlign={'right'}>
-                  <ThemeDemoBoard medium settings={{theme: {scheme, rotated, rounded: true, numbers}}}/>
+                  <ThemeDemoBoard medium settings={{theme: {...theme, rotateOpponent: true}}}/>
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -121,7 +120,29 @@ class SettingsContent extends Component {
                     />
                   </Grid.Column>
                   <Grid.Column floated={'right'} textAlign={'right'}>
-                    <ThemeDemoBoard medium settings={{theme: {scheme, rotated, rounded, numbers: option.value}}}/>
+                    <ThemeDemoBoard medium settings={{theme: {...theme, numbers: option.value}}}/>
+                  </Grid.Column>
+                </Grid.Row>
+              ))}
+              <Grid.Row>
+                <Grid.Column textAlign={'center'}>
+                  <Form.Field><Header as={'h2'}>Pieces:</Header></Form.Field>
+                </Grid.Column>
+              </Grid.Row>
+              {this.themePiecesOptions.map(option => (
+                <Grid.Row key={`theme-pieces-${option.value}`}>
+                  <Grid.Column width={4}>
+                    <Checkbox
+                      radio
+                      label={option.label}
+                      name={'theme.pieces'}
+                      value={option.value}
+                      checked={pieces === option.value}
+                      onChange={this.updateThemePieces}
+                    />
+                  </Grid.Column>
+                  <Grid.Column floated={'right'} textAlign={'right'}>
+                    <ThemeDemoBoard medium settings={{theme: {...theme, pieces: option.value}}}/>
                   </Grid.Column>
                 </Grid.Row>
               ))}
@@ -143,7 +164,7 @@ class SettingsContent extends Component {
                     />
                   </Grid.Column>
                   <Grid.Column floated={'right'} textAlign={'right'}>
-                    <ThemeDemoBoard medium settings={{theme: {scheme: option.value, rotated, rounded, numbers}}}/>
+                    <ThemeDemoBoard medium settings={{theme: {...theme, scheme: option.value}}}/>
                   </Grid.Column>
                 </Grid.Row>
               ))}

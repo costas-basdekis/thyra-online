@@ -1,39 +1,42 @@
-import React, {Component} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Game from "../../game/game";
-import "../../styles/html-board.css";
+import Game from "../../../game/game";
+import * as constants from './constants';
+import Cell from "./Cell";
+import Piece from "./Piece";
+import '../../../styles/svg-board.css';
 
-class HtmlBoardBackground extends Component {
+class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
       allowControl, settings, rowsAndColumns,
     } = this.props;
-    const {theme: {scheme, numbers}} = settings;
+    const {theme} = settings;
 
-    className = classNames("board", "html-board", {
+    className = classNames("board", "svg-board", `board-theme-${theme.scheme || 'default'}`, {
       'small-board': small,
       'medium-board': medium,
       editable: !!makeMove && (clickable || undoable),
       selectable: !!onSelect,
       selected,
-      'board-theme-default': scheme === '',
-      'board-theme-subtle': scheme === 'subtle',
-      'board-theme-pastel': scheme === 'pastel',
-      'board-theme-green': scheme === 'green',
-      'numbered-levels': ['obvious', 'subtle', 'very-subtle'].includes(numbers),
-      'obvious-levels': numbers === 'obvious',
-      'subtle-levels': numbers === 'subtle',
-      'very-subtle-levels': numbers === 'very-subtle',
     }, className);
+    const rowCount = rowsAndColumns.length;
+    const columnCount= Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
 
     return (
-      <div className={className} onClick={onSelect}>
+      <svg
+        className={className}
+        viewBox={`0 0 ${constants.cellSize * columnCount} ${constants.cellSize * rowCount}`}
+        style={{'--column-count': columnCount, '--row-count': rowCount}}
+        preserveAspectRatio={"xMinYMin meet"}
+        onClick={onSelect}
+      >
         {rowsAndColumns.map(row => (
-          <div key={`row-${row.y}`} className={"row"}>
+          <g key={`row-${row.y}`}>
             {row.cells.map(cell => (
-              <HtmlBoardCell
+              <SvgBoardCell
                 key={`${cell.x}-${cell.y}`}
                 cell={cell}
                 clickable={clickable || (undoable && isCellUndoable(cell))}
@@ -43,16 +46,17 @@ class HtmlBoardBackground extends Component {
                 settings={settings}
                 makeMove={this.props.makeMove}
                 undo={this.props.undo}
+                theme={theme}
               />
             ))}
-          </div>
+          </g>
         ))}
-      </div>
+      </svg>
     );
   }
 }
 
-HtmlBoardBackground.propTypes = {
+SvgBoardBackground.propTypes = {
   rowsAndColumns: PropTypes.array,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   makeMove: PropTypes.func,
@@ -69,7 +73,7 @@ HtmlBoardBackground.propTypes = {
   settings: PropTypes.object.isRequired,
 };
 
-HtmlBoardBackground.defaultProps = {
+SvgBoardBackground.defaultProps = {
   className: '',
   small: false,
   medium: false,
@@ -78,7 +82,23 @@ HtmlBoardBackground.defaultProps = {
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
 };
 
-class HtmlBoardCell extends Component {
+class SvgBoardBackgroundDefinitions extends PureComponent {
+  render() {
+    return (
+      <Fragment>
+        <svg className={classNames('board', 'svg-board')} style={{display: 'none'}}>
+          <defs>
+            <Cell.Definitions />
+            <Piece.Definitions />
+          </defs>
+        </svg>
+      </Fragment>
+    );
+  }
+}
+SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
+
+class SvgBoardCell extends PureComponent {
   makeMove = () => {
     if (this.props.available && this.props.makeMove) {
       this.props.makeMove(this.props.cell);
@@ -88,37 +108,23 @@ class HtmlBoardCell extends Component {
   };
 
   render() {
-    let {cell, clickable, available, undoable, settings: {theme: {numbers}}, makeMove, undo} = this.props;
-    const displayLevel = (
-      ['obvious', 'subtle', 'very-subtle'].includes(numbers)
-      && cell.level > 0
-      && cell.level <4
-    ) ? cell.level : null;
+    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo} = this.props;
     return (
-      <div
-        key={`row-${cell.x}-${cell.y}`}
-        className={classNames("cell", `level-${cell.level}`, {available, undoable})}
+      <Cell
+        x={cell.x}
+        y={cell.y}
+        available={available}
+        undoable={undoable}
+        level={cell.level}
+        player={cell.player}
+        theme={theme}
         onClick={((makeMove && available) || (undo && undoable)) && clickable ? this.makeMove : null}
-      >
-        <div className={classNames("level", "level-1")}>
-          <div className={classNames("level", "level-2")}>
-            <div className={classNames("level", "level-3")}>
-              {cell.player ? (
-                <div className={classNames("worker", `player-${cell.player}`)}>
-                  {displayLevel}
-                </div>
-              ) : cell.level === 4 ? (
-                <div className={classNames("level", "level-4")} />
-              ) : displayLevel}
-            </div>
-          </div>
-        </div>
-      </div>
+      />
     );
   }
 }
 
-HtmlBoardCell.propTypes = {
+SvgBoardCell.propTypes = {
   cell: PropTypes.object.isRequired,
   clickable: PropTypes.bool.isRequired,
   available: PropTypes.bool.isRequired,
@@ -128,10 +134,10 @@ HtmlBoardCell.propTypes = {
   undo: PropTypes.func,
 };
 
-HtmlBoardCell.defaultProps = {
+SvgBoardCell.defaultProps = {
   clickable: false,
   available: false,
   undoable: false,
 };
 
-export default HtmlBoardBackground;
+export default SvgBoardBackground;

@@ -1,0 +1,75 @@
+.board.board-theme-default {
+    --cell-available-border: blue;
+    --cell-available-hovered-border: black;
+    --cell-undoable-border: red;
+    --cell-undoable-hovered-border: yellow;
+    --level-0-border: white;
+    --level-0-background: limegreen;
+    --level-1-border: #eee;
+    --level-1-background: white;
+    --level-2-border: #ddd;
+    --level-2-background: yellow;
+    --level-3-border: #ccc;
+    --level-3-background: red;
+    --level-4-border: darkblue;
+    --level-4-background: darkblue;
+    --player-a-fill: grey;
+    --player-b-fill: cyan;
+}
+
+.board.board-theme-subtle {
+    --cell-available-border: blue;
+    --cell-available-hovered-border: black;
+    --cell-undoable-border: red;
+    --cell-undoable-hovered-border: yellow;
+    --level-0-border: #eeeeee;
+    --level-0-background: white;
+    --level-1-border: #ccc;
+    --level-1-background: #ccc;
+    --level-2-border: #999;
+    --level-2-background: #999;
+    --level-3-border: #666;
+    --level-3-background: #666;
+    --level-4-border: #0c1a3e;
+    --level-4-background: #0c1a3e;
+    --player-a-fill: #ffd700;
+    --player-b-fill: #800000;
+}
+
+.board.board-theme-pastel {
+    --cell-available-border: blue;
+    --cell-available-hovered-border: black;
+    --cell-undoable-border: red;
+    --cell-undoable-hovered-border: yellow;
+    --level-0-border: white;
+    --level-0-background: #a5f69d;
+    --level-1-border: #eee;
+    --level-1-background: #e7f695;
+    --level-2-border: #ddd;
+    --level-2-background: #d99efb;
+    --level-3-border: #ccc;
+    --level-3-background: #fd8c8c;
+    --level-4-border: darkblue;
+    --level-4-background: #90e1f9;
+    --player-a-fill: #333;
+    --player-b-fill: #700;
+}
+
+.board.board-theme-green {
+    --cell-available-border: blue;
+    --cell-available-hovered-border: black;
+    --cell-undoable-border: red;
+    --cell-undoable-hovered-border: yellow;
+    --level-0-border: white;
+    --level-0-background: #dddddd;
+    --level-1-border: #eee;
+    --level-1-background: #88a974;
+    --level-2-border: #ddd;
+    --level-2-background: #85d33b;
+    --level-3-border: #ccc;
+    --level-3-background: #81fd02;
+    --level-4-border: darkblue;
+    --level-4-background: #8f55e5;
+    --player-a-fill: #333;
+    --player-b-fill: #700;
+}

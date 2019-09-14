@@ -2,22 +2,24 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../../game/game";
 import HtmlBoardBackground from "./HtmlBoardBackground";
+import SvgBoardBackground from "./SvgBoardBackground";
+import "../../styles/board.css";
+import "../../styles/board-theme.css";
 
 class BoardBackground extends Component {
   render() {
-    let {renderer = 'html', ...props} = this.props;
+    let {renderer = 'svg', ...props} = this.props;
 
     const renderers = {
       'html': HtmlBoardBackground,
+      'svg': SvgBoardBackground,
     };
     const Renderer = renderers[renderer];
-
     return <Renderer {...props} />;
   }
 }
 
 BoardBackground.propTypes = {
-  children: PropTypes.node,
   rowsAndColumns: PropTypes.array,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   makeMove: PropTypes.func,

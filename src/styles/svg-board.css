@@ -1,0 +1,98 @@
+.svg-board .cell-contents {
+  pointer-events: none;
+}
+
+.svg-board use[*|href="#cell-border"] {
+  fill: var(--level-0-border);
+}
+
+.svg-board use[*|href="#cell-border"].available {
+  fill: var(--cell-available-border);
+}
+.svg-board:not(.selectable) use[*|href="#cell-border"].available {
+  cursor: pointer;
+}
+
+.svg-board use[*|href="#cell-border"].available:hover {
+  fill: var(--cell-available-hovered-border);
+}
+
+.svg-board use[*|href="#cell-border"].undoable {
+  fill: var(--cell-undoable-border);
+}
+
+.svg-board:not(.selectable) use[*|href="#cell-border"].undoable {
+  cursor: pointer;
+}
+
+.svg-board use[*|href="#cell-border"].undoable:hover {
+  fill: var(--cell-undoable-hovered-border);
+}
+
+.svg-board #cell-0 {
+    fill: var(--level-0-background);
+}
+
+.svg-board #cell-1 > .border {
+    fill: var(--level-1-border);
+}
+.svg-board #cell-1 > .fill {
+    fill: var(--level-1-background);
+}
+
+.svg-board #cell-2 > .border {
+    fill: var(--level-2-border);
+}
+.svg-board #cell-2 > .fill {
+    fill: var(--level-2-background);
+}
+
+.svg-board #cell-3 > .border {
+    fill: var(--level-3-border);
+}
+.svg-board #cell-3 > .fill {
+    fill: var(--level-3-background);
+}
+
+.svg-board #cell-4 > .border {
+    fill: var(--level-4-border);
+}
+.svg-board #cell-4 > .fill {
+    fill: var(--level-4-background);
+}
+
+.svg-board {
+    --cell-size: 100px;
+    --column-count: 5;
+    --row-count: 5;
+    width: calc(var(--cell-size) * var(--column-count));
+    height: calc(var(--cell-size) * var(--row-count));
+}
+
+@media all and (min-width: 601px) {
+    .svg-board {
+        --cell-size: 100px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .svg-board {
+        --cell-size: 80px;
+    }
+}
+
+@media all and (max-width: 500px) {
+    .svg-board {
+        --cell-size: 60px;
+    }
+}
+
+.svg-board.small-board {
+    border-width: 1px;
+    --cell-size: 10px;
+}
+
+.svg-board.medium-board {
+    border-width: 1px;
+    --cell-size: 40px;
+}

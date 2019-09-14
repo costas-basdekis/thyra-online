@@ -1,290 +1,183 @@
-.html-board.background {
-    display: inline-block;
-    border: 5px solid black;
-    background: limegreen;
+.html-board {
+    background: var(--level-0-background);
 }
-.html-board.background.ui.image {
-    background: limegreen;
-}
-.html-board.background.selectable {
-    cursor: pointer;
-}
-.html-board.background.selectable:hover {
-    border-color: red;
-}
-.html-board.background.selectable.selected {
-    border-color: yellow;
+.html-board.ui.image {
+    background: var(--level-0-background);
 }
 
-.html-board.background .row {
+.html-board .row {
     display: flex;
 }
 
-.html-board.background .cell {
+.html-board .cell {
     display: inline-block;
     width: 100px;
     height: 100px;
-    border: 5px solid white;
+    border: 5px solid var(--level-0-border);
 }
 
-.html-board.background .cell.available {
-    border-color: blue;
+.html-board .cell.available {
+    border-color: var(--cell-available-border);
 }
-.html-board.background.editable .cell.available {
+.html-board.editable .cell.available {
     cursor: pointer;
 }
-.html-board.background .cell.available:hover {
-    border-color: black;
+.html-board .cell.available:hover {
+    border-color: var(--cell-available-hovered-border);
 }
 
-.html-board.background .cell.undoable {
-    border-color: red;
+.html-board .cell.undoable {
+    border-color: var(--cell-undoable-border);
 }
-.html-board.background.editable .cell.undoable {
+.html-board.editable .cell.undoable {
     cursor: pointer;
 }
-.html-board.background .cell.undoable:hover {
-    border-color: yellow;
+.html-board .cell.undoable:hover {
+    border-color: var(--cell-undoable-hovered-border);
 }
 
-.html-board.background .cell .worker {
+.html-board .cell .worker {
     display: block;
     width: 100%;
     height: 100%;
     border-radius: 50%;
 }
 
-.html-board.background .cell .worker.player-player-a {
-    background-color: grey;
+.html-board .cell .worker.player-player-a {
+    background-color: var(--player-a-fill);
 }
 
-.html-board.background .cell .worker.player-player-b {
-    background-color: cyan;
+.html-board .cell .worker.player-player-b {
+    background-color: var(--player-b-fill);
 }
 
-.html-board.background .level {
+.html-board .level {
     display: block;
     width: 100%;
     height: 100%;
-    background-color: white;
-    border: 7px solid white;
+    background-color: var(--level-1-background);
+    border: 7px solid var(--level-1-border);
 }
 
-.html-board.background .level.level-1 {
-    border-color: #EEE;
-    background-color: white;
+.html-board .level.level-1 {
+    border-color: var(--level-1-border);
+    background-color: var(--level-1-background);
 }
 
-.html-board.background .level.level-2 {
-    border-color: #DDD;
-    background-color: yellow;
+.html-board .level.level-2 {
+    border-color: var(--level-2-border);
+    background-color: var(--level-2-background);
 }
 
-.html-board.background .level.level-3 {
-    border-color: #CCC;
-    background-color: red;
+.html-board .level.level-3 {
+    border-color: var(--level-3-border);
+    background-color: var(--level-3-backgorund);
 }
 
-.html-board.background .level.level-4 {
-    border-color: darkblue;
-    background-color: darkblue;
+.html-board .level.level-4 {
+    border-color: var(--level-4-border);
+    background-color: var(--level-4-background);
 }
 
-.html-board.background.theme-subtle .cell:not(.available) {
-    border-color: #eeeeee;
-}
-.html-board.background.theme-subtle .cell {
-    background-color: #ffffff;
-}
-.html-board.background.theme-subtle .cell .level.level-1 {
-    border-color: #cccccc;
-    background-color: #cccccc;
-}
-.html-board.background.theme-subtle .cell .level.level-2 {
-    border-color: #999999;
-    background-color: #999999;
-}
-.html-board.background.theme-subtle .cell .level.level-3 {
-    border-color: #666666;
-    background-color: #666666;
-}
-.html-board.background.theme-subtle .cell .level.level-4 {
-    border-color: #0c1a3e;
-    background-color: #0c1a3e;
-}
-.html-board.background.theme-subtle .cell .worker.player-player-a {
-    background-color: #ffd700;
-}
-.html-board.background.theme-subtle .cell .worker.player-player-b {
-    background-color: #800000;
-}
-
-.html-board.background.theme-pastel .cell {
-    background-color: #a5f69d;
-}
-.html-board.background.theme-pastel .cell .level.level-1 {
-    background-color: #e7f695;
-}
-.html-board.background.theme-pastel .cell .level.level-2 {
-    background-color: #d99efb;
-}
-.html-board.background.theme-pastel .cell .level.level-3 {
-    background-color: #fd8c8c;
-}
-.html-board.background.theme-pastel .cell .level.level-4 {
-    background-color: #90e1f9;
-}
-.html-board.background.theme-pastel .cell .worker.player-player-a {
-    background-color: #333333;
-}
-.html-board.background.theme-pastel .cell .worker.player-player-b {
-    background-color: #770000;
-}
-
-.html-board.background.theme-green .cell {
-    background-color: #dddddd;
-}
-.html-board.background.theme-green .cell .level.level-1 {
-    background-color: #88a974;
-}
-.html-board.background.theme-green .cell .level.level-2 {
-    background-color: #85d33b;
-}
-.html-board.background.theme-green .cell .level.level-3 {
-    background-color: #81fd02;
-}
-.html-board.background.theme-green .cell .level.level-4 {
-    background-color: #8f55e5;
-}
-.html-board.background.theme-green .cell .worker.player-player-a {
-    background-color: #333333;
-}
-.html-board.background.theme-green .cell .worker.player-player-b {
-    background-color: #770000;
-}
-
-.html-board.background .cell.level-0 .level.level-4,
-.html-board.background .cell.level-1 .level.level-4,
-.html-board.background .cell.level-2 .level.level-4,
-.html-board.background .cell.level-3 .level.level-4,
-.html-board.background .cell.level-0 .level.level-3,
-.html-board.background .cell.level-1 .level.level-3,
-.html-board.background .cell.level-2 .level.level-3,
-.html-board.background .cell.level-0 .level.level-2,
-.html-board.background .cell.level-1 .level.level-2,
-.html-board.background .cell.level-0 .level.level-1
+.html-board .cell.level-0 .level.level-4,
+.html-board .cell.level-1 .level.level-4,
+.html-board .cell.level-2 .level.level-4,
+.html-board .cell.level-3 .level.level-4,
+.html-board .cell.level-0 .level.level-3,
+.html-board .cell.level-1 .level.level-3,
+.html-board .cell.level-2 .level.level-3,
+.html-board .cell.level-0 .level.level-2,
+.html-board .cell.level-1 .level.level-2,
+.html-board .cell.level-0 .level.level-1
 {
     border-color: transparent;
     background-color: transparent;
 }
 
-.html-board.background .cell .level.level-3 {
+.html-board .cell .level.level-3 {
     color: transparent;
     font-size: 0;
 }
-.html-board.background.numbered-levels .cell .level.level-3 {
+.html-board.numbered-levels .cell .level.level-3 {
     color: black;
 }
-.html-board.background.numbered-levels.obvious-levels .cell .level.level-3 {
+.html-board.numbered-levels.obvious-levels .cell .level.level-3 {
     font-size: 45px;
     line-height: 100%;
 }
-.html-board.background.numbered-levels.subtle-levels .cell .level.level-3 {
+.html-board.numbered-levels.subtle-levels .cell .level.level-3 {
     font-size: 20px;
     line-height: 50%;
     text-align: left;
 }
-.html-board.background.numbered-levels.very-subtle-levels .cell .level.level-3 {
+.html-board.numbered-levels.very-subtle-levels .cell .level.level-3 {
     font-size: 10px;
     line-height: 25%;
     text-align: left;
 }
 
-.html-board.background.theme-rotated .cell .level.level-2 {
-    transform: rotate(45deg) scale(0.7);
-}
-.html-board.background.theme-rotated .cell .level.level-3 {
-    transform: rotate(-45deg) scale(0.7);
-}
-
-.html-board.background.theme-rounded .cell {
-    border-radius: 20%;
-}
-.html-board.background.theme-rounded .cell .level.level-1 {
-    border-radius: 20%;
-}
-.html-board.background.theme-rounded .cell .level.level-2 {
-    border-radius: 20%;
-}
-.html-board.background.theme-rounded .cell .level.level-3 {
-    border-radius: 20%;
-}
-.html-board.background.theme-rounded .cell .level.level-4 {
-    border-radius: 20%;
-}
-
 @media all and (min-width: 601px) {
-    .html-board.background .cell {
+    .html-board .cell {
         width: 100px;
         height: 100px;
     }
 
-    .html-board.background .level {
+    .html-board .level {
         border-width: 7px;
     }
 }
 
 @media all and (max-width: 600px) {
-    .html-board.background .cell {
+    .html-board .cell {
         width: 80px;
         height: 80px;
     }
 
-    .html-board.background .level {
+    .html-board .level {
         border-width: 5px;
     }
 }
 
 @media all and (max-width: 500px) {
-    .html-board.background .cell {
+    .html-board .cell {
         width: 60px;
         height: 60px;
     }
 
-    .html-board.background .level {
+    .html-board .level {
         border-width: 5px;
     }
 }
 
-.html-board.background.small-board {
+.html-board.small-board {
     border-width: 1px;
 }
-.html-board.background.small-board.mini {
+.html-board.small-board.mini {
     width: 52px;
 }
-.html-board.background.small-board .cell {
+.html-board.small-board .cell {
     width: 10px;
     height: 10px;
     border-width: 1px;
 }
-.html-board.background.small-board .level {
+.html-board.small-board .level {
     border-width: 1px;
 }
-.html-board.background.small-board.numbered-levels .cell .level.level-3 {
+.html-board.small-board.numbered-levels .cell .level.level-3 {
     font-size: 0px;
 }
 
-.html-board.background.medium-board {
+.html-board.medium-board {
     border-width: 1px;
 }
-.html-board.background.medium-board .cell {
+.html-board.medium-board .cell {
     width: 40px;
     height: 40px;
     border-width: 1px;
 }
-.html-board.background.medium-board .level {
+.html-board.medium-board .level {
     border-width: 1px;
 }
-.html-board.background.medium-board.numbered-levels.obvious-levels .cell .level.level-3 {
+.html-board.medium-board.numbered-levels.obvious-levels .cell .level.level-3 {
     font-size: 30px;
 }

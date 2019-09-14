@@ -3,12 +3,29 @@ import _ from "lodash";
 const appVersion = 3;
 
 class Client {
+  static getDefaultSettings() {
+    return JSON.parse(JSON.stringify({
+      autoSubmitMoves: false,
+      enableNotifications: false,
+      theme: {pieces: 'king', scheme: '', rotateOpponent: true, numbers: ''},
+    }));
+  }
+
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
     this.username = localStorage.getItem('user-name') || null;
     const password = localStorage.getItem('user-password') || null;
     localStorage.removeItem('user-password');
     this.token = localStorage.getItem('user-token') || password;
+    const localSettings = localStorage.getItem('user-settings') || 'null';
+    try {
+      this.settings = JSON.parse(localSettings);
+    } catch (e) {
+      this.settings = null;
+    }
+    if (!this.settings) {
+      this.settings = this.constructor.getDefaultSettings();
+    }
     if (!window.io) {
       window.io = () => ({
         on: () => console.warn("Socket script was missing"),
@@ -90,9 +107,11 @@ class Client {
       this.id = user.id;
       this.username = user.name;
       this.token = user.token;
+      this.settings = user.settings;
       localStorage.setItem('user-id', this.id);
       localStorage.setItem('user-name', this.username);
       localStorage.setItem('user-token', this.token);
+      localStorage.setItem('user-settings', JSON.stringify(this.settings));
     }
     this.user = user;
     this.onUser.map(callback => callback(user));

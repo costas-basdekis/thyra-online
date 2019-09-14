@@ -139,7 +139,10 @@ class Play extends Component {
   }
 
   render() {
-    const {user, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names, allowControl, matchGame} = this.props;
+    const {
+      user, defaultSettings, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names,
+      allowControl, matchGame,
+    } = this.props;
     const {selectedGame, game} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
@@ -224,7 +227,7 @@ class Play extends Component {
               this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
             )}
             allowControl={displayGame === game ? allowControl : undefined}
-            settings={user ? user.settings : undefined}
+            settings={user ? user.settings : defaultSettings}
             animated
           />
         </Segment>
@@ -237,7 +240,7 @@ class Play extends Component {
                 small
                 onSelect={this.selectGame}
                 selected={previousGame === selectedGame}
-                settings={user ? user.settings : undefined}
+                settings={user ? user.settings : defaultSettings}
               />
             ))}
           </div>
@@ -275,6 +278,7 @@ class Play extends Component {
 
 Play.propTypes = {
   user: PropTypes.object,
+  defaultSettings: PropTypes.object.isRequired,
   otherUser: PropTypes.object,
   settings: PropTypes.object,
   changeSettings: PropTypes.func,

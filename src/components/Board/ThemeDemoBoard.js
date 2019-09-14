@@ -55,14 +55,6 @@ ThemeDemoBoard.defaultProps = {
   className: '',
   small: false,
   medium: false,
-  settings: {
-    theme: {
-      scheme: '',
-      rotated: false,
-      rounded: false,
-      numbers: '',
-    },
-  },
 };
 
 export default ThemeDemoBoard;

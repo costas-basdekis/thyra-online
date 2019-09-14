@@ -168,7 +168,10 @@ class ChosenOnlineGame extends Component {
   };
 
   render() {
-    const {location, user, usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames}, game, selectLiveGame} = this.props;
+    const {
+      location, user, client, game, selectLiveGame,
+      usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
+    } = this.props;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -244,6 +247,7 @@ class ChosenOnlineGame extends Component {
         </Segment>
         <Play
           user={user}
+          defaultSettings={client.settings}
           otherUser={otherUser}
           changeSettings={this.changeSettings}
           game={gameGame}

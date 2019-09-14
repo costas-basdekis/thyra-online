@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import PropTypes from 'prop-types';
 import {Checkbox, Form, Grid, Header, Label, Modal, Segment, Tab} from "semantic-ui-react";
+import Client from "../client/client";
 import {withClient} from "../client/withClient";
 import {ThemeDemoBoard} from "./Board";
 
@@ -184,20 +185,14 @@ SettingsContent.propTypes = {
 class Settings extends Component {
   state = {
     user: null,
-    settings: {
-      autoSubmitMoves: false,
-      theme: {scheme: '', rotated: false, rounded: false, numbers: ''},
-    },
+    settings: Client.getDefaultSettings(),
   };
 
   static getDerivedStateFromProps(props, state) {
     if (props.user && props.user !== state.user) {
       return {
         user: props.user,
-        settings: props.user.settings || {
-          autoSubmitMoves: false,
-          theme: {scheme: '', rotated: false, rounded: false, numbers: ''},
-        },
+        settings: props.user.settings || Client.getDefaultSettings(),
       };
     }
 

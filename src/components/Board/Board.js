@@ -81,14 +81,6 @@ Board.defaultProps = {
   medium: false,
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
-  settings: {
-    theme: {
-      scheme: '',
-      rotated: false,
-      rounded: false,
-      numbers: '',
-    },
-  },
   animated: false,
 };
 

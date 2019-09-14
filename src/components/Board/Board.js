@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../../game/game";
 import BoardBackground from "./BoardBackground";
 
-class Board extends Component {
+class Board extends PureComponent {
   makeMove = (cell) => {
     this.props.makeMove(this.props.game.makeMove({x: cell.x, y: cell.y}));
   };
@@ -47,10 +47,10 @@ class Board extends Component {
     return (
       <BoardBackground
         {...this.props}
-        isCellAvailable={this.isCellAvailable}
-        isCellUndoable={this.isCellUndoable}
+        isCellAvailable={animated ? this.isCellAvailable : () => false}
+        isCellUndoable={animated ? this.isCellUndoable : () => false}
         clickable={allowControl.includes(game.nextPlayer)}
-        undoable={this.isGameUndoable()}
+        undoable={animated ? this.isGameUndoable() : false}
         onSelect={onSelect ? this.onSelect : null}
         makeMove={makeMove ? this.makeMove : null}
         undo={makeMove ? this.undo : null}

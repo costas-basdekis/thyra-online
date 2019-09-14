@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./Board";
-import {Button, Checkbox, Header, Icon, Modal, Segment, Statistic} from "semantic-ui-react";
+import {Button, Checkbox, Grid, Header, Icon, Label, Modal, Pagination, Segment, Statistic} from "semantic-ui-react";
 import classNames from 'classnames';
 
 class Play extends Component {
@@ -231,20 +231,13 @@ class Play extends Component {
             animated
           />
         </Segment>
-        <Segment>
-          <div>
-            {[...game.history].reverse().map(previousGame => (
-              <Board
-                key={previousGame.chainCount}
-                game={previousGame}
-                small
-                onSelect={this.selectGame}
-                selected={previousGame === selectedGame}
-                settings={user ? user.settings : defaultSettings}
-              />
-            ))}
-          </div>
-        </Segment>
+        <PlayHistory
+          game={game}
+          selectedGame={selectedGame}
+          selectGame={this.selectGame}
+          user={user}
+          defaultSettings={defaultSettings}
+        />
         {selectedGame ? (
           <Segment textAlign={"center"}>
             <Header as={"h2"}>Reviewing previous move</Header>
@@ -299,6 +292,75 @@ Play.defaultProps = {
     [Game.PLAYER_B]: "Player B",
   },
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
+};
+
+class PlayHistory extends Component {
+  state = {
+    activePage: 1,
+  };
+
+  onPageChange = (e, {activePage}) => {
+    this.setState({activePage});
+  };
+
+  render() {
+    const {game, selectedGame, user, defaultSettings, selectGame, pageSize} = this.props;
+    const {activePage} = this.state;
+
+    const totalPages = Math.ceil((game.history.length - 1) / pageSize);
+    const visibleGames = [...game.history]
+      .slice(1 + (totalPages - activePage) * pageSize, 1 + (totalPages - activePage) * pageSize + pageSize)
+      .reverse();
+    const lastVisibleGame = visibleGames[visibleGames.length - 1];
+
+    return (
+      <Segment>
+        <Grid centered>
+          <Grid.Row>
+            {visibleGames.map(previousGame => (
+              <Fragment key={previousGame.chainCount}>
+                {previousGame.moveCount % 2 === 1 ? (
+                  <Label content={previousGame.moveCount - 1} />
+                ) : null}
+                <Board
+                  game={previousGame}
+                  small
+                  onSelect={selectGame}
+                  selected={previousGame === selectedGame}
+                  settings={user ? user.settings : defaultSettings}
+                />
+              </Fragment>
+            ))}
+            {lastVisibleGame && (lastVisibleGame.moveCount % 2 === 0) ? (
+              <Label content={lastVisibleGame.moveCount - 2} />
+            ) : null}
+          </Grid.Row>
+          <Grid.Row>
+            <Pagination
+              totalPages={totalPages}
+              activePage={activePage}
+              onPageChange={this.onPageChange}
+              pointing
+              secondary
+            />
+          </Grid.Row>
+        </Grid>
+      </Segment>
+    );
+  }
+}
+
+PlayHistory.propTypes = {
+  game: PropTypes.instanceOf(Game).isRequired,
+  selectedGame: PropTypes.instanceOf(Game),
+  user: PropTypes.object,
+  defaultSettings: PropTypes.object.isRequired,
+  selectGame: PropTypes.func,
+  pageSize: PropTypes.number.isRequired,
+};
+
+PlayHistory.defaultProps = {
+  pageSize: 10,
 };
 
 export default Play;

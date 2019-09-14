@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import PropTypes from 'prop-types';
 import * as constants from './constants';
 
 class LevelIndicatorVerySubtle extends PureComponent {
@@ -19,6 +20,9 @@ class LevelIndicatorVerySubtle extends PureComponent {
   }
 }
 
+LevelIndicatorVerySubtle.propTypes = {
+  level: PropTypes.oneOf([0, 1, 2, 3, 4]).isRequired,
+};
 
 class LevelIndicatorSubtle extends PureComponent {
 	render() {
@@ -39,6 +43,9 @@ class LevelIndicatorSubtle extends PureComponent {
   }
 }
 
+LevelIndicatorSubtle.propTypes = {
+  level: PropTypes.oneOf([0, 1, 2, 3, 4]).isRequired,
+};
 
 class LevelIndicatorObvious extends PureComponent {
 	render() {
@@ -61,6 +68,9 @@ class LevelIndicatorObvious extends PureComponent {
   }
 }
 
+LevelIndicatorObvious.propTypes = {
+  level: PropTypes.oneOf([0, 1, 2, 3, 4]).isRequired,
+};
 
 class LevelIndicator extends PureComponent {
 	static indicatorMap = {
@@ -80,5 +90,11 @@ class LevelIndicator extends PureComponent {
     );
   }
 }
+
+LevelIndicator.propTypes = {
+  type: PropTypes.oneOf(['very-subtle', 'subtle', 'obvious']).isRequired,
+  level: PropTypes.oneOf([0, 1, 2, 3, 4]).isRequired,
+};
+
 
 export default LevelIndicator;

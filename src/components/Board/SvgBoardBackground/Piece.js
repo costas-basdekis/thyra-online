@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import PropTypes from 'prop-types';
 import * as constants from "./constants";
 
 class BasePieceDefinition extends PureComponent {
@@ -24,6 +25,13 @@ class BasePieceDefinition extends PureComponent {
   }
 }
 
+BasePieceDefinition.propTypes = {
+  name: PropTypes.string.isRequired,
+  path: PropTypes.node.isRequired,
+  dimensions: PropTypes.object.isRequired,
+  offset: PropTypes.object.isRequired,
+};
+
 class BasePiece extends PureComponent {
 	static rotateTransform =
   	`rotate(180,${constants.cellSize / 2},${constants.cellSize / 2})`;
@@ -38,6 +46,12 @@ class BasePiece extends PureComponent {
     );
   }
 }
+
+BasePiece.propTypes = {
+  name: PropTypes.string.isRequired,
+  colour: PropTypes.oneOf(['white', 'black']),
+  rotated: PropTypes.bool.isRequired,
+};
 
 const definePiece = (className, {path, dimensions, offset = {x: 0, y: 0}}) => {
   class PieceDefinitionFor extends PureComponent {
@@ -140,6 +154,12 @@ class Piece extends PureComponent {
     );
   }
 }
+
+Piece.propTypes = {
+  style: PropTypes.oneOf(Object.keys(Piece.pieceStyleMap)).isRequired,
+  colour: PropTypes.oneOf(['white', 'black']).isRequired,
+  rotated: PropTypes.bool.isRequired,
+};
 
 class PieceDefinitions extends PureComponent {
 	render() {

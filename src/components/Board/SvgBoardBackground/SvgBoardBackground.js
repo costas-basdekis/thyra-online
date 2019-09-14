@@ -160,6 +160,11 @@ class SvgBoardPiece extends PureComponent {
   }
 }
 
+SvgBoardPiece.propTypes = {
+  cell: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
+};
+
 class SvgBoardCell extends PureComponent {
   makeMove = () => {
     if (this.props.available && this.props.makeMove) {
@@ -178,7 +183,7 @@ class SvgBoardCell extends PureComponent {
         available={available}
         undoable={undoable}
         level={cell.level}
-        player={animated ? undefined : cell.player}
+        player={cell.player}
         allowControl={allowControl}
         animated={animated}
         theme={theme}

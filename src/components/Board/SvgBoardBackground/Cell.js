@@ -1,4 +1,5 @@
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import * as constants from './constants';
 import LevelIndicator from "./LevelIndicator";
@@ -151,15 +152,34 @@ class Cell extends PureComponent {
               />
             </use>
           ))) : ([0, 1, 2, 3, 4].filter(i => i <= level).map(i => (
-            <use key={i} xlinkHref={`${this.constructor.levelMap[i]}`} />
+            <Fragment key={i}>
+              <use xlinkHref={`${this.constructor.levelMap[i]}`} />
+              {player === Game.PLAYER_A ? <Piece style={pieces} colour={'white'} rotated={rotateOpponent && isPlayerAOpponent} /> : null}
+              {player === Game.PLAYER_B ? <Piece style={pieces} colour={'black'} rotated={rotateOpponent && isPlayerBOpponent} /> : null}
+            </Fragment>
           )))}
-          {player === Game.PLAYER_A ? <Piece style={pieces} colour={'white'} rotated={rotateOpponent && isPlayerAOpponent} /> : null}
-          {player === Game.PLAYER_B ? <Piece style={pieces} colour={'black'} rotated={rotateOpponent && isPlayerBOpponent} /> : null}
           {numbers ? <LevelIndicator level={level} type={numbers} /> : null}
         </g>
       </g>
     );
   }
 }
+
+Cell.propTypes = {
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired,
+  available: PropTypes.bool.isRequired,
+  undoable: PropTypes.bool.isRequired,
+  level: PropTypes.number.isRequired,
+  player: PropTypes.string,
+  onClick: PropTypes.func,
+  animated: PropTypes.bool.isRequired,
+  allowControl: PropTypes.array.isRequired,
+  theme: PropTypes.object.isRequired,
+};
+
+Cell.defaultProps = {
+  animated: false,
+};
 
 export default Cell;

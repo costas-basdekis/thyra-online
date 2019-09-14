@@ -21,13 +21,15 @@ class NavigationalTab extends Component {
     let activeTo = match.url;
 
     const preparedPanes = panes
-      .map((pane, index) => {
+      .map((pane, originalIndex) => [pane, originalIndex])
+      .filter(([pane]) => pane)
+      .map(([pane, originalIndex], index) => {
         if (!pane) {
           return null;
         }
 
         const to = this.constructUrl(pane.path);
-        if (index === defaultIndex) {
+        if (originalIndex === defaultIndex) {
           defaultTo = to;
         }
         const navigate = pane.navigate !== undefined ? this.constructUrl(pane.navigate) : to;

@@ -76,7 +76,13 @@ class Client {
   }
 
   getUser() {
-    this.socket.emit("create-user", {appVersion, id: this.id, name: this.username, token: this.token});
+    this.socket.emit("create-user", {
+      appVersion,
+      id: this.id,
+      name: this.username,
+      token: this.token,
+      settings: this.settings,
+    });
   }
 
   logIn(name, password, mergeUsers) {

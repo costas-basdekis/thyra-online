@@ -121,8 +121,13 @@ class Cell extends PureComponent {
   }
 
 	render() {
-  	const {x, y, available, undoable, level, player, theme: {pieces = 'king', rotateOpponent = true, numbers}, onClick, animated = false} = this.props;
+  	const {
+  	  x, y, available, undoable, level, player, onClick, animated, allowControl,
+      theme: {pieces = 'king', rotateOpponent = true, numbers},
+    } = this.props;
   	const {previousLevel, currentLevel} = this.state;
+  	const isPlayerAOpponent = !allowControl.includes(Game.PLAYER_A) && allowControl.includes(Game.PLAYER_B);
+  	const isPlayerBOpponent = !isPlayerAOpponent;
   	return (
     	<g transform={`translate(${x * 100},${y * 100})`}>
         <use
@@ -148,8 +153,8 @@ class Cell extends PureComponent {
           ))) : ([0, 1, 2, 3, 4].filter(i => i <= level).map(i => (
             <use key={i} xlinkHref={`${this.constructor.levelMap[i]}`} />
           )))}
-          {player === Game.PLAYER_A ? <Piece style={pieces} colour={'white'} /> : null}
-          {player === Game.PLAYER_B ? <Piece style={pieces} colour={'black'} rotated={rotateOpponent} /> : null}
+          {player === Game.PLAYER_A ? <Piece style={pieces} colour={'white'} rotated={rotateOpponent && isPlayerAOpponent} /> : null}
+          {player === Game.PLAYER_B ? <Piece style={pieces} colour={'black'} rotated={rotateOpponent && isPlayerBOpponent} /> : null}
           {numbers ? <LevelIndicator level={level} type={numbers} /> : null}
         </g>
       </g>

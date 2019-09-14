@@ -170,7 +170,7 @@ class SvgBoardCell extends PureComponent {
   };
 
   render() {
-    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo, animated} = this.props;
+    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo, animated, allowControl} = this.props;
     return (
       <Cell
         x={cell.x}
@@ -179,6 +179,7 @@ class SvgBoardCell extends PureComponent {
         undoable={undoable}
         level={cell.level}
         player={animated ? undefined : cell.player}
+        allowControl={allowControl}
         animated={animated}
         theme={theme}
         onClick={((makeMove && available) || (undo && undoable)) && clickable ? this.makeMove : null}
@@ -196,6 +197,7 @@ SvgBoardCell.propTypes = {
   makeMove: PropTypes.func,
   undo: PropTypes.func,
   animated: PropTypes.bool.isRequired,
+  allowControl: PropTypes.array.isRequired,
 };
 
 SvgBoardCell.defaultProps = {
@@ -203,6 +205,7 @@ SvgBoardCell.defaultProps = {
   available: false,
   undoable: false,
   animated: false,
+  allowControl: [Game.PLAYER_A, Game.PLAYER_B],
 };
 
 export default SvgBoardBackground;

@@ -1,14 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Game from "../../game/game";
 import "../../styles/html-board.css";
 
 class HtmlBoardBackground extends Component {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns,
+      settings, rowsAndColumns,
     } = this.props;
     const {theme: {scheme, numbers}} = settings;
 
@@ -39,7 +38,6 @@ class HtmlBoardBackground extends Component {
                 clickable={clickable || (undoable && isCellUndoable(cell))}
                 available={isCellAvailable(cell)}
                 undoable={isCellUndoable(cell)}
-                allowControl={allowControl}
                 settings={settings}
                 makeMove={this.props.makeMove}
                 undo={this.props.undo}
@@ -65,7 +63,6 @@ HtmlBoardBackground.propTypes = {
   selected: PropTypes.bool.isRequired,
   isCellAvailable: PropTypes.func.isRequired,
   isCellUndoable: PropTypes.func.isRequired,
-  allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
   animated: PropTypes.bool.isRequired,
 };
@@ -76,7 +73,6 @@ HtmlBoardBackground.defaultProps = {
   medium: false,
   clickable: false,
   selected: false,
-  allowControl: [Game.PLAYER_A, Game.PLAYER_B],
   animated: false,
 };
 

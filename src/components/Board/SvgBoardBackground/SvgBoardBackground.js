@@ -1,6 +1,7 @@
 import React, {Fragment, PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import _ from "lodash";
 import Game from "../../../game/game";
 import * as constants from './constants';
 import Cell from "./Cell";
@@ -11,7 +12,7 @@ class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns,
+      allowControl, settings, rowsAndColumns, animated,
     } = this.props;
     const {theme} = settings;
 
@@ -24,6 +25,7 @@ class SvgBoardBackground extends PureComponent {
     }, className);
     const rowCount = rowsAndColumns.length;
     const columnCount= Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
+    const pieces = _.sortBy(_.flatten(rowsAndColumns.map(row => row.cells.filter(cell => cell.player))), ['player', 'worker']);
 
     return (
       <svg
@@ -33,24 +35,34 @@ class SvgBoardBackground extends PureComponent {
         preserveAspectRatio={"xMinYMin meet"}
         onClick={onSelect}
       >
-        {rowsAndColumns.map(row => (
-          <g key={`row-${row.y}`}>
-            {row.cells.map(cell => (
-              <SvgBoardCell
-                key={`${cell.x}-${cell.y}`}
-                cell={cell}
-                clickable={clickable || (undoable && isCellUndoable(cell))}
-                available={isCellAvailable(cell)}
-                undoable={isCellUndoable(cell)}
-                allowControl={allowControl}
-                settings={settings}
-                makeMove={this.props.makeMove}
-                undo={this.props.undo}
-                theme={theme}
-              />
+        <g data-key={'rows'}>
+          {rowsAndColumns.map(row => (
+            <g data-key={`row-${row.y}`} key={`row-${row.y}`}>
+              {row.cells.map(cell => (
+                <SvgBoardCell
+                  key={`${cell.x}-${cell.y}`}
+                  cell={cell}
+                  clickable={clickable || (undoable && isCellUndoable(cell))}
+                  available={isCellAvailable(cell)}
+                  undoable={isCellUndoable(cell)}
+                  allowControl={allowControl}
+                  settings={settings}
+                  makeMove={this.props.makeMove}
+                  undo={this.props.undo}
+                  theme={theme}
+                  animated={animated}
+                />
+              ))}
+            </g>
+          ))}
+        </g>
+        {animated ? (
+          <g data-key={'pieces'} style={{pointerEvents: 'none'}}>
+            {pieces.map(cell => (
+              <SvgBoardPiece key={`${cell.player}-${cell.worker}`} cell={cell} theme={theme} />
             ))}
           </g>
-        ))}
+        ) : null}
       </svg>
     );
   }
@@ -71,6 +83,7 @@ SvgBoardBackground.propTypes = {
   isCellUndoable: PropTypes.func.isRequired,
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
+  animated: PropTypes.bool.isRequired,
 };
 
 SvgBoardBackground.defaultProps = {
@@ -80,6 +93,7 @@ SvgBoardBackground.defaultProps = {
   clickable: false,
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
+  animated: false,
 };
 
 class SvgBoardBackgroundDefinitions extends PureComponent {
@@ -98,6 +112,54 @@ class SvgBoardBackgroundDefinitions extends PureComponent {
 }
 SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
 
+class SvgBoardPiece extends PureComponent {
+  state = {
+    previousPosition: {x: this.props.cell.x, y: this.props.cell.y},
+    position: {x: this.props.cell.x, y: this.props.cell.y},
+  };
+
+  animateTransform = React.createRef();
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.cell.x !== state.position.x || props.cell.y !== state.position.y) {
+      return {previousPosition: state.position, position: {x: props.cell.x, y: props.cell.y}};
+    }
+
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.state.position !== prevState.position) {
+      setTimeout(() => this.animateTransform.current.beginElement(), 0);
+    }
+  }
+
+  render() {
+    const {cell, theme} = this.props;
+    const {previousPosition, position} = this.state;
+    return (
+      <g transform={`translate(${position.x * 100},${position.y * 100})`}>
+        <Piece
+          style={theme.pieces || 'king'}
+          colour={cell.player === Game.PLAYER_A ? 'white' : 'black'}
+          rotated={cell.player === Game.PLAYER_B && theme.rotateOpponent}
+        />
+        <animateTransform
+          ref={this.animateTransform}
+          attributeName={'transform'}
+          attributeType={'XML'}
+          type={'translate'}
+          from={`${previousPosition.x * 100} ${previousPosition.y * 100}`}
+          to={`${position.x * 100} ${position.y * 100}`}
+          dur={'0.1s'}
+          repeatCount={1}
+          fill={'freeze'}
+        />
+      </g>
+    );
+  }
+}
+
 class SvgBoardCell extends PureComponent {
   makeMove = () => {
     if (this.props.available && this.props.makeMove) {
@@ -108,7 +170,7 @@ class SvgBoardCell extends PureComponent {
   };
 
   render() {
-    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo} = this.props;
+    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo, animated} = this.props;
     return (
       <Cell
         x={cell.x}
@@ -116,7 +178,8 @@ class SvgBoardCell extends PureComponent {
         available={available}
         undoable={undoable}
         level={cell.level}
-        player={cell.player}
+        player={animated ? undefined : cell.player}
+        animated={animated}
         theme={theme}
         onClick={((makeMove && available) || (undo && undoable)) && clickable ? this.makeMove : null}
       />
@@ -132,12 +195,14 @@ SvgBoardCell.propTypes = {
   settings: PropTypes.object.isRequired,
   makeMove: PropTypes.func,
   undo: PropTypes.func,
+  animated: PropTypes.bool.isRequired,
 };
 
 SvgBoardCell.defaultProps = {
   clickable: false,
   available: false,
   undoable: false,
+  animated: false,
 };
 
 export default SvgBoardBackground;

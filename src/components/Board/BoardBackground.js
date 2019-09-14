@@ -34,6 +34,7 @@ BoardBackground.propTypes = {
   isCellUndoable: PropTypes.func.isRequired,
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
+  animated: PropTypes.bool.isRequired,
 };
 
 BoardBackground.defaultProps = {
@@ -43,6 +44,7 @@ BoardBackground.defaultProps = {
   clickable: false,
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
+  animated: false,
 };
 
 export default BoardBackground;

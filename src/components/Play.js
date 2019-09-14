@@ -225,12 +225,20 @@ class Play extends Component {
             )}
             allowControl={displayGame === game ? allowControl : undefined}
             settings={user ? user.settings : undefined}
+            animated
           />
         </Segment>
         <Segment>
           <div>
             {[...game.history].reverse().map(previousGame => (
-              <Board key={previousGame.chainCount} game={previousGame} small onSelect={this.selectGame} selected={previousGame === selectedGame} settings={user ? user.settings : undefined} />
+              <Board
+                key={previousGame.chainCount}
+                game={previousGame}
+                small
+                onSelect={this.selectGame}
+                selected={previousGame === selectedGame}
+                settings={user ? user.settings : undefined}
+              />
             ))}
           </div>
         </Segment>

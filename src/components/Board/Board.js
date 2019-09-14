@@ -42,7 +42,7 @@ class Board extends Component {
   }
 
   render() {
-    let {game, allowControl, onSelect, makeMove} = this.props;
+    const {game, allowControl, onSelect, makeMove, animated} = this.props;
 
     return (
       <BoardBackground
@@ -55,6 +55,7 @@ class Board extends Component {
         makeMove={makeMove ? this.makeMove : null}
         undo={makeMove ? this.undo : null}
         rowsAndColumns={game.rowsAndColumns}
+        animated={animated}
       />
     );
   }
@@ -71,6 +72,7 @@ Board.propTypes = {
   selected: PropTypes.bool.isRequired,
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
+  animated: PropTypes.bool.isRequired,
 };
 
 Board.defaultProps = {
@@ -87,6 +89,7 @@ Board.defaultProps = {
       numbers: '',
     },
   },
+  animated: false,
 };
 
 export default Board;

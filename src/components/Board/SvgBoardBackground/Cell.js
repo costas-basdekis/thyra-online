@@ -21,7 +21,6 @@ class CellDefinitions extends PureComponent {
           transform={`translate(${(constants.borderWidth)},${(constants.borderWidth)})`}
         />
         <g id={`cell-1`}>
-          <use xlinkHref={`#cell-0`} />
           <rect
             className={'border'}
             width={constants.cellSize - constants.borderWidth * 2}
@@ -36,7 +35,6 @@ class CellDefinitions extends PureComponent {
           />
         </g>
         <g id={`cell-2`}>
-          <use xlinkHref={`#cell-1`} />
           <rect
             className={'border'}
             width={constants.cellSize - constants.borderWidth * 4}
@@ -51,7 +49,6 @@ class CellDefinitions extends PureComponent {
           />
         </g>
         <g id={`cell-3`}>
-          <use xlinkHref={`#cell-2`} />
           <rect
             className={'border'}
             width={constants.cellSize - constants.borderWidth * 6}
@@ -66,7 +63,6 @@ class CellDefinitions extends PureComponent {
           />
         </g>
         <g id={`cell-4`}>
-          <use xlinkHref={`#cell-3`} />
           <rect
             className={'border'}
             width={constants.cellSize - constants.borderWidth * 8}
@@ -96,8 +92,37 @@ class Cell extends PureComponent {
     4: '#cell-4',
   };
 
+	state = {
+	  previousLevel: this.props.level,
+	  currentLevel: this.props.level,
+  };
+
+	levelsAnimate = [0, 1, 2, 3, 4].map(i => React.createRef());
+
+	static getDerivedStateFromProps(props, state) {
+    if (props.animated && props.level !== state.level) {
+      return {previousLevel: state.currentLevel, currentLevel: props.level};
+    }
+
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.animated && this.state.currentLevel !== this.state.previousLevel) {
+      setTimeout(() => {
+        this.levelsAnimate
+          .filter((levelAnimate, i) => (
+            (this.state.previousLevel <= i && i <= this.state.currentLevel)
+            || (this.state.currentLevel <= i && i <= this.state.previousLevel)
+          ))
+          .map(levelAnimate => levelAnimate.current.beginElement());
+      }, 0);
+    }
+  }
+
 	render() {
-  	const {x, y, available, undoable, level, player, theme: {pieces = 'king', rotateOpponent, numbers}, onClick} = this.props;
+  	const {x, y, available, undoable, level, player, theme: {pieces = 'king', rotateOpponent = true, numbers}, onClick, animated = false} = this.props;
+  	const {previousLevel, currentLevel} = this.state;
   	return (
     	<g transform={`translate(${x * 100},${y * 100})`}>
         <use
@@ -106,7 +131,23 @@ class Cell extends PureComponent {
           onClick={onClick}
         />
         <g className={'cell-contents'}>
-          <use xlinkHref={`${this.constructor.levelMap[level]}`} />
+          {animated ? ([0, 1, 2, 3, 4].map(i => (
+            <use key={i} xlinkHref={`${this.constructor.levelMap[i]}`} opacity={i <= level ? 1 : 0}>
+              <animate
+                ref={this.levelsAnimate[i]}
+                attributeName={'opacity'}
+                attributeType={'XML'}
+                type={'translate'}
+                from={previousLevel < i ? 0 : 1}
+                to={currentLevel < i ? 0 : 1}
+                dur={'0.2s'}
+                repeatCount={1}
+                fill={'freeze'}
+              />
+            </use>
+          ))) : ([0, 1, 2, 3, 4].filter(i => i <= level).map(i => (
+            <use key={i} xlinkHref={`${this.constructor.levelMap[i]}`} />
+          )))}
           {player === Game.PLAYER_A ? <Piece style={pieces} colour={'white'} /> : null}
           {player === Game.PLAYER_B ? <Piece style={pieces} colour={'black'} rotated={rotateOpponent} /> : null}
           {numbers ? <LevelIndicator level={level} type={numbers} /> : null}

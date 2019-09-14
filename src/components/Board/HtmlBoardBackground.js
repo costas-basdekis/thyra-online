@@ -67,6 +67,7 @@ HtmlBoardBackground.propTypes = {
   isCellUndoable: PropTypes.func.isRequired,
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
+  animated: PropTypes.bool.isRequired,
 };
 
 HtmlBoardBackground.defaultProps = {
@@ -76,6 +77,7 @@ HtmlBoardBackground.defaultProps = {
   clickable: false,
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
+  animated: false,
 };
 
 class HtmlBoardCell extends Component {

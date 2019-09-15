@@ -9,7 +9,7 @@ import Game from "../../../game/game";
 class CellDefinitions extends PureComponent {
 	render() {
   	return (
-    	<React.Fragment>
+    	<Fragment>
         <rect
           id={`cell-border`}
           width={constants.cellSize}
@@ -77,7 +77,7 @@ class CellDefinitions extends PureComponent {
             transform={`translate(${constants.borderWidth * 5},${constants.borderWidth * 5})`}
           />
         </g>
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

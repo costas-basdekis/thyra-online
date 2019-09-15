@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {PureComponent, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import * as constants from "./constants";
 
@@ -6,7 +6,7 @@ class BasePieceDefinition extends PureComponent {
 	render() {
   	const {name, path, dimensions, offset} = this.props;
   	return (
-    	<React.Fragment>
+    	<Fragment>
         <g id={`piece-${name}-base`} transform={[
       		`translate(${constants.cellSize / 2},${constants.cellSize / 2})`,
         	`scale(${(constants.pieceScaling)},${(constants.pieceScaling)})`,
@@ -20,7 +20,7 @@ class BasePieceDefinition extends PureComponent {
           <use xlinkHref={`#piece-${name}-base`} strokeWidth={constants.pieceStrokeWidth} stroke={"#bbb"} />
           <use xlinkHref={`#piece-${name}-base`} fill={'black'} />
         </g>
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

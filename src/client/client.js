@@ -178,6 +178,7 @@ class Client {
   }
 
   gotGames = games => {
+    games = _.orderBy(games, ['startDatetime', 'id'], ['desc', 'desc']);
     this.gamesInfo = this.prepareGames(games);
     this.onGames.map(callback => callback(this.gamesInfo));
   };

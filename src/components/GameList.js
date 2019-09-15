@@ -69,11 +69,11 @@ class GameCard extends Component {
           </Card.Header>
           {!terse ? (
             <Card.Meta>
-              {isMyGame ? <Label><Icon name={"user"} color={"green"} />My game</Label> : null}
+              {isMyGame ? <Label icon={{name: 'user', color: 'green'}} content={'My game'} /> : null}
               {" "}
-              {!game.finished ? <Label><Icon name={"circle"} color={"green"} />Live</Label> : null}
+              {!game.finished ? <Label icon={{name: 'circle', color: 'green'}} content={'Live'} /> : null}
               {" "}
-              <Label content={`Move ${game.move}`} />
+              <Label content={`Move ${game.move}`} icon={'play'} />
             </Card.Meta>
           ) : null}
         </Card.Content>

@@ -38,6 +38,8 @@ class Client {
       this.scriptIoReloadInterval = setInterval(this.reloadScriptIo, 1000);
     }
 
+    this.disconnected = false;
+
     this.onConnect = [];
     this.onDisconnect = [];
     this.onUser = [];
@@ -134,6 +136,7 @@ class Client {
 
   justDisconnected = () => {
     this.connected = false;
+    this.disconnected = true;
     this.onDisconnect.map(callback => callback(this.connected));
   };
 

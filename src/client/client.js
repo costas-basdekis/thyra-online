@@ -11,6 +11,8 @@ class Client {
     }));
   }
 
+  scriptIoReloadInterval = null;
+
   constructor() {
     this.id = localStorage.getItem('user-id') || null;
     this.username = localStorage.getItem('user-name') || null;
@@ -32,30 +34,57 @@ class Client {
         emit: () => console.warn("Socket script was missing"),
         unavailable: true,
       });
+      window.io.unavailable = true;
+      this.scriptIoReloadInterval = setInterval(this.reloadScriptIo, 1000);
     }
+
+    this.onConnect = [];
+    this.onDisconnect = [];
+    this.onUser = [];
+    this.onUsers = [];
+    this.onGames = [];
+    this.onTournaments = [];
+
+    this.bindSocket();
+  }
+
+  bindSocket() {
     this.socket = window.io(process.env.REACT_APP_SERVER_URL);
     this.available = !this.socket.unavailable;
     this.connected = false;
     this.socket.on('connect', this.justConnected);
-    this.onConnect = [];
     this.socket.on('disconnect', this.justDisconnected);
-    this.onDisconnect = [];
     this.socket.on("reload", this.reload);
 
     this.user = null;
-    this.onUser = [];
     this.socket.on("user", this.gotUser);
 
     this.usersInfo = this.prepareUsers([]);
-    this.onUsers = [];
     this.socket.on("users", this.gotUsers);
 
     this.gamesInfo = this.prepareGames([]);
-    this.onGames = [];
     this.socket.on("games", this.gotGames);
 
     this.getUser();
   }
+
+  reloadScriptIo = () => {
+    if (!window.io.unavailable) {
+      clearInterval(this.scriptIoReloadInterval);
+      this.scriptIoReloadInterval = null;
+      this.bindSocket();
+      console.log('Loaded script.io!');
+      return;
+    }
+    const oldScriptEl = document.getElementById('socket-io-script');
+    const newScriptEl = document.createElement('script');
+    newScriptEl.id = oldScriptEl.id;
+    newScriptEl.type = oldScriptEl.type;
+    newScriptEl.src = oldScriptEl.src;
+    oldScriptEl.remove();
+    document.head.append(newScriptEl);
+    console.warn('Retrying socket.io script download...');
+  };
 
   subscribe(callbacks) {
     for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames']) {

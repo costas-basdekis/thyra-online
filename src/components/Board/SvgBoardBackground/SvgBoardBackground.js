@@ -25,7 +25,6 @@ class SvgBoardBackground extends PureComponent {
     }, className);
     const rowCount = rowsAndColumns.length;
     const columnCount= Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
-    const pieces = _.sortBy(_.flatten(rowsAndColumns.map(row => row.cells.filter(cell => cell.player))), ['player', 'worker']);
 
     return (
       <svg
@@ -57,16 +56,7 @@ class SvgBoardBackground extends PureComponent {
           ))}
         </g>
         {animated ? (
-          <g data-key={'pieces'} style={{pointerEvents: 'none'}}>
-            {pieces.map(cell => (
-              <SvgBoardPiece
-                key={`${cell.player}-${cell.worker}`}
-                cell={cell}
-                theme={theme}
-                allowControl={allowControl}
-              />
-            ))}
-          </g>
+          <SvgBoardPieces rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
         ) : null}
       </svg>
     );
@@ -116,6 +106,33 @@ class SvgBoardBackgroundDefinitions extends PureComponent {
   }
 }
 SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
+
+class SvgBoardPieces extends PureComponent {
+  render() {
+    const {rowsAndColumns, theme, allowControl} = this.props;
+
+    const pieces = _.sortBy(_.flatten(rowsAndColumns.map(row => row.cells.filter(cell => cell.player))), ['player', 'worker']);
+
+    return (
+      <g data-key={'pieces'} style={{pointerEvents: 'none'}}>
+        {pieces.map(cell => (
+          <SvgBoardPiece
+            key={`${cell.player}-${cell.worker}`}
+            cell={cell}
+            theme={theme}
+            allowControl={allowControl}
+          />
+        ))}
+      </g>
+    );
+  }
+}
+
+SvgBoardPieces.propTypes = {
+  rowsAndColumns: PropTypes.array.isRequired,
+  theme: PropTypes.object.isRequired,
+  allowControl: PropTypes.array.isRequired,
+};
 
 class SvgBoardPiece extends PureComponent {
   state = {

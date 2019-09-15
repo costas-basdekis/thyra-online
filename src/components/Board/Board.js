@@ -61,6 +61,7 @@ class Board extends PureComponent {
         makeMove={makeMove ? this.makeMove : null}
         undo={makeMove ? this.undo : null}
         rowsAndColumns={rowsAndColumns}
+        transformation={transformation}
         game={game}
         animated={animated}
       />
@@ -112,43 +113,76 @@ class BoardTransformation extends PureComponent {
   };
 
   static makeTransformRowsAndColumns(config) {
-    return rowsAndColumns => this.transformRowsAndColumns(rowsAndColumns, config);
+    const transformRowsAndColumns = rowsAndColumns => {
+      return this.transformRowsAndColumns(rowsAndColumns, config);
+    };
+    // We can tell if the board is flipped (horizontally or vertically)
+    const flipped = config.transpose ^ config.flipX ^ config.flipY;
+    const reverseConfig = config.transpose && !flipped ? {
+      transpose: config.transpose,
+      flipX: !config.flipX,
+      flipY: !config.flipY,
+    } : config;
+    transformRowsAndColumns.reverseCoordinates = (rowsAndColumns, coordinates) => {
+      return this.reverseTransformCoordinates(rowsAndColumns, coordinates, reverseConfig);
+    };
+
+    return transformRowsAndColumns;
   }
 
   static transformRowsAndColumns(rowsAndColumns, config) {
-    const rowCount = rowsAndColumns.length;
-    const columnCount = Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
-    const {transpose, flipX, flipY} = config;
-    let newRowCount, newColumnCount;
-    if (transpose) {
-      [newColumnCount, newRowCount] = [rowCount, columnCount];
-    } else {
-      [newColumnCount, newRowCount] = [columnCount, rowCount];
-    }
+    let {newRowCount, newColumnCount} = this.getNewRowAndColumnCount(rowsAndColumns, config);
     const newXs = _.range(newColumnCount);
     const newYs = _.range(newRowCount);
 
     return newYs.map(newY => ({
       y: newY,
       cells: newXs.map(newX => {
-        let oldX, oldY;
-        if (transpose) {
-          [oldX, oldY] = [newY, newX];
-        } else {
-          [oldX, oldY] = [newX, newY];
-        }
-        if (flipX) {
-          oldX = newColumnCount - 1 - oldX;
-        }
-        if (flipY) {
-          oldY = newRowCount - 1 - oldY;
-        }
+        let {oldX, oldY} = this.getOldCoordinates( {newX, newY}, {newRowCount, newColumnCount}, config);
         return {
         ...rowsAndColumns[oldY].cells[oldX],
           x: newX, y: newY,
         };
       }),
     }));
+  }
+
+  static reverseTransformCoordinates(rowsAndColumns, coordinates, config) {
+    let {newRowCount, newColumnCount} = this.getNewRowAndColumnCount(rowsAndColumns, config);
+    const {x: newX, y: newY} = coordinates;
+    const {oldX, oldY} = this.getOldCoordinates( {newX, newY}, {newRowCount, newColumnCount}, config);
+
+    return {x: oldX, y: oldY};
+  }
+
+  static getNewRowAndColumnCount(rowsAndColumns, config) {
+    const rowCount = rowsAndColumns.length;
+    const columnCount = Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
+    const {transpose} = config;
+    let newRowCount, newColumnCount;
+    if (transpose) {
+      [newColumnCount, newRowCount] = [rowCount, columnCount];
+    } else {
+      [newColumnCount, newRowCount] = [columnCount, rowCount];
+    }
+    return {newRowCount, newColumnCount};
+  }
+
+  static getOldCoordinates({newX, newY}, {newColumnCount, newRowCount}, config) {
+    const {transpose, flipX, flipY} = config;
+    let oldX, oldY;
+    if (transpose) {
+      [oldX, oldY] = [newY, newX];
+    } else {
+      [oldX, oldY] = [newX, newY];
+    }
+    if (flipX) {
+      oldX = newColumnCount - 1 - oldX;
+    }
+    if (flipY) {
+      oldY = newRowCount - 1 - oldY;
+    }
+    return {oldX, oldY};
   }
 
    updateOrientation = method => {

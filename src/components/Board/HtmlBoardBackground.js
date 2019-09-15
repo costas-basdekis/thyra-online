@@ -51,7 +51,7 @@ class HtmlBoardBackground extends Component {
 }
 
 HtmlBoardBackground.propTypes = {
-  rowsAndColumns: PropTypes.array,
+  rowsAndColumns: PropTypes.array.isRequired,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   makeMove: PropTypes.func,
   undo: PropTypes.func,

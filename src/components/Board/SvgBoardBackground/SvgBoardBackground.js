@@ -13,7 +13,7 @@ class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns, animated, game,
+      allowControl, settings, rowsAndColumns, transformation, animated, game,
     } = this.props;
     const {theme} = settings;
 
@@ -60,7 +60,7 @@ class SvgBoardBackground extends PureComponent {
           <SvgBoardPieces rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
         ) : null}
         {animated ? (
-          <SvgBoardArrows game={game} />
+          <SvgBoardArrows game={game} transformation={transformation} />
         ) : null}
       </svg>
     );
@@ -68,7 +68,8 @@ class SvgBoardBackground extends PureComponent {
 }
 
 SvgBoardBackground.propTypes = {
-  rowsAndColumns: PropTypes.array,
+  rowsAndColumns: PropTypes.array.isRequired,
+  transformation: PropTypes.func,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
   makeMove: PropTypes.func,
   undo: PropTypes.func,
@@ -115,14 +116,14 @@ SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
 
 class SvgBoardArrows extends PureComponent {
   getPlayerMoves() {
+    const {transformation} = this.props;
     const {player, relevantHistory} = this.getRelevantHistory();
     const gameWithPieceMove = relevantHistory
       .find(game => Game.MOVE_TYPES_MOVE_WORKER.includes(game.thisMoveType));
     const gameWithBuildMove = relevantHistory
       .find(game => game.thisMoveType === Game.MOVE_TYPE_BUILD_AROUND_WORKER);
 
-    return {
-      player,
+    const {move, build} = {
       move: gameWithPieceMove ? {
         from: gameWithPieceMove.previous.lastMove,
         to: gameWithPieceMove.lastMove,
@@ -132,6 +133,19 @@ class SvgBoardArrows extends PureComponent {
         to: gameWithBuildMove.lastMove,
       }: null,
     };
+
+    if (transformation) {
+      if (move) {
+        move.from = transformation.reverseCoordinates(gameWithPieceMove.previous.rowsAndColumns, move.from);
+        move.to = transformation.reverseCoordinates(gameWithPieceMove.rowsAndColumns, move.to);
+      }
+      if (build) {
+        build.from = transformation.reverseCoordinates(gameWithBuildMove.previous.rowsAndColumns, build.from);
+        build.to = transformation.reverseCoordinates(gameWithBuildMove.rowsAndColumns, build.to);
+      }
+    }
+
+    return {player, move, build};
   }
 
   getRelevantHistory() {
@@ -177,6 +191,7 @@ class SvgBoardArrows extends PureComponent {
 
 SvgBoardArrows.propTypes = {
   game: PropTypes.instanceOf(Game),
+  transformation: PropTypes.func,
 };
 
 class SvgBoardPieces extends PureComponent {

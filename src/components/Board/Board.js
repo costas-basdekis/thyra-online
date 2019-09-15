@@ -101,80 +101,48 @@ class BoardTransformation extends PureComponent {
   // noinspection JSSuspiciousNameCombination
   static transformationMap = {
     '0,false': null,
-    // rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-    //   newXs: _.range(columnCount),
-    //   newYs: _.range(rowCount),
-    //   getOldCoordinates: ({newX, newY}) => ({
-    //     oldX: newX,
-    //     oldY: newY,
-    //   }),
-    // })),
-    '1,false': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(rowCount),
-      newYs: _.range(columnCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: newY,
-        oldY: columnCount - 1 - newX,
-      }),
-    })),
-    '2,false': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(columnCount),
-      newYs: _.range(rowCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: columnCount - 1 - newX,
-        oldY: rowCount - 1 - newY,
-      }),
-    })),
-    '3,false': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(rowCount),
-      newYs: _.range(columnCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: rowCount -1 - newY,
-        oldY: newX,
-      }),
-    })),
-    '0,true': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(columnCount),
-      newYs: _.range(rowCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: columnCount - 1 - newX,
-        oldY: newY,
-      }),
-    })),
-    '1,true': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(rowCount),
-      newYs: _.range(columnCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: rowCount - 1 - newY,
-        oldY: columnCount - 1 - newX,
-      }),
-    })),
-    '2,true': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(columnCount),
-      newYs: _.range(rowCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: newX,
-        oldY: rowCount - 1 - newY,
-      }),
-    })),
-    '3,true': rowsAndColumns => this.transformCoordinates(rowsAndColumns, (rowCount, columnCount) => ({
-      newXs: _.range(rowCount),
-      newYs: _.range(columnCount),
-      getOldCoordinates: ({newX, newY}) => ({
-        oldX: newY,
-        oldY: newX,
-      }),
-    })),
+    // makeTransformRowsAndColumns({transpose:  false, flipX: false, flipY: false}),
+    '1,false': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: true}),
+    '2,false': this.makeTransformRowsAndColumns({transpose: false, flipX: true, flipY: true}),
+    '3,false': this.makeTransformRowsAndColumns({transpose: true, flipX: true, flipY: false}),
+    '0,true': this.makeTransformRowsAndColumns({transpose: false, flipX: true, flipY: false}),
+    '1,true': this.makeTransformRowsAndColumns({transpose: true, flipX: true, flipY: true}),
+    '2,true': this.makeTransformRowsAndColumns({transpose: false, flipX: false, flipY: true}),
+    '3,true': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: false}),
   };
 
-  static transformCoordinates(rowsAndColumns, getNewXsAndYs) {
+  static makeTransformRowsAndColumns(config) {
+    return rowsAndColumns => this.transformRowsAndColumns(rowsAndColumns, config);
+  }
+
+  static transformRowsAndColumns(rowsAndColumns, config) {
     const rowCount = rowsAndColumns.length;
     const columnCount = Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
-    const {newXs, newYs, getOldCoordinates} = getNewXsAndYs(rowCount, columnCount);
+    const {transpose, flipX, flipY} = config;
+    let newRowCount, newColumnCount;
+    if (transpose) {
+      [newColumnCount, newRowCount] = [rowCount, columnCount];
+    } else {
+      [newColumnCount, newRowCount] = [columnCount, rowCount];
+    }
+    const newXs = _.range(newColumnCount);
+    const newYs = _.range(newRowCount);
+
     return newYs.map(newY => ({
       y: newY,
       cells: newXs.map(newX => {
-        const {oldX, oldY} = getOldCoordinates({newX, newY});
+        let oldX, oldY;
+        if (transpose) {
+          [oldX, oldY] = [newY, newX];
+        } else {
+          [oldX, oldY] = [newX, newY];
+        }
+        if (flipX) {
+          oldX = newColumnCount - 1 - oldX;
+        }
+        if (flipY) {
+          oldY = newRowCount - 1 - oldY;
+        }
         return {
         ...rowsAndColumns[oldY].cells[oldX],
           x: newX, y: newY,

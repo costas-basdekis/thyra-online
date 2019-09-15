@@ -3,7 +3,19 @@ import PropTypes from 'prop-types';
 import '../styles/play.css';
 import Game from "../game/game";
 import Board from "./Board";
-import {Button, Checkbox, Grid, Header, Icon, Label, Modal, Pagination, Segment, Statistic} from "semantic-ui-react";
+import {
+  Button,
+  Checkbox,
+  Grid,
+  Header,
+  Icon,
+  Label,
+  Menu,
+  Modal,
+  Pagination,
+  Segment,
+  Statistic
+} from "semantic-ui-react";
 import classNames from 'classnames';
 import {BoardTransformation} from "./Board/Board";
 
@@ -226,18 +238,23 @@ class Play extends Component {
           </Segment>
         ) : null}
         <Segment style={{textAlign: "center"}}>
-          <Board
-            game={displayGame}
-            transformation={transformation}
-            makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
-            minChainCount={this.props.submit ? this.props.game.chainCount : (
-              this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
-            )}
-            allowControl={displayGame === game ? allowControl : undefined}
-            settings={user ? user.settings : defaultSettings}
-            animated
-          />
           <Grid centered>
+            <Grid.Row>
+              <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
+            </Grid.Row>
+            <Grid.Row>
+              <Board
+                game={displayGame}
+                transformation={transformation}
+                makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
+                minChainCount={this.props.submit ? this.props.game.chainCount : (
+                  this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
+                )}
+                allowControl={displayGame === game ? allowControl : undefined}
+                settings={user ? user.settings : defaultSettings}
+                animated
+              />
+            </Grid.Row>
             <Grid.Row>
               <BoardTransformation onChange={this.onTransformationChange} />
             </Grid.Row>
@@ -329,6 +346,9 @@ class PlayHistory extends Component {
       <Segment>
         <Grid centered>
           <Grid.Row>
+            <PlayNavigation game={game} selectedGame={selectedGame} selectGame={selectGame} />
+          </Grid.Row>
+          <Grid.Row>
             {visibleGames.map(previousGame => (
               <Fragment key={previousGame.chainCount}>
                 {previousGame.moveCount % 2 === 1 ? (
@@ -373,6 +393,48 @@ PlayHistory.propTypes = {
 
 PlayHistory.defaultProps = {
   pageSize: 10,
+};
+
+class PlayNavigation extends Component {
+  goToCurrentMove = () => {
+    this.props.selectGame(this.props.game);
+  };
+
+  goToNextMove = () => {
+    const selectedGameIndex = this.props.game.history.indexOf(this.props.selectedGame || this.props.game);
+    this.props.selectGame(this.props.game.history[selectedGameIndex + 1]);
+  };
+
+  goToPreviousMove = () => {
+    this.props.selectGame((this.props.selectedGame || this.props.game).previousInHistory);
+  };
+
+  goToFirstMove = () => {
+    this.props.selectGame(this.props.game.history[0]);
+  };
+
+  render() {
+    const {game, selectedGame} = this.props;
+
+    const selectedGameIndex = game.history.indexOf(selectedGame || game);
+    const lastGameIndex = game.history.length - 1;
+
+    return (
+      <Menu size={'massive'} items={[
+        {key: 'current', icon: 'fast backward', onClick: this.goToCurrentMove, disabled: selectedGameIndex === lastGameIndex},
+        {key: 'previous', icon: 'backward', onClick: this.goToNextMove, disabled: selectedGameIndex < 0 || selectedGameIndex === lastGameIndex},
+        {key: 'moveCount', content: selectedGameIndex >= 0 ? `${(selectedGame || game).moveCount}/${game.moveCount}` : selectedGame.moveCount, disabled: game.finished},
+        {key: 'next', icon: 'forward', onClick: this.goToPreviousMove, disabled: selectedGameIndex < 0 || selectedGameIndex === 0},
+        {key: 'first', icon: 'fast forward', onClick: this.goToFirstMove, disabled: selectedGameIndex === 0},
+      ]} />
+    );
+  }
+}
+
+PlayNavigation.propTypes = {
+  game: PropTypes.instanceOf(Game).isRequired,
+  selectedGame: PropTypes.instanceOf(Game),
+  selectGame: PropTypes.func.isRequired,
 };
 
 export default Play;

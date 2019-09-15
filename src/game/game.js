@@ -100,6 +100,7 @@ class Game {
     this.history = (this.previous ? this.previous.history : [])
       .filter(game => !game.canUndo)
       .concat([this]);
+    this.previousInHistory = this.history[this.history.length - 2];
     this.fullHistory = (this.previous ? this.previous.fullHistory : []).concat(this);
     this.isNextMove = isNextMove;
     this.moveCount = this.previous ? (isNextMove ? this.previous.moveCount + 1 : this.previous.moveCount) : 1;

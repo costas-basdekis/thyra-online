@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Icon, Label, Card} from "semantic-ui-react";
+import moment from 'moment';
 
 import Game from "../game/game";
 import Board from "./Board";
@@ -74,6 +75,8 @@ class GameCard extends Component {
               {!game.finished ? <Label icon={{name: 'circle', color: 'green'}} content={'Live'} /> : null}
               {" "}
               <Label content={`Move ${game.move}`} icon={'play'} />
+              {" "}
+              <Label content={moment(game.endDatetime || game.startDatetime).from()} icon={'calendar'} />
             </Card.Meta>
           ) : null}
         </Card.Content>

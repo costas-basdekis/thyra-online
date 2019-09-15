@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Icon, Label, Card} from "semantic-ui-react";
+import {Icon, Label, Card, Grid, Pagination} from "semantic-ui-react";
 import moment from 'moment';
 
 import Game from "../game/game";
@@ -101,27 +101,59 @@ GameCard.defaultProps = {
 };
 
 class GameList extends Component {
+  state = {
+    activePage: 1,
+  };
+
+  onPageChange = (e, {activePage}) => {
+    this.setState({activePage});
+  };
+
   render() {
-    const {user, usersById, games, terse, live, selectLiveGame, currentGameId} = this.props;
+    const {user, usersById, games, terse, live, selectLiveGame, currentGameId, pageSize} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
+    let {activePage} = this.state;
+
+    const totalPages = Math.ceil(games.length / pageSize);
+    if (activePage > totalPages) {
+      activePage = totalPages;
+    }
+    const visibleGames = games
+      .slice((totalPages - activePage) * pageSize, (totalPages - activePage) * pageSize + pageSize)
+      .reverse();
 
     return (
-      <Card.Group style={{maxHeight: '300px', overflowY: 'auto', flexWrap: !terse ? undefined : 'unset'}}>
-        {games.map(game => (
-          <GameCard
-            key={game.id}
-            user={user}
-            usersById={usersById}
-            game={game}
-            selectLiveGame={selectLiveGame}
-            terse={terse}
-            live={live}
-            currentGameId={currentGameId}
-          />
-        ))}
-      </Card.Group>
+      <Fragment>
+        <Card.Group style={{maxHeight: '300px', overflowY: 'auto', flexWrap: !terse ? undefined : 'unset'}}>
+          {visibleGames.map(game => (
+            <GameCard
+              key={game.id}
+              user={user}
+              usersById={usersById}
+              game={game}
+              selectLiveGame={selectLiveGame}
+              terse={terse}
+              live={live}
+              currentGameId={currentGameId}
+            />
+          ))}
+        </Card.Group>
+        {totalPages > 1 ? (
+          <Grid centered>
+            <Grid.Row>
+              <Pagination
+                totalPages={totalPages}
+                activePage={activePage}
+                onPageChange={this.onPageChange}
+                pointing
+                secondary
+              />
+            </Grid.Row>
+          </Grid>
+        ) : null}
+      </Fragment>
     );
   }
 }
@@ -134,11 +166,13 @@ GameList.propTypes = {
   terse: PropTypes.bool.isRequired,
   live: PropTypes.bool.isRequired,
   currentGameId: PropTypes.string,
+  pageSize: PropTypes.number.isRequired,
 };
 
 GameList.defaultProps = {
   terse: false,
   live: false,
+  pageSize: 10,
 };
 
 export default GameList;

@@ -7,12 +7,13 @@ import * as constants from './constants';
 import Cell from "./Cell";
 import Piece from "./Piece";
 import '../../../styles/svg-board.css';
+import Arrow from "./Arrow";
 
 class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns, animated,
+      allowControl, settings, rowsAndColumns, animated, game,
     } = this.props;
     const {theme} = settings;
 
@@ -58,6 +59,9 @@ class SvgBoardBackground extends PureComponent {
         {animated ? (
           <SvgBoardPieces rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
         ) : null}
+        {animated ? (
+          <SvgBoardArrows game={game} />
+        ) : null}
       </svg>
     );
   }
@@ -79,6 +83,7 @@ SvgBoardBackground.propTypes = {
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
   animated: PropTypes.bool.isRequired,
+  game: PropTypes.instanceOf(Game),
 };
 
 SvgBoardBackground.defaultProps = {
@@ -99,6 +104,7 @@ class SvgBoardBackgroundDefinitions extends PureComponent {
           <defs>
             <Cell.Definitions />
             <Piece.Definitions />
+            <Arrow.Definition />
           </defs>
         </svg>
       </Fragment>
@@ -106,6 +112,72 @@ class SvgBoardBackgroundDefinitions extends PureComponent {
   }
 }
 SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
+
+class SvgBoardArrows extends PureComponent {
+  getPlayerMoves() {
+    const {player, relevantHistory} = this.getRelevantHistory();
+    const gameWithPieceMove = relevantHistory
+      .find(game => Game.MOVE_TYPES_MOVE_WORKER.includes(game.thisMoveType));
+    const gameWithBuildMove = relevantHistory
+      .find(game => game.thisMoveType === Game.MOVE_TYPE_BUILD_AROUND_WORKER);
+
+    return {
+      player,
+      move: gameWithPieceMove ? {
+        from: gameWithPieceMove.previous.lastMove,
+        to: gameWithPieceMove.lastMove,
+      } : null,
+      build: gameWithBuildMove ? {
+        from: gameWithBuildMove.previous.lastMove,
+        to: gameWithBuildMove.lastMove,
+      }: null,
+    };
+  }
+
+  getRelevantHistory() {
+    const {game} = this.props;
+
+    const relevantHistory = [game];
+    const player = game.thisPlayer;
+    let iteratingGame = game;
+    while (iteratingGame.previous) {
+      iteratingGame = iteratingGame.previous;
+      if (iteratingGame.thisPlayer !== player) {
+        break;
+      }
+      relevantHistory.push(iteratingGame);
+    }
+
+    return {player, relevantHistory};
+  }
+
+  render() {
+    const {game} = this.props;
+    if (!game) {
+      return null;
+    }
+
+    const {player, move, build} = this.getPlayerMoves();
+    if (!move && !build) {
+      return null;
+    }
+    const colour = player === Game.PLAYER_A ? 'white' : 'black';
+
+    let moveArrow = null, buildArrow = null;
+    if (move) {
+      moveArrow = <Arrow key={'move'} from={move.from} to={move.to} colour={colour} />;
+    }
+    if (build) {
+      buildArrow = <Arrow key={'build'} from={build.from} to={build.to} colour={colour} />;
+    }
+
+    return [moveArrow, buildArrow];
+  }
+}
+
+SvgBoardArrows.propTypes = {
+  game: PropTypes.instanceOf(Game),
+};
 
 class SvgBoardPieces extends PureComponent {
   render() {

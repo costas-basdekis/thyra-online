@@ -25,6 +25,9 @@ class Game {
   static MOVE_TYPE_MOVE_SECOND_WORKER = 'move-second-worker';
   static MOVE_TYPE_BUILD_AROUND_WORKER = 'build-around-worker';
 
+  static MOVE_TYPES_PLACE_WORKER = [this.MOVE_TYPE_PLACE_FIRST_WORKER, this.MOVE_TYPE_PLACE_SECOND_WORKER];
+  static MOVE_TYPES_MOVE_WORKER = [this.MOVE_TYPE_MOVE_FIRST_WORKER, this.MOVE_TYPE_MOVE_SECOND_WORKER];
+
   static ROWS = Array.from({length: 5}, (value, index) => index);
   static COLUMNS = Array.from({length: 5}, (value, index) => index);
   static MOVE_NOTATION = this.ROWS.map(y => this.COLUMNS.map(x =>
@@ -114,7 +117,9 @@ class Game {
     }));
 
     const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer} = status;
+    this.thisPlayer = previous ? previous.nextPlayer : Game.PLAYER_A;
     this.nextPlayer = nextPlayer;
+    this.thisMoveType = previous ? previous.moveType : null;
     this.moveType = moveType;
     this.availableMovesMatrix = availableMovesMatrix;
     this.canUndo = canUndo;

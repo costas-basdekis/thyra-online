@@ -55,6 +55,7 @@ class Board extends PureComponent {
         makeMove={makeMove ? this.makeMove : null}
         undo={makeMove ? this.undo : null}
         rowsAndColumns={game.rowsAndColumns}
+        game={game}
         animated={animated}
       />
     );

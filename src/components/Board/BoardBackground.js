@@ -35,6 +35,7 @@ BoardBackground.propTypes = {
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
   animated: PropTypes.bool.isRequired,
+  game: PropTypes.instanceOf(Game),
 };
 
 BoardBackground.defaultProps = {

@@ -116,6 +116,7 @@ class Cell extends PureComponent {
             (this.state.previousLevel <= i && i <= this.state.currentLevel)
             || (this.state.currentLevel <= i && i <= this.state.previousLevel)
           ))
+          .filter(levelAnimate => levelAnimate.current)
           .map(levelAnimate => levelAnimate.current.beginElement());
       }, 0);
     }

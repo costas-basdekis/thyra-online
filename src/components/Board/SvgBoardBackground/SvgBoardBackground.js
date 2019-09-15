@@ -239,7 +239,11 @@ class SvgBoardPiece extends PureComponent {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.position !== prevState.position) {
-      setTimeout(() => this.animateTransform.current.beginElement(), 0);
+      setTimeout(() => {
+        if (this.animateTransform.current) {
+          this.animateTransform.current.beginElement();
+        }
+      }, 0);
     }
   }
 

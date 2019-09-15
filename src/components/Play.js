@@ -18,6 +18,7 @@ import {
 } from "semantic-ui-react";
 import classNames from 'classnames';
 import {BoardTransformation} from "./Board/Board";
+import keydown, {Keys} from "react-keydown";
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -396,36 +397,101 @@ PlayHistory.defaultProps = {
 };
 
 class PlayNavigation extends Component {
+  static keys = [
+    'left', 'right', 'shift+left', 'shift+right', 'home', 'end',
+  ];
+
+  componentWillReceiveProps({keydown}) {
+    if (keydown.event) {
+      const {which, shiftKey} = keydown.event;
+      if (which === Keys.left && shiftKey) {
+        this.goToCurrentMove();
+      } else if (which === Keys.home) {
+        this.goToCurrentMove();
+      } else if (which === Keys.left && !shiftKey) {
+        this.goToNextMove();
+      } else if (which === Keys.right && !shiftKey) {
+        this.goToPreviousMove();
+      } else if (which === Keys.right && shiftKey) {
+        this.goToFirstMove();
+      } else if (which === Keys.home) {
+        this.goToFirstMove();
+      }
+    }
+  }
+
+  get gameIndexes() {
+    const {game, selectedGame} = this.props;
+    const selectedGameIndex = game.history.indexOf(selectedGame || game);
+    const lastGameIndex = game.history.length - 1;
+
+    return {selectedGameIndex, lastGameIndex};
+  }
+
+  canGoToCurrentMove() {
+    const {selectedGameIndex, lastGameIndex} = this.gameIndexes;
+
+    return selectedGameIndex !== lastGameIndex;
+  }
+
   goToCurrentMove = () => {
+    if (!this.canGoToCurrentMove()) {
+      return;
+    }
     this.props.selectGame(this.props.game);
   };
 
+  canGoToNextMove() {
+    const {selectedGameIndex, lastGameIndex} = this.gameIndexes;
+
+    return selectedGameIndex >= 0 && selectedGameIndex !== lastGameIndex;
+  }
+
   goToNextMove = () => {
+    if (!this.canGoToNextMove()) {
+      return;
+    }
     const selectedGameIndex = this.props.game.history.indexOf(this.props.selectedGame || this.props.game);
     this.props.selectGame(this.props.game.history[selectedGameIndex + 1]);
   };
 
+  canGoToPreviousMove() {
+    const {selectedGameIndex} = this.gameIndexes;
+
+    return selectedGameIndex >= 0 && selectedGameIndex !== 0;
+  }
+
   goToPreviousMove = () => {
+    if (!this.canGoToPreviousMove()) {
+      return;
+    }
     this.props.selectGame((this.props.selectedGame || this.props.game).previousInHistory);
   };
 
+  canGoToFirstMove() {
+    const {selectedGameIndex} = this.gameIndexes;
+
+    return selectedGameIndex !== 0;
+  }
+
   goToFirstMove = () => {
+    if (!this.canGoToFirstMove()) {
+      return;
+    }
     this.props.selectGame(this.props.game.history[0]);
   };
 
   render() {
     const {game, selectedGame} = this.props;
-
-    const selectedGameIndex = game.history.indexOf(selectedGame || game);
-    const lastGameIndex = game.history.length - 1;
+    const {selectedGameIndex} = this.gameIndexes;
 
     return (
       <Menu size={'massive'} items={[
-        {key: 'current', icon: 'fast backward', onClick: this.goToCurrentMove, disabled: selectedGameIndex === lastGameIndex},
-        {key: 'previous', icon: 'backward', onClick: this.goToNextMove, disabled: selectedGameIndex < 0 || selectedGameIndex === lastGameIndex},
+        {key: 'current', icon: 'fast backward', onClick: this.goToCurrentMove, disabled: !this.canGoToCurrentMove()},
+        {key: 'previous', icon: 'backward', onClick: this.goToNextMove, disabled: !this.canGoToNextMove()},
         {key: 'moveCount', content: selectedGameIndex >= 0 ? `${(selectedGame || game).moveCount}/${game.moveCount}` : selectedGame.moveCount, disabled: game.finished},
-        {key: 'next', icon: 'forward', onClick: this.goToPreviousMove, disabled: selectedGameIndex < 0 || selectedGameIndex === 0},
-        {key: 'first', icon: 'fast forward', onClick: this.goToFirstMove, disabled: selectedGameIndex === 0},
+        {key: 'next', icon: 'forward', onClick: this.goToPreviousMove, disabled: !this.canGoToPreviousMove()},
+        {key: 'first', icon: 'fast forward', onClick: this.goToFirstMove, disabled: !this.canGoToFirstMove()},
       ]} />
     );
   }
@@ -436,5 +502,7 @@ PlayNavigation.propTypes = {
   selectedGame: PropTypes.instanceOf(Game),
   selectGame: PropTypes.func.isRequired,
 };
+
+PlayNavigation = keydown(PlayNavigation.keys)(PlayNavigation);
 
 export default Play;

@@ -5,6 +5,7 @@ import Game from "../game/game";
 import Board from "./Board";
 import {Button, Checkbox, Grid, Header, Icon, Label, Modal, Pagination, Segment, Statistic} from "semantic-ui-react";
 import classNames from 'classnames';
+import {BoardTransformation} from "./Board/Board";
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -19,6 +20,7 @@ class Play extends Component {
   state = {
     selectedGame: null,
     game: this.props.game,
+    transformation: null,
   };
 
   autoSubmitModal = React.createRef();
@@ -138,12 +140,16 @@ class Play extends Component {
     );
   }
 
+  onTransformationChange = ({transformation}) => {
+    this.setState({transformation});
+  };
+
   render() {
     const {
       user, defaultSettings, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names,
       allowControl, matchGame,
     } = this.props;
-    const {selectedGame, game} = this.state;
+    const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
     const canSubmit = this.canSubmit();
@@ -222,6 +228,7 @@ class Play extends Component {
         <Segment style={{textAlign: "center"}}>
           <Board
             game={displayGame}
+            transformation={transformation}
             makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
             minChainCount={this.props.submit ? this.props.game.chainCount : (
               this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
@@ -230,6 +237,11 @@ class Play extends Component {
             settings={user ? user.settings : defaultSettings}
             animated
           />
+          <Grid centered>
+            <Grid.Row>
+              <BoardTransformation onChange={this.onTransformationChange} />
+            </Grid.Row>
+          </Grid>
         </Segment>
         <PlayHistory
           game={game}

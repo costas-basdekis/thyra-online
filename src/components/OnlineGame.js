@@ -41,7 +41,7 @@ class OnlineGamePlayer extends Component {
             <Fragment>
               {" "}({resultingPlayerScore ? (
                 <Fragment>
-                  {resultingPlayerScore - initialPlayer.score}
+                  {isWinner ? `+${initialPlayer.winPoints}` : initialPlayer.losePoints}
                   {" "}<Icon name={'long arrow alternate right'} />{" "}
                   {resultingPlayerScore}
                 </Fragment>

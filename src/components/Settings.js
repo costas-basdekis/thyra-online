@@ -42,6 +42,14 @@ class SettingsContent extends Component {
     this.props.updateSettings({theme: {rotateOpponent: checked}});
   };
 
+  updateAnimations = (e, {checked}) => {
+    this.props.updateSettings({theme: {animations: checked}});
+  };
+
+  updateArrows = (e, {checked}) => {
+    this.props.updateSettings({theme: {arrows: checked}});
+  };
+
   updateThemeNumbers = (e, {value}) => {
     this.props.updateSettings({theme: {numbers: value}});
   };
@@ -56,7 +64,7 @@ class SettingsContent extends Component {
 
   render() {
     const {settings: {autoSubmitMoves, enableNotifications, theme}} = this.props;
-    const {pieces = 'king', scheme, rotateOpponent, numbers} = theme;
+    const {pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
 
     return (
       <Tab menu={{pointing: true, attached: false}} panes={[
@@ -101,6 +109,32 @@ class SettingsContent extends Component {
                 </Grid.Column>
                 <Grid.Column floated={'right'} textAlign={'right'}>
                   <ThemeDemoBoard medium settings={{theme: {...theme, rotateOpponent: true}}}/>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={4}>
+                  <Checkbox
+                    label={'Animation'}
+                    name={'theme.animations'}
+                    checked={animations}
+                    onChange={this.updateAnimations}
+                  />
+                </Grid.Column>
+                <Grid.Column floated={'right'} textAlign={'right'}>
+                  <ThemeDemoBoard medium settings={{theme: {...theme, animations: true}}}/>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={4}>
+                  <Checkbox
+                    label={'Arrows'}
+                    name={'theme.arrows'}
+                    checked={arrows}
+                    onChange={this.updateArrows}
+                  />
+                </Grid.Column>
+                <Grid.Column floated={'right'} textAlign={'right'}>
+                  <ThemeDemoBoard medium settings={{theme: {...theme, arrows: true}}} arrows={this.arrows}/>
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>

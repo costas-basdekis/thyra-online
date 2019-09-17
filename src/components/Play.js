@@ -167,6 +167,7 @@ class Play extends Component {
     const isMyGame = allowControl.length > 0;
     const canSubmit = this.canSubmit();
     const tooShortToResign = matchGame ? matchGame.tooShortToResign : false;
+    const settings = user ? user.settings : defaultSettings;
     return (
       <Fragment>
         <Segment>
@@ -252,8 +253,9 @@ class Play extends Component {
                   this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
                 )}
                 allowControl={displayGame === game ? allowControl : undefined}
-                settings={user ? user.settings : defaultSettings}
-                animated
+                settings={settings}
+                animated={settings.theme.animations}
+                showArrows={settings.theme.arrows}
               />
             </Grid.Row>
             <Grid.Row>

@@ -13,7 +13,7 @@ class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns, transformation, animated, game,
+      allowControl, settings, rowsAndColumns, transformation, animated, showArrows, game, arrows,
     } = this.props;
     const {theme} = settings;
 
@@ -59,8 +59,14 @@ class SvgBoardBackground extends PureComponent {
         {animated ? (
           <SvgBoardPieces rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
         ) : null}
-        {animated ? (
-          <SvgBoardArrows game={game} transformation={transformation} />
+        {showArrows ? (
+          arrows ? (
+            arrows.map((arrow, index) => (
+              <Arrow key={index} {...arrow} />
+            ))
+          ) : (
+            <SvgBoardArrows game={game} transformation={transformation} />
+          )
         ) : null}
       </svg>
     );
@@ -84,7 +90,9 @@ SvgBoardBackground.propTypes = {
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
   animated: PropTypes.bool.isRequired,
+  showArrows: PropTypes.bool.isRequired,
   game: PropTypes.instanceOf(Game),
+  arrows: PropTypes.array,
 };
 
 SvgBoardBackground.defaultProps = {
@@ -95,6 +103,7 @@ SvgBoardBackground.defaultProps = {
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
   animated: false,
+  showArrows: false,
 };
 
 class SvgBoardBackgroundDefinitions extends PureComponent {

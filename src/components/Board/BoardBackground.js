@@ -36,7 +36,9 @@ BoardBackground.propTypes = {
   allowControl: PropTypes.array.isRequired,
   settings: PropTypes.object.isRequired,
   animated: PropTypes.bool.isRequired,
+  showArrows: PropTypes.bool.isRequired,
   game: PropTypes.instanceOf(Game),
+  arrows: PropTypes.array,
 };
 
 BoardBackground.defaultProps = {
@@ -47,6 +49,7 @@ BoardBackground.defaultProps = {
   selected: false,
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
   animated: false,
+  showArrows: false,
 };
 
 export default BoardBackground;

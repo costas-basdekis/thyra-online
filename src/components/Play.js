@@ -325,7 +325,7 @@ class PlayPlayer extends Component {
     return (
       <Menu
         stackable
-        className={classNames({attention: isPlayerControlled && isPlayersTurn && !canSubmit})}
+        className={classNames({attention: !game.finished && isPlayerControlled && isPlayersTurn && !canSubmit})}
         size={'massive'}
         inverted={game.finished || player === Game.PLAYER_B}
         color={game.finished ? (playerWon ? 'green' : 'red') : undefined}

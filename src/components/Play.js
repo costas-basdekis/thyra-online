@@ -362,7 +362,7 @@ class PlayPlayer extends Component {
                   )
               )
           )},
-          submit && allowControl.includes(player) ? {
+          !game.finished && submit && allowControl.includes(player) ? {
             key: 'auto-submit', content: (
               <Checkbox
                 label={'Auto submit moves'}

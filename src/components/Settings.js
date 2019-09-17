@@ -99,110 +99,122 @@ class SettingsContent extends Component {
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-                <Grid.Column width={4}>
-                  <Checkbox
-                    label={'Rotate Opponent'}
-                    name={'theme.rotateOpponent'}
-                    checked={rotateOpponent}
-                    onChange={this.updateThemeRotateOpponent}
-                  />
-                </Grid.Column>
-                <Grid.Column floated={'right'} textAlign={'right'}>
-                  <ThemeDemoBoard medium settings={{theme: {...theme, rotateOpponent: true}}}/>
-                </Grid.Column>
+                <Tab menu={{pointing: true, attached: false}} panes={[
+                  {menuItem: 'Pieces', render: () => (
+                    <Tab.Pane>
+                    <Grid stackable columns={'equal'} verticalAlign={'middle'}>
+                      <Grid.Row>
+                        <Grid.Column width={4}>
+                          <Checkbox
+                            label={'Rotate Opponent'}
+                            name={'theme.rotateOpponent'}
+                            checked={rotateOpponent}
+                            onChange={this.updateThemeRotateOpponent}
+                          />
+                        </Grid.Column>
+                        <Grid.Column floated={'right'} textAlign={'right'}>
+                          <ThemeDemoBoard medium settings={{theme: {...theme, rotateOpponent: true}}}/>
+                        </Grid.Column>
+                      </Grid.Row>
+                      <Grid.Row>
+                        <Grid.Column width={4}>
+                          <Checkbox
+                            label={'Animation'}
+                            name={'theme.animations'}
+                            checked={animations}
+                            onChange={this.updateAnimations}
+                          />
+                        </Grid.Column>
+                        <Grid.Column floated={'right'} textAlign={'right'}>
+                          <ThemeDemoBoard medium settings={{theme: {...theme, animations: true}}}/>
+                        </Grid.Column>
+                      </Grid.Row>
+                      <Grid.Row>
+                        <Grid.Column width={4}>
+                          <Checkbox
+                            label={'Arrows'}
+                            name={'theme.arrows'}
+                            checked={arrows}
+                            onChange={this.updateArrows}
+                          />
+                        </Grid.Column>
+                        <Grid.Column floated={'right'} textAlign={'right'}>
+                          <ThemeDemoBoard medium settings={{theme: {...theme, arrows: true}}} arrows={this.arrows}/>
+                        </Grid.Column>
+                      </Grid.Row>
+                      <Grid.Row>
+                        <Grid.Column textAlign={'center'}>
+                          <Form.Field><Header as={'h2'}>Pieces:</Header></Form.Field>
+                        </Grid.Column>
+                      </Grid.Row>
+                      {this.themePiecesOptions.map(option => (
+                        <Grid.Row key={`theme-pieces-${option.value}`}>
+                          <Grid.Column width={4}>
+                            <Checkbox
+                              radio
+                              label={option.label}
+                              name={'theme.pieces'}
+                              value={option.value}
+                              checked={pieces === option.value}
+                              onChange={this.updateThemePieces}
+                            />
+                          </Grid.Column>
+                          <Grid.Column floated={'right'} textAlign={'right'}>
+                            <ThemeDemoBoard medium settings={{theme: {...theme, pieces: option.value}}}/>
+                          </Grid.Column>
+                        </Grid.Row>
+                      ))}
+                    </Grid>
+                  </Tab.Pane>
+                  )},
+                  {menuItem: 'Board', render: () => (
+                    <Tab.Pane>
+                      <Grid stackable columns={'equal'} verticalAlign={'middle'}>
+                        {this.themeSchemeOptions.map(option => (
+                          <Grid.Row key={`theme-scheme-${option.value}`}>
+                            <Grid.Column width={4}>
+                              <Checkbox
+                                radio
+                                label={option.label}
+                                name={'theme.scheme'}
+                                value={option.value}
+                                checked={scheme === option.value}
+                                onChange={this.updateThemeScheme}
+                              />
+                            </Grid.Column>
+                            <Grid.Column floated={'right'} textAlign={'right'}>
+                              <ThemeDemoBoard medium settings={{theme: {...theme, scheme: option.value}}}/>
+                            </Grid.Column>
+                          </Grid.Row>
+                        ))}
+                      </Grid>
+                    </Tab.Pane>
+                  )},
+                  {menuItem: 'Level Indicators', render: () => (
+                    <Tab.Pane>
+                      <Grid stackable columns={'equal'} verticalAlign={'middle'}>
+                        {this.themeNumbersOptions.map(option => (
+                          <Grid.Row key={`theme-numbers-${option.value}`}>
+                            <Grid.Column width={4}>
+                              <Checkbox
+                                radio
+                                label={option.label}
+                                name={'theme.numbers'}
+                                value={option.value}
+                                checked={numbers === option.value}
+                                onChange={this.updateThemeNumbers}
+                              />
+                            </Grid.Column>
+                            <Grid.Column floated={'right'} textAlign={'right'}>
+                              <ThemeDemoBoard medium settings={{theme: {...theme, numbers: option.value}}}/>
+                            </Grid.Column>
+                          </Grid.Row>
+                        ))}
+                      </Grid>
+                    </Tab.Pane>
+                  )}
+                ]} />
               </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={4}>
-                  <Checkbox
-                    label={'Animation'}
-                    name={'theme.animations'}
-                    checked={animations}
-                    onChange={this.updateAnimations}
-                  />
-                </Grid.Column>
-                <Grid.Column floated={'right'} textAlign={'right'}>
-                  <ThemeDemoBoard medium settings={{theme: {...theme, animations: true}}}/>
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={4}>
-                  <Checkbox
-                    label={'Arrows'}
-                    name={'theme.arrows'}
-                    checked={arrows}
-                    onChange={this.updateArrows}
-                  />
-                </Grid.Column>
-                <Grid.Column floated={'right'} textAlign={'right'}>
-                  <ThemeDemoBoard medium settings={{theme: {...theme, arrows: true}}} arrows={this.arrows}/>
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column textAlign={'center'}>
-                  <Form.Field><Header as={'h2'}>Numbers:</Header></Form.Field>
-                </Grid.Column>
-              </Grid.Row>
-              {this.themeNumbersOptions.map(option => (
-                <Grid.Row key={`theme-numbers-${option.value}`}>
-                  <Grid.Column width={4}>
-                    <Checkbox
-                      radio
-                      label={option.label}
-                      name={'theme.numbers'}
-                      value={option.value}
-                      checked={numbers === option.value}
-                      onChange={this.updateThemeNumbers}
-                    />
-                  </Grid.Column>
-                  <Grid.Column floated={'right'} textAlign={'right'}>
-                    <ThemeDemoBoard medium settings={{theme: {...theme, numbers: option.value}}}/>
-                  </Grid.Column>
-                </Grid.Row>
-              ))}
-              <Grid.Row>
-                <Grid.Column textAlign={'center'}>
-                  <Form.Field><Header as={'h2'}>Pieces:</Header></Form.Field>
-                </Grid.Column>
-              </Grid.Row>
-              {this.themePiecesOptions.map(option => (
-                <Grid.Row key={`theme-pieces-${option.value}`}>
-                  <Grid.Column width={4}>
-                    <Checkbox
-                      radio
-                      label={option.label}
-                      name={'theme.pieces'}
-                      value={option.value}
-                      checked={pieces === option.value}
-                      onChange={this.updateThemePieces}
-                    />
-                  </Grid.Column>
-                  <Grid.Column floated={'right'} textAlign={'right'}>
-                    <ThemeDemoBoard medium settings={{theme: {...theme, pieces: option.value}}}/>
-                  </Grid.Column>
-                </Grid.Row>
-              ))}
-              <Grid.Row>
-                <Grid.Column textAlign={'center'}>
-                  <Form.Field><Header as={'h2'}>Scheme:</Header></Form.Field>
-                </Grid.Column>
-              </Grid.Row>
-              {this.themeSchemeOptions.map(option => (
-                <Grid.Row key={`theme-scheme-${option.value}`}>
-                  <Grid.Column width={4}>
-                    <Checkbox
-                      radio
-                      label={option.label}
-                      name={'theme.scheme'}
-                      value={option.value}
-                      checked={scheme === option.value}
-                      onChange={this.updateThemeScheme}
-                    />
-                  </Grid.Column>
-                  <Grid.Column floated={'right'} textAlign={'right'}>
-                    <ThemeDemoBoard medium settings={{theme: {...theme, scheme: option.value}}}/>
-                  </Grid.Column>
-                </Grid.Row>
-              ))}
             </Grid>
           </Segment>
         )},

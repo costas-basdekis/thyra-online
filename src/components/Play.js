@@ -8,7 +8,6 @@ import {
   Checkbox,
   Grid,
   Header,
-  Icon,
   Label,
   Menu,
   Modal,
@@ -19,6 +18,7 @@ import {
 import classNames from 'classnames';
 import {BoardTransformation} from "./Board/Board";
 import keydown, {Keys} from "react-keydown";
+import PlayerColourBoard from "./Board/PlayerColourBoard";
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -145,7 +145,7 @@ class Play extends Component {
       !!submit
       && !selectedGame
       && game !== props.game
-      && this.getMovesToSubmit().length
+      && !!this.getMovesToSubmit().length
       && (
         game.finished
         || game.nextPlayer !== props.game.nextPlayer
@@ -159,8 +159,7 @@ class Play extends Component {
 
   render() {
     const {
-      user, defaultSettings, otherUser, changeSettings, challengeUser, stopChallengeUser, challengedUser, names,
-      allowControl, matchGame,
+      user, defaultSettings, names, allowControl, matchGame,
     } = this.props;
     const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
@@ -168,81 +167,26 @@ class Play extends Component {
     const canSubmit = this.canSubmit();
     const tooShortToResign = matchGame ? matchGame.tooShortToResign : false;
     const settings = user ? user.settings : defaultSettings;
+  	const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
+
     return (
       <Fragment>
-        <Segment>
-          <Statistic.Group widths={"three"} size={"tiny"}>
-            {game.finished ? (
-              <Statistic color={"green"} value={names[game.winner]} label={"Won!"} />
-            ) : (
-              <Statistic value={names[game.nextPlayer]} label={this.constructor.MOVE_TYPE_NAMES[game.moveType]} />
-            )}
-            <Statistic value={game.moveCount} label={"Move"} />
-            {this.props.game.finished ? (
-              this.props.submit ? (
-                (isMyGame && challengeUser) ? (
-                  challengedUser ? (
-                    <Statistic value={<Button color={'green'} onClick={stopChallengeUser}><Icon loading name={'circle notch'} />Waiting for {challengedUser.name}...</Button>} />
-                  ) : (
-                    otherUser && otherUser.readyToPlay === user.id ? (
-                      <Statistic value={<Button className={'attention'} color={'yellow'} icon={'play'} onClick={challengeUser} content={'Accept challenge'} />} />
-                    ) : (
-                      <Statistic value={<Button color={'yellow'} icon={'play'} onClick={challengeUser} content={'Challenge user'} />} />
-                    )
-                  )
-                ) : null
-              ) : (
-                <Statistic value={<Button negative onClick={this.newGame} disabled={!game.previous}>New Game</Button>} />
-              )
-            ) : (
-              this.props.submit
-                ? <Statistic value={(
-                  <Fragment>
-                    {!user || !user.settings.autoSubmitMoves ? <Button positive onClick={this.submit} className={classNames({attention: canSubmit})} disabled={!canSubmit}>Submit</Button> : null}
-                    {user && changeSettings ? (
-                      <Segment>
-                        <Checkbox
-                          label={'Auto submit moves'}
-                          toggle
-                          checked={user.settings.autoSubmitMoves}
-                          onChange={this.changeAutoSubmitMoves}
-                        />
-                        <Modal
-                          ref={this.autoSubmitModal}
-                          header={'Auto submit moves'}
-                          content={'Are you sure you want to be auto submitting your moves?'}
-                          actions={[
-                            {key: 'yes', content: 'Auto submit', onClick: this.doAutoSubmitMoves, primary: true},
-                            {key: 'no', content: 'No, manually submit moves', secondary: true},
-                          ]}
-                        />
-                      </Segment>
-                    ) : null}
-                  </Fragment>
-                )}/>
-                : <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
-            )}
-          </Statistic.Group>
-        </Segment>
-        {this.props.submit && isMyGame ? (
-          <Segment>
-            <Statistic.Group widths={"two"} size={"tiny"}>
-              <Statistic value={
-                <Modal
-                  trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>{tooShortToResign ? 'Abort' : 'Resign'}</Button>}
-                  header={tooShortToResign ? 'Abort?' : 'Resign?'}
-                  content={`Are you sure you want to ${tooShortToResign ? 'abort' : 'forfeit'}?${tooShortToResign ? ' This game is too short to resign.' : ''}`}
-                  actions={[{key: 'resign', content: tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', inverted: true, secondary: true }]}
-                />
-              } />
-              <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
-            </Statistic.Group>
-          </Segment>
-        ) : null}
         <Segment style={{textAlign: "center"}}>
           <Grid centered>
             <Grid.Row>
               <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
+            </Grid.Row>
+            <Grid.Row>
+              <PlayPlayer
+                player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
+                canSubmit={false}
+                submit={this.props.submit ? this.submit : null}
+                changeAutoSubmitMoves={this.changeAutoSubmitMoves}
+                game={canSubmit ? game.previous : game}
+                settings={settings}
+                names={names}
+                allowControl={allowControl}
+              />
             </Grid.Row>
             <Grid.Row>
               <Board
@@ -259,10 +203,45 @@ class Play extends Component {
               />
             </Grid.Row>
             <Grid.Row>
+              <PlayPlayer
+                player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
+                canSubmit={canSubmit}
+                submit={this.props.submit ? this.submit : null}
+                changeAutoSubmitMoves={this.changeAutoSubmitMoves}
+                game={canSubmit ? game.previous : game}
+                settings={settings}
+                names={names}
+                allowControl={allowControl}
+              />
+            </Grid.Row>
+            <Grid.Row>
               <BoardTransformation onChange={this.onTransformationChange} />
             </Grid.Row>
           </Grid>
         </Segment>
+        {this.props.submit && isMyGame ? (
+          <Segment>
+            <Statistic.Group widths={"two"} size={"tiny"}>
+              <Statistic value={
+                <Modal
+                  trigger={<Button negative disabled={!!selectedGame || this.props.game.finished}>{tooShortToResign ? 'Abort' : 'Resign'}</Button>}
+                  header={tooShortToResign ? 'Abort?' : 'Resign?'}
+                  content={`Are you sure you want to ${tooShortToResign ? 'abort' : 'forfeit'}?${tooShortToResign ? ' This game is too short to resign.' : ''}`}
+                  actions={[{key: 'resign', content: tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', inverted: true, secondary: true }]}
+                />
+              } />
+              <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
+            </Statistic.Group>
+          </Segment>
+        ) : null}
+        {!this.props.submit ? (
+          <Segment>
+            <Statistic.Group widths={"two"} size={"small"}>
+              <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
+              <Statistic value={<Button negative onClick={this.newGame} disabled={!!selectedGame || !game.previous}>New Game</Button>} />
+            </Statistic.Group>
+          </Segment>
+        ) : null}
         <PlayHistory
           game={game}
           selectedGame={selectedGame}
@@ -288,14 +267,15 @@ class Play extends Component {
             </Statistic.Group>
           </Segment>
         ) : null}
-        {!this.props.submit ? (
-          <Segment>
-            <Statistic.Group widths={"two"} size={"small"}>
-              <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
-              <Statistic value={<Button negative onClick={this.newGame} disabled={!!selectedGame || !game.previous}>New Game</Button>} />
-            </Statistic.Group>
-          </Segment>
-        ) : null}
+        <Modal
+          ref={this.autoSubmitModal}
+          header={'Auto submit moves'}
+          content={'Are you sure you want to be auto submitting your moves?'}
+          actions={[
+            {key: 'yes', content: 'Auto submit', onClick: this.doAutoSubmitMoves, primary: true},
+            {key: 'no', content: 'No, manually submit moves', secondary: true},
+          ]}
+        />
       </Fragment>
     );
   }
@@ -324,6 +304,89 @@ Play.defaultProps = {
     [Game.PLAYER_B]: "Player B",
   },
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
+};
+
+class PlayPlayer extends Component {
+  static MOVE_TYPE_NAMES = {
+    [Game.MOVE_TYPE_PLACE_FIRST_WORKER]: "Place a worker",
+    [Game.MOVE_TYPE_PLACE_SECOND_WORKER]: "Place a worker",
+    [Game.MOVE_TYPE_SELECT_WORKER_TO_MOVE]: "Select a worker",
+    [Game.MOVE_TYPE_MOVE_FIRST_WORKER]: "Move worker",
+    [Game.MOVE_TYPE_MOVE_SECOND_WORKER]: "Move worker",
+    [Game.MOVE_TYPE_BUILD_AROUND_WORKER]: "Build",
+  };
+
+  render() {
+    const {game, player, allowControl, names, settings, canSubmit, submit, changeAutoSubmitMoves} = this.props;
+    const isPlayerControlled = allowControl.includes(player);
+    const isPlayersTurn = game.nextPlayer === player;
+    const playerWon = game.winner === player;
+
+    return (
+      <Menu
+        stackable
+        className={classNames({attention: isPlayerControlled && isPlayersTurn && !canSubmit})}
+        size={'massive'}
+        inverted={game.finished || player === Game.PLAYER_B}
+        color={game.finished ? (playerWon ? 'green' : 'red') : undefined}
+        items={[
+          {key: 'icon',
+            icon: game.finished ? (playerWon ? 'trophy' : 'thumbs down') : (isPlayersTurn ? 'play' : 'hourglass'),
+            content: (
+              <Fragment>
+                <PlayerColourBoard medium settings={settings} player={player} allowControl={allowControl} />
+                {names[player]}
+              </Fragment>
+            )},
+          {key: 'instructions', content: (
+            game.finished
+              ? (playerWon ? 'Won' : 'Lost')
+              : (
+                canSubmit
+                  ? (
+                    settings.autoSubmitMoves
+                      ? 'Auto-submitting'
+                      : (
+                        <Button
+                          positive
+                          onClick={submit}
+                          className={'attention'}
+                        >
+                          Submit
+                        </Button>
+                      )
+                  ) : (
+                    isPlayersTurn
+                      ? this.constructor.MOVE_TYPE_NAMES[game.moveType]
+                      : 'Waiting for opponent'
+                  )
+              )
+          )},
+          submit && allowControl.includes(player) ? {
+            key: 'auto-submit', content: (
+              <Checkbox
+                label={'Auto submit moves'}
+                toggle
+                checked={settings.autoSubmitMoves}
+                onChange={changeAutoSubmitMoves}
+              />
+            )
+          } : null,
+        ].filter(item => item)}
+      />
+    );
+  }
+}
+
+PlayPlayer.propTypes = {
+  settings: PropTypes.object,
+  game: PropTypes.instanceOf(Game).isRequired,
+  names: PropTypes.object.isRequired,
+  allowControl: PropTypes.array.isRequired,
+  player: PropTypes.oneOf(Game.PLAYERS).isRequired,
+  canSubmit: PropTypes.bool.isRequired,
+  submit: PropTypes.func,
+  changeAutoSubmitMoves: PropTypes.func.isRequired,
 };
 
 class PlayHistory extends Component {

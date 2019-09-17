@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Button, Grid, Header, Icon, Label, Modal, Segment, Statistic} from "semantic-ui-react";
+import {Grid, Header, Icon, Label, Menu, Modal, Segment} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
@@ -167,6 +167,11 @@ class ChosenOnlineGame extends Component {
     this.props.client.changeReadyToPlay(false);
   };
 
+  getEditPositionUrl = () => {
+    const {gameGame} = this;
+    return `${process.env.REACT_APP_PAGE_BASE_PATH}${process.env.REACT_APP_PAGE_BASE_PATH.endsWith('/') ? '' : '/'}hotseat?position=${gameGame.compressedFullNotation}`;
+  };
+
   render() {
     const {
       location, user, client, game, selectLiveGame,
@@ -197,48 +202,34 @@ class ChosenOnlineGame extends Component {
     return (
       <Fragment>
         <Settings/>
-        <Segment>
-          <Statistic.Group widths={"three"} size={"tiny"}>
-            <Statistic
-              value={<Statistic.Value><OnlineGamePlayer game={game} player={playerA} /></Statistic.Value>}
-              label={isUserPlayerA ? <Label><Icon name={"user"} />Me</Label> : null}
-              color={isUserPlayerA ? "green" : undefined}
-            />
-            <Statistic label={"vs"}/>
-            <Statistic
-              value={<Statistic.Value><OnlineGamePlayer game={game} player={playerB} /></Statistic.Value>}
-              label={isUserPlayerB ? <Label><Icon name={"user"} />Me</Label> : null}
-              color={isUserPlayerB ? "green" : undefined}
-            />
-          </Statistic.Group>
-          <Grid columns={'equal'}>
-            <Grid.Column textAlign={'left'}><Button negative onClick={this.close}>Close</Button></Grid.Column>
-            <Grid.Column>
-              <Button
-                positive
-                icon
-                onClick={this.shareGame}
-                style={{width: '100%'}}
-                as={'a'}
-                href={location.pathname}
-                title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
-              >
-                <Icon name={'share'}/> Share Game
-              </Button>
-              <Button
-                positive
-                icon
-                style={{width: '100%'}}
-                as={'a'}
-                href={`${process.env.REACT_APP_PAGE_BASE_PATH}${process.env.REACT_APP_PAGE_BASE_PATH.endsWith('/') ? '' : '/'}hotseat?position=${gameGame.compressedFullNotation}`}
-                title={'Click to open hotseat with this game'}
-                target={'_blank'}
-              >
-                <Icon name={'share'}/> Edit position
-              </Button>
-            </Grid.Column>
-          </Grid>
-        </Segment>
+        <Grid centered>
+          <Grid.Row>
+            <Menu stackable size={'massive'} inverted items={[
+              {key: 'close', content: 'Close', icon: 'x', onClick: this.close, color: 'red', active: true},
+              {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareGame, as: 'a',
+                href: location.pathname, color: 'green', active: true,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'},
+              {key: 'edit', content: 'Edit position', icon: 'edit', as: 'a', href: this.getEditPositionUrl(),
+                color: 'green', active: true, title: 'Click to open hotseat with this game', target: '_blank'},
+            ]} />
+          </Grid.Row>
+          <Grid.Row>
+            <Menu stackable size={'massive'} items={[
+              {key: 'player-a', content: (
+                <Fragment>
+                  {isUserPlayerA ? <Label color={'green'} icon={"user"} content={'Me'} /> : null}
+                  <OnlineGamePlayer game={game} player={playerA} />
+                </Fragment>
+              ), color: isUserPlayerA ? 'green' : undefined},
+              {key: 'player-b', content: (
+                <Fragment>
+                  {isUserPlayerB ? <Label color={'green'} icon={"user"} content={'Me'} /> : null}
+                  <OnlineGamePlayer game={game} player={playerB} />
+                </Fragment>
+              ), color: isUserPlayerB ? 'green' : undefined},
+            ]}/>
+          </Grid.Row>
+        </Grid>
         <Segment>
           <GameList user={user} selectLiveGame={selectLiveGame} games={myLiveGames} usersById={usersById} terse live currentGameId={game ? game.id : null} />
           {otherLiveGames.length ? (

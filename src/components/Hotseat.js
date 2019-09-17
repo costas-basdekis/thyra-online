@@ -2,7 +2,7 @@ import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Play from "./Play";
 import Game from "../game/game";
-import {Button, Icon, Grid, Modal} from "semantic-ui-react";
+import {Grid, Modal, Menu} from "semantic-ui-react";
 import * as utils from "../utils";
 import Settings from "./Settings";
 import {withClient} from "../client/withClient";
@@ -68,6 +68,7 @@ class Hotseat extends Component {
 
     return (
       <Fragment>
+        <Settings/>
         <Modal
           open={error}
           size={'mini'}
@@ -76,26 +77,14 @@ class Hotseat extends Component {
           content={`${error}. Please check that you copied the full URL`}
           actions={[{content: 'OK', positive: true}]}
         />
-        <Grid columns={'equal'}>
-          <Grid.Column>
-            <Grid columns={'equal'}>
-              <Grid.Column><Settings/></Grid.Column>
-              <Grid.Column />
-            </Grid>
-          </Grid.Column>
-          <Grid.Column>
-            <Button
-              positive
-              icon
-              onClick={this.share}
-              style={{width: '100%'}}
-              as={'a'}
-              href={`?position=${game.compressedFullNotation}`}
-              title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
-            >
-              <Icon name={'share'}/> Share position
-            </Button>
-          </Grid.Column>
+        <Grid centered>
+          <Grid.Row>
+            <Menu inverted size={'massive'} items={[
+              {key: 'share', icon: 'share', content: 'Share position', color: 'green', active: true, as: 'a',
+                href: `?position=${game.compressedFullNotation}`,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
+            ]} />
+          </Grid.Row>
         </Grid>
         <Play user={user} defaultSettings={client.settings} game={game} makeMove={this.makeMove} />
       </Fragment>

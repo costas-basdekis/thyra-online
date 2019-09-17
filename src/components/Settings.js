@@ -262,7 +262,7 @@ class Settings extends Component {
           {key: 'cancel', content: 'Cancel'},
           {key: 'save', content: 'Save', positive: true, onClick: this.save},
         ]}
-        content={<SettingsContent settings={settings} updateSettings={this.updateSettings} />}
+        content={{scrolling: true, content: <SettingsContent settings={settings} updateSettings={this.updateSettings} />}}
       />
     );
   }

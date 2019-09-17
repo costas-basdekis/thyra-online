@@ -30,6 +30,13 @@ class SettingsContent extends Component {
     {value: 'very-subtle', label: 'Very subtle'},
   ];
 
+  themeDemoBoard = overrides => {
+    const {settings: {theme}} = this.props;
+    return (
+      <ThemeDemoBoard medium settings={{theme: {...theme, animations: false, ...overrides}}}/>
+    );
+  };
+
   updateAutoSubmitMove = (e, {checked}) => {
     this.props.updateSettings({autoSubmitMoves: checked});
   };
@@ -95,7 +102,7 @@ class SettingsContent extends Component {
             <Grid stackable columns={'equal'} verticalAlign={'middle'}>
               <Grid.Row>
                 <Grid.Column textAlign={'center'}>
-                  <ThemeDemoBoard medium settings={{theme}}/>
+                  {this.themeDemoBoard({animations: theme.animations})}
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -113,7 +120,7 @@ class SettingsContent extends Component {
                           />
                         </Grid.Column>
                         <Grid.Column floated={'right'} textAlign={'right'}>
-                          <ThemeDemoBoard medium settings={{theme: {...theme, rotateOpponent: true}}}/>
+                          {this.themeDemoBoard({rotateOpponent: true})}
                         </Grid.Column>
                       </Grid.Row>
                       <Grid.Row>
@@ -126,7 +133,7 @@ class SettingsContent extends Component {
                           />
                         </Grid.Column>
                         <Grid.Column floated={'right'} textAlign={'right'}>
-                          <ThemeDemoBoard medium settings={{theme: {...theme, animations: true}}}/>
+                          {this.themeDemoBoard({animations: true})}
                         </Grid.Column>
                       </Grid.Row>
                       <Grid.Row>
@@ -139,7 +146,7 @@ class SettingsContent extends Component {
                           />
                         </Grid.Column>
                         <Grid.Column floated={'right'} textAlign={'right'}>
-                          <ThemeDemoBoard medium settings={{theme: {...theme, arrows: true}}} arrows={this.arrows}/>
+                          {this.themeDemoBoard({arrows: true})}
                         </Grid.Column>
                       </Grid.Row>
                       <Grid.Row>
@@ -160,7 +167,7 @@ class SettingsContent extends Component {
                             />
                           </Grid.Column>
                           <Grid.Column floated={'right'} textAlign={'right'}>
-                            <ThemeDemoBoard medium settings={{theme: {...theme, pieces: option.value}}}/>
+                            {this.themeDemoBoard({pieces: option.value})}
                           </Grid.Column>
                         </Grid.Row>
                       ))}
@@ -183,7 +190,7 @@ class SettingsContent extends Component {
                               />
                             </Grid.Column>
                             <Grid.Column floated={'right'} textAlign={'right'}>
-                              <ThemeDemoBoard medium settings={{theme: {...theme, scheme: option.value}}}/>
+                              {this.themeDemoBoard({scheme: option.value})}
                             </Grid.Column>
                           </Grid.Row>
                         ))}
@@ -206,7 +213,7 @@ class SettingsContent extends Component {
                               />
                             </Grid.Column>
                             <Grid.Column floated={'right'} textAlign={'right'}>
-                              <ThemeDemoBoard medium settings={{theme: {...theme, numbers: option.value}}}/>
+                              {this.themeDemoBoard({numbers: option.value})}
                             </Grid.Column>
                           </Grid.Row>
                         ))}

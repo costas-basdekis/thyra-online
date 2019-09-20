@@ -58,6 +58,7 @@ class ArrowDefinition extends PureComponent {
 class Arrow extends PureComponent {
   static Definition = ArrowDefinition;
   static offsetX = constants.cellSize * 0.10;
+  static smallScaling = 0.75;
 
   static rotationMap = {
     '0,1': 0,
@@ -71,8 +72,8 @@ class Arrow extends PureComponent {
   };
 
   render() {
-    const {offsetX} = this.constructor;
-    const {from, to, colour, type} = this.props;
+    const {offsetX, smallScaling} = this.constructor;
+    const {from, to, colour, type, small} = this.props;
     const diff = {x: to.x - from.x, y: to.y - from.y};
     const rotation = this.constructor.rotationMap[`${diff.x},${diff.y}`];
     const offsetYFactor = Math.sqrt(Math.abs(diff.x) + Math.abs(diff.y));
@@ -84,7 +85,12 @@ class Arrow extends PureComponent {
           `translate(${constants.cellSize * from.x},${constants.cellSize * from.y})`,
           `rotate(${rotation},${constants.cellSize / 2},${constants.cellSize / 2})`,
           `translate(${offsetX},${constants.cellSize / 2 * offsetYFactor})`,
-        ].join(',')}
+          ...(small ? [
+            `translate(${constants.cellSize / 2},${constants.cellSize / 2})`,
+            `scale(${smallScaling})`,
+            `translate(${-constants.cellSize / 2},${-constants.cellSize / 2})`,
+          ] : []),
+        ].filter(transform => transform).join(',')}
       />
     );
   }
@@ -95,6 +101,11 @@ Arrow.propTypes = {
   to: PropTypes.object.isRequired,
   colour: PropTypes.oneOf(['white', 'black']).isRequired,
   type: PropTypes.oneOf(['move', 'build']).isRequired,
+  small: PropTypes.bool.isRequired,
+};
+
+Arrow.defaultProps = {
+  small: false,
 };
 
 export default Arrow;

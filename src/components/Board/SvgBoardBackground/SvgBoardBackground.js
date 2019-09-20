@@ -65,7 +65,10 @@ class SvgBoardBackground extends PureComponent {
               <Arrow key={index} {...arrow} />
             ))
           ) : (
-            <SvgBoardArrows game={game} transformation={transformation} />
+            <Fragment>
+              <SvgBoardHistoryArrows game={game} transformation={transformation} />
+              {/*<SvgBoardAvailableMovesArrows game={game} isCellAvailable={isCellAvailable} transformation={transformation} />*/}
+            </Fragment>
           )
         ) : null}
       </svg>
@@ -123,7 +126,7 @@ class SvgBoardBackgroundDefinitions extends PureComponent {
 }
 SvgBoardBackground.Definitions = SvgBoardBackgroundDefinitions;
 
-class SvgBoardArrows extends PureComponent {
+class SvgBoardHistoryArrows extends PureComponent {
   getPlayerMoves() {
     const {transformation} = this.props;
     const {player, relevantHistory} = this.getRelevantHistory();
@@ -200,8 +203,39 @@ class SvgBoardArrows extends PureComponent {
   }
 }
 
-SvgBoardArrows.propTypes = {
+SvgBoardHistoryArrows.propTypes = {
   game: PropTypes.instanceOf(Game),
+  transformation: PropTypes.func,
+};
+
+class SvgBoardAvailableMovesArrows extends PureComponent {
+  render() {
+    const {game, transformation, isCellAvailable} = this.props;
+    if (!game) {
+      return null;
+    }
+    if (!Game.MOVE_TYPES_MOVE_OR_BUILD.includes(game.moveType)) {
+      return null;
+    }
+
+    let from = game.lastMove;
+    let availableCells = _.flatten(game.rowsAndColumns.map(row => row.cells.filter(isCellAvailable)));
+    if (transformation) {
+      from = transformation.reverseCoordinates(game.rowsAndColumns, from);
+      availableCells = availableCells.map(cell => transformation.reverseCoordinates(game.rowsAndColumns, cell));
+    }
+    const colour = game.nextPlayer === Game.PLAYER_A ? 'white' : 'black';
+    const type = game.moveType === Game.MOVE_TYPE_BUILD_AROUND_WORKER ? 'build' : 'move';
+
+    return availableCells.map((cell, index) => (
+      <Arrow key={index} from={from} to={cell} colour={colour} type={type} small />
+    ));
+  }
+}
+
+SvgBoardAvailableMovesArrows.propTypes = {
+  game: PropTypes.instanceOf(Game),
+  isCellAvailable: PropTypes.func.isRequired,
   transformation: PropTypes.func,
 };
 

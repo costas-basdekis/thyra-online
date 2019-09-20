@@ -75,6 +75,7 @@ class Arrow extends PureComponent {
     const {from, to, colour, type} = this.props;
     const diff = {x: to.x - from.x, y: to.y - from.y};
     const rotation = this.constructor.rotationMap[`${diff.x},${diff.y}`];
+    const offsetYFactor = Math.sqrt(Math.abs(diff.x) + Math.abs(diff.y));
 
     return (
       <use
@@ -82,7 +83,7 @@ class Arrow extends PureComponent {
         transform={[
           `translate(${constants.cellSize * from.x},${constants.cellSize * from.y})`,
           `rotate(${rotation},${constants.cellSize / 2},${constants.cellSize / 2})`,
-          `translate(${offsetX},${constants.cellSize / 2})`,
+          `translate(${offsetX},${constants.cellSize / 2 * offsetYFactor})`,
         ].join(',')}
       />
     );

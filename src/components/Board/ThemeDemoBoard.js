@@ -33,8 +33,8 @@ class ThemeDemoBoard extends Component {
     },
   ];
   static arrows = [
-    {from: {x: 5, y: 0}, to: {x: 4, y: 0}, colour: 'white'},
-    {from: {x: 4, y: 0}, to: {x: 5, y: 0}, colour: 'white'},
+    {from: {x: 5, y: 0}, to: {x: 4, y: 0}, colour: 'white', type: 'build'},
+    {from: {x: 4, y: 0}, to: {x: 5, y: 0}, colour: 'white', type: 'move'},
   ];
 
   state = {

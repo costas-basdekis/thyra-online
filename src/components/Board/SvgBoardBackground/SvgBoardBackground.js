@@ -147,10 +147,12 @@ class SvgBoardArrows extends PureComponent {
       if (move) {
         move.from = transformation.reverseCoordinates(gameWithPieceMove.previous.rowsAndColumns, move.from);
         move.to = transformation.reverseCoordinates(gameWithPieceMove.rowsAndColumns, move.to);
+        move.type = 'move';
       }
       if (build) {
         build.from = transformation.reverseCoordinates(gameWithBuildMove.previous.rowsAndColumns, build.from);
         build.to = transformation.reverseCoordinates(gameWithBuildMove.rowsAndColumns, build.to);
+        build.type = 'build';
       }
     }
 
@@ -188,10 +190,10 @@ class SvgBoardArrows extends PureComponent {
 
     let moveArrow = null, buildArrow = null;
     if (move) {
-      moveArrow = <Arrow key={'move'} from={move.from} to={move.to} colour={colour} />;
+      moveArrow = <Arrow key={'move'} from={move.from} to={move.to} colour={colour} type={'move'} />;
     }
     if (build) {
-      buildArrow = <Arrow key={'build'} from={build.from} to={build.to} colour={colour} />;
+      buildArrow = <Arrow key={'build'} from={build.from} to={build.to} colour={colour} type={'build'} />;
     }
 
     return [moveArrow, buildArrow];

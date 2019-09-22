@@ -220,13 +220,16 @@ class Client {
 
   prepareGames(games) {
     const live = games.filter(game => !game.finished);
+    const finished = games.filter(game => game.finished);
     return {
       games,
       byId: _.fromPairs(games.map(game => [game.id, game])),
       live,
       myLive: this.user ? live.filter(game => game.userIds.includes(this.user.id)) : [],
       otherLive: this.user ? live.filter(game => !game.userIds.includes(this.user.id)) : live,
-      finished: games.filter(game => game.finished),
+      finished,
+      myFinished: this.user ? finished.filter(game => game.userIds.includes(this.user.id)) : [],
+      otherFinished: this.user ? finished.filter(game => !game.userIds.includes(this.user.id)) : live,
       mine: this.user ? games.filter(game => game.userIds.includes(this.user.id)) : [],
     };
   }
@@ -264,16 +267,19 @@ class Client {
   prepareTournaments(tournaments) {
     const future = tournaments.filter(tournament => !tournament.started);
     const live = tournaments.filter(tournament => tournament.started && !tournament.finished);
+    const futureAndLive = future.concat(live);
     const finished = tournaments.filter(tournament => tournament.finished);
     return {
       tournaments,
       byId: _.fromPairs(tournaments.map(game => [game.id, game])),
-      future, live, finished,
+      future, live, futureAndLive, finished,
       myFuture: this.user ? future.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
       myLive: this.user ? live.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+      myFutureAndLive: this.user ? futureAndLive.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
       myFinished: this.user ? finished.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
       otherFuture: this.user ? live.filter(tournament => !tournament.userIds.includes(this.user.id)) : live,
       otherLive: this.user ? future.filter(tournament => !tournament.userIds.includes(this.user.id)) : future,
+      otherFutureAndLive: this.user ? futureAndLive.filter(tournament => !tournament.userIds.includes(this.user.id)) : future,
       otherFinished: this.user ? finished.filter(tournament => !tournament.userIds.includes(this.user.id)) : finished,
       mine: this.user ? tournaments.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
     };

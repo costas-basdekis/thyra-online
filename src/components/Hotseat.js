@@ -4,7 +4,6 @@ import Play from "./Play";
 import Game from "../game/game";
 import {Grid, Modal, Menu} from "semantic-ui-react";
 import * as utils from "../utils";
-import Settings from "./Settings";
 import {withClient} from "../client/withClient";
 
 class Hotseat extends Component {
@@ -68,7 +67,6 @@ class Hotseat extends Component {
 
     return (
       <Fragment>
-        <Settings/>
         <Modal
           open={error}
           size={'mini'}

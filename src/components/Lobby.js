@@ -1,13 +1,13 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Header, Checkbox} from "semantic-ui-react";
+import {Tab, Button, Icon, Input, Label, Card, Segment, Modal, Checkbox} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import HashedIcon from "./HashedIcon";
-import Settings from "./Settings";
 import GameList from "./GameList";
-import TournamentsSegment from "./TournamentsSegment";
+import CreateTournament from "./CreateTournament";
+import TournamentList from "./TournamentList";
 
 class UserList extends Component {
   render() {
@@ -237,7 +237,7 @@ EditUser.propTypes = {
   trigger: PropTypes.node.isRequired,
 };
 
-class LogIn extends Component {
+export class LogIn extends Component {
   state = {
     username: '',
     password: '',
@@ -267,7 +267,7 @@ class LogIn extends Component {
     return (
       <Modal
         ref={this.modal}
-        trigger={<Label as={'a'} icon={'sign in'} content={'Log In'} />}
+        trigger={<Label as={'a'} icon={'sign in'} content={'Log In'} float={'left'} />}
         size={'small'}
         header={'Log In'}
         content={(
@@ -296,7 +296,7 @@ LogIn.propTypes = {
   client: PropTypes.object.isRequired,
 };
 
-class LogOut extends Component {
+export class LogOut extends Component {
   logOut = () => {
     this.props.client.logOut();
   };
@@ -321,7 +321,7 @@ class Lobby extends Component {
     const {
       client, user,
       usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe},
-      gamesInfo: {live, myLive, finished}, selectLiveGame, selectLiveTournament,
+      gamesInfo: {myLive, otherLive, myFinished, otherFinished}, selectLiveGame, selectLiveTournament,
       tournamentsInfo,
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
@@ -332,9 +332,6 @@ class Lobby extends Component {
 
     return (
       <Fragment>
-        <Settings/>
-        <LogIn client={client} />
-        <LogOut client={client} />
         <Card.Group centered>
           {user ? (
             <UserCard
@@ -347,75 +344,54 @@ class Lobby extends Component {
             />
           ) : null}
         </Card.Group>
-        {myLive.length ? (
-          <Segment>
-            <Header as={'h2'}>My live games ({myLive.length})</Header>
-            <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={myLive} selectLiveGame={selectLiveGame} />
-          </Segment>
-        ) : null}
         <Segment>
-          <Header as={'h2'}>All live games ({live.length})</Header>
           <Tab menu={{pointing: true}} panes={[
-            {menuItem: `${live.length} live games`, render: () => (
-              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={live} selectLiveGame={selectLiveGame} />
-            )},
-            {menuItem: `${finished.length} past games`, render: () => (
-              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={finished} selectLiveGame={selectLiveGame} />
-            )},
-          ]} />
+            {label: "My Live games", items: myLive, color: 'green'},
+            {label: "Other Live games", items: otherLive, color: 'green'},
+            {label: "My Past games", items: myFinished},
+            {label: "Other Past games", items: otherFinished},
+          ].filter(({items}) => items.length).map(({label, items, color}) => (
+            {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
+            )}
+          ))} />
         </Segment>
         <Segment>
-          <TournamentsSegment
-            user={user}
-            usersById={usersById}
-            chosenTournamentsInfo={{
-              future: tournamentsInfo.myFuture,
-              live: tournamentsInfo.myLive,
-              finished: tournamentsInfo.myFinished,
-            }}
-            selectLiveTournament={selectLiveTournament}
-            mine={true}
-          />
-        </Segment>
-        <Segment>
-          <TournamentsSegment
-            user={user}
-            usersById={usersById}
-            chosenTournamentsInfo={{
-              future: tournamentsInfo.future,
-              live: tournamentsInfo.live,
-              finished: tournamentsInfo.finished,
-            }}
-            selectLiveTournament={selectLiveTournament}
-            mine={false}
-          />
+          <CreateTournament />
+          <br/><br/>
+          <Tab menu={{pointing: true}} panes={[
+            {label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
+            {label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
+            {label: "My Past tournaments", items: tournamentsInfo.myFinished},
+            {label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
+          ].filter(({items}) => items.length).map(({label, items, color}) => (
+            {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+              <TournamentList
+                user={user}
+                usersById={usersById}
+                tournaments={items}
+                selectLiveTournament={selectLiveTournament}
+              />
+            )}
+          ))} />
         </Segment>
         <Segment>
           <Tab menu={{pointing: true}} panes={[
-            {menuItem: `${online.length} users online`, render: () => (
+            {label: "Online Users", items: online, color: 'green'},
+            {label: "Offline Users", items: offline},
+            {label: "All Users", items: users},
+          ].filter(({items}) => items.length).map(({label, items, color}) => (
+            {menuItem: {key: label, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
               <UserList
                 client={client}
-                users={online}
+                users={items}
                 user={user}
                 challengedUser={challengedUser}
                 readyToPlayUsers={readyToPlay}
                 readyToPlayMeUsers={readyToPlayMe}
               />
-            )},
-            {menuItem: `${offline.length} users offline`, render: () => (
-              <UserList users={offline} user={user} challengedUser={challengedUser} />
-            )},
-            {menuItem: `${users.length} users`, render: () => (
-              <UserList
-                client={client}
-                users={users}
-                user={user}
-                challengedUser={challengedUser}
-                readyToPlayUsers={readyToPlay}
-                readyToPlayMeUsers={readyToPlayMe}
-              />
-            )},
-          ]} />
+            )}
+          ))} />
         </Segment>
       </Fragment>
     );

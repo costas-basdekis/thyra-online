@@ -2,17 +2,18 @@ import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import classNames from 'classnames';
-import {Button, Grid, Icon, Modal, Segment, Statistic, Tab, Table} from "semantic-ui-react";
+import {Button, Grid, Icon, Label, Modal, Segment, Statistic, Tab, Table} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
 import {Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
-import TournamentsSegment from "./TournamentsSegment";
 // import TournamentList from "./TournamentList";
 import {GameCard} from "./GameList";
 import {createSelector} from "reselect";
 import '../styles/tournament.css';
+import CreateTournament from "./CreateTournament";
+import TournamentList from "./TournamentList";
 
 class ChosenOnlineTournament extends Component {
   tournamentSelector = createSelector([
@@ -437,30 +438,23 @@ class OnlineTournament extends Component {
       <Switch>
         <Route exact path={this.props.match.path}>
           <Segment>
-            <TournamentsSegment
-              user={user}
-              usersById={usersById}
-              chosenTournamentsInfo={{
-                future: tournamentsInfo.myFuture,
-                live: tournamentsInfo.myLive,
-                finished: tournamentsInfo.myFinished,
-              }}
-              selectLiveTournament={selectLiveTournament}
-              mine={true}
-            />
-          </Segment>
-          <Segment>
-            <TournamentsSegment
-              user={user}
-              usersById={usersById}
-              chosenTournamentsInfo={{
-                future: tournamentsInfo.future,
-                live: tournamentsInfo.live,
-                finished: tournamentsInfo.finished,
-              }}
-              selectLiveTournament={selectLiveTournament}
-              mine={false}
-            />
+            <CreateTournament />
+            <br/><br/>
+            <Tab menu={{pointing: true}} panes={[
+              {label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
+              {label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
+              {label: "My Past tournaments", items: tournamentsInfo.myFinished},
+              {label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
+            ].filter(({items}) => items.length).map(({label, items, color}) => (
+              {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+                <TournamentList
+                  user={user}
+                  usersById={usersById}
+                  tournaments={items}
+                  selectLiveTournament={selectLiveTournament}
+                />
+              )}
+            ))} />
           </Segment>
         </Route>
         <Route path={`${this.props.match.path}/:id`}>

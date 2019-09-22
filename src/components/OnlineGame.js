@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Grid, Header, Icon, Label, Menu, Modal, Segment} from "semantic-ui-react";
+import {Grid, Icon, Label, Menu, Modal, Segment, Tab} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
@@ -298,7 +298,10 @@ class OnlineGame extends Component {
   }
 
   render() {
-    const {selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {live, myLive}, tournamentsInfo: {byId: tournamentsById}} = this.props;
+    const {
+      selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {myLive, otherLive, myFinished, otherFinished},
+      tournamentsInfo: {byId: tournamentsById},
+    } = this.props;
     if (!Object.values(byId).length) {
       return null;
     }
@@ -307,12 +310,16 @@ class OnlineGame extends Component {
       <Switch>
         <Route exact path={this.props.match.path}>
           <Segment>
-            <Header as={'h2'}>My live games ({myLive.length})</Header>
-            <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={myLive} selectLiveGame={selectLiveGame} />
-          </Segment>
-          <Segment>
-            <Header as={'h2'}>Live games ({live.length})</Header>
-            <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={live} selectLiveGame={selectLiveGame} />
+            <Tab menu={{pointing: true}} panes={[
+              {label: "My Live games", items: myLive, color: 'green'},
+              {label: "Other Live games", items: otherLive, color: 'green'},
+              {label: "My Past games", items: myFinished},
+              {label: "Other Past games", items: otherFinished},
+            ].filter(({items}) => items.length).map(({label, items, color}) => (
+              {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+                <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
+              )}
+            ))} />
           </Segment>
         </Route>
         <Route path={`${this.props.match.path}/:id`}>

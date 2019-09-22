@@ -8,12 +8,13 @@ import {client} from "./client/client";
 import NavigationalTab from "./components/NavigationalTab";
 import {withRouter} from "react-router-dom";
 import Hotseat from "./components/Hotseat";
-import Lobby from "./components/Lobby";
+import Lobby, {LogIn, LogOut} from "./components/Lobby";
 import OnlineGame from "./components/OnlineGame";
 import {withClient} from "./client/withClient";
 import services from "./services";
 import SvgBoardBackground from "./components/Board/SvgBoardBackground";
 import OnlineTournament from "./components/OnlineTournament";
+import Settings from "./components/Settings";
 
 class App extends Component {
   state = {
@@ -189,6 +190,9 @@ class App extends Component {
         <SvgBoardBackground.Definitions />
         <Segment textAlign={"center"}>
           <Header as={"h1"}>Thyra Online</Header>
+          <Settings/>
+          <LogIn client={client} />
+          <LogOut client={client} />
         </Segment>
         {!connected ? (
           (disconnected || !available) ? (

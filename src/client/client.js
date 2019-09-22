@@ -256,7 +256,7 @@ class Client {
   }
 
   gotTournaments = tournaments => {
-    tournaments = _.orderBy(tournaments, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
+    tournaments = _.sortBy(tournaments, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
     this.tournamentsInfo = this.prepareTournaments(tournaments);
     this.onTournaments.map(callback => callback(this.tournamentsInfo));
   };

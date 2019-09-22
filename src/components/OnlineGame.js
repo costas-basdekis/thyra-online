@@ -176,6 +176,7 @@ class ChosenOnlineGame extends Component {
     const {
       location, user, client, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
+      tournamentsInfo: {byId: tournamentsById},
     } = this.props;
     const {gameGame} = this;
 
@@ -231,9 +232,27 @@ class ChosenOnlineGame extends Component {
           </Grid.Row>
         </Grid>
         <Segment>
-          <GameList user={user} selectLiveGame={selectLiveGame} games={myLiveGames} usersById={usersById} terse live currentGameId={game ? game.id : null} />
+          <GameList
+            user={user}
+            selectLiveGame={selectLiveGame}
+            games={myLiveGames}
+            usersById={usersById}
+            tournamentsById={tournamentsById}
+            terse
+            live
+            currentGameId={game ? game.id : null}
+          />
           {otherLiveGames.length ? (
-            <GameList user={user} selectLiveGame={selectLiveGame} games={otherLiveGames} usersById={usersById} terse live currentGameId={game ? game.id : null} />
+            <GameList
+              user={user}
+              selectLiveGame={selectLiveGame}
+              games={otherLiveGames}
+              usersById={usersById}
+              tournamentsById={tournamentsById}
+              terse
+              live
+              currentGameId={game ? game.id : null}
+            />
           ) : null}
         </Segment>
         <Play
@@ -262,6 +281,7 @@ ChosenOnlineGame.propTypes = {
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
+  tournamentsInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   game: PropTypes.object,
 };
@@ -278,7 +298,7 @@ class OnlineGame extends Component {
   }
 
   render() {
-    const {selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {live, myLive}} = this.props;
+    const {selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {live, myLive}, tournamentsInfo: {byId: tournamentsById}} = this.props;
     if (!Object.values(byId).length) {
       return null;
     }
@@ -288,11 +308,11 @@ class OnlineGame extends Component {
         <Route exact path={this.props.match.path}>
           <Segment>
             <Header as={'h2'}>My live games ({myLive.length})</Header>
-            <GameList user={user} usersById={byId} games={myLive} selectLiveGame={selectLiveGame} />
+            <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={myLive} selectLiveGame={selectLiveGame} />
           </Segment>
           <Segment>
             <Header as={'h2'}>Live games ({live.length})</Header>
-            <GameList user={user} usersById={byId} games={live} selectLiveGame={selectLiveGame} />
+            <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={live} selectLiveGame={selectLiveGame} />
           </Segment>
         </Route>
         <Route path={`${this.props.match.path}/:id`}>
@@ -310,6 +330,7 @@ OnlineGame.propTypes = {
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
+  tournamentsInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
 };
 

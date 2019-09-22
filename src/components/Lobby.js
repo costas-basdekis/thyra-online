@@ -7,6 +7,7 @@ import {withClient} from "../client/withClient";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
 import GameList from "./GameList";
+import TournamentsSegment from "./TournamentsSegment";
 
 class UserList extends Component {
   render() {
@@ -138,6 +139,14 @@ class UserCard extends Component {
             </Label>
             {" "}
             <Label icon={'trophy'} content={` ${otherUser.winCount}/${otherUser.gameCount}`} />
+            {" "}
+            {otherUser.tournamentWinCount ? (
+              <Label
+                icon={{name: 'sitemap', color: 'yellow'}}
+                content={otherUser.tournamentWinCount}
+                title={`Won ${otherUser.tournamentWinCount}/${otherUser.tournamentCount} tournaments entered`}
+              />
+              ) : null}
           </Card.Meta>
         </Card.Content>
         {playButtonLabel ? <Card.Content extra>
@@ -309,7 +318,13 @@ class Lobby extends Component {
   };
 
   render() {
-    const {client, user, usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe}, gamesInfo: {live, myLive, finished}, selectLiveGame} = this.props;
+    const {
+      client, user,
+      usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe},
+      gamesInfo: {live, myLive, finished}, selectLiveGame, selectLiveTournament,
+      tournamentsInfo,
+    } = this.props;
+    const {byId: tournamentsById} = tournamentsInfo;
 
     if (!user) {
       return <Tab.Pane>Connecting to server...</Tab.Pane>;
@@ -335,18 +350,45 @@ class Lobby extends Component {
         {myLive.length ? (
           <Segment>
             <Header as={'h2'}>My live games ({myLive.length})</Header>
-            <GameList user={user} usersById={usersById} games={myLive} selectLiveGame={selectLiveGame} />
+            <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={myLive} selectLiveGame={selectLiveGame} />
           </Segment>
         ) : null}
         <Segment>
+          <Header as={'h2'}>All live games ({live.length})</Header>
           <Tab menu={{pointing: true}} panes={[
             {menuItem: `${live.length} live games`, render: () => (
-              <GameList user={user} usersById={usersById} games={live} selectLiveGame={selectLiveGame} />
+              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={live} selectLiveGame={selectLiveGame} />
             )},
             {menuItem: `${finished.length} past games`, render: () => (
-              <GameList user={user} usersById={usersById} games={finished} selectLiveGame={selectLiveGame} />
+              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={finished} selectLiveGame={selectLiveGame} />
             )},
           ]} />
+        </Segment>
+        <Segment>
+          <TournamentsSegment
+            user={user}
+            usersById={usersById}
+            chosenTournamentsInfo={{
+              future: tournamentsInfo.myFuture,
+              live: tournamentsInfo.myLive,
+              finished: tournamentsInfo.myFinished,
+            }}
+            selectLiveTournament={selectLiveTournament}
+            mine={true}
+          />
+        </Segment>
+        <Segment>
+          <TournamentsSegment
+            user={user}
+            usersById={usersById}
+            chosenTournamentsInfo={{
+              future: tournamentsInfo.future,
+              live: tournamentsInfo.live,
+              finished: tournamentsInfo.finished,
+            }}
+            selectLiveTournament={selectLiveTournament}
+            mine={false}
+          />
         </Segment>
         <Segment>
           <Tab menu={{pointing: true}} panes={[
@@ -385,7 +427,9 @@ Lobby.propTypes = {
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
+  tournamentsInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
+  selectLiveTournament: PropTypes.func.isRequired,
 };
 
 export default withClient(Lobby);

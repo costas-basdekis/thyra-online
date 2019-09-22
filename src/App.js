@@ -12,10 +12,12 @@ import OnlineGame from "./components/OnlineGame";
 import {withClient} from "./client/withClient";
 import services from "./services";
 import SvgBoardBackground from "./components/Board/SvgBoardBackground";
+import OnlineTournament from "./components/OnlineTournament";
 
 class App extends Component {
   state = {
     liveGame: null,
+    liveTournament: null,
   };
 
   getLiveGameUrl(game) {
@@ -36,6 +38,48 @@ class App extends Component {
       return;
     }
     this.setState({liveGame});
+  };
+
+  getLiveTournamentUrl(tournament) {
+    return `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/tournament/${tournament.id}`;
+  }
+
+  selectLiveTournament = liveTournament => {
+    let tournamentUrl;
+    if (liveTournament) {
+      tournamentUrl = this.getLiveTournamentUrl(liveTournament);
+    } else {
+      tournamentUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/lobby`;
+    }
+    if (tournamentUrl !== this.props.location.pathname) {
+      this.props.history.push(tournamentUrl);
+    }
+    if (this.state.liveTournament === liveTournament) {
+      return;
+    }
+    this.setState({liveTournament});
+  };
+
+  toggleParticipation = tournament => {
+    const {user, client} = this.props;
+
+    if (tournament.userIds.includes(user.id)) {
+      client.leaveTournament(tournament);
+    } else {
+      client.joinTournament(tournament);
+    }
+  };
+
+  startTournament = tournament => {
+    const {client} = this.props;
+
+    client.startTournament(tournament);
+  };
+
+  abortTournament = tournament => {
+    const {client} = this.props;
+
+    client.abortTournament(tournament);
   };
 
   componentDidUpdate(prevProps) {
@@ -117,7 +161,7 @@ class App extends Component {
   }
 
   render() {
-    const {liveGame} = this.state;
+    const {liveGame, liveTournament} = this.state;
     const {connected, disconnected, available, user, usersInfo: {byId: usersById}} = this.props;
     const playerA = liveGame ? usersById[liveGame.userIds[0]] : null;
     const playerB = liveGame ? usersById[liveGame.userIds[1]] : null;
@@ -131,6 +175,14 @@ class App extends Component {
           ? `Live Play ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`
           : `Spectate ${isUserPlayerA ? 'you' : playerA.name} vs ${isUserPlayerB ? 'you' : playerB.name}`))
       : 'Live Play/Spectate/Review';
+    const isMyTournament = (liveTournament && user) ? liveTournament.userIds.includes(user.id) : false;
+    const onlineTournamentLabel = liveTournament
+      ? (liveTournament.finished
+        ? `Review tournament ${liveTournament.name}`
+        : (isMyTournament
+          ? `Live tournament ${liveTournament.name}`
+          : `Spectate tournament ${liveTournament.name}`))
+      : 'Tournaments';
     return (
       <Container>
         <SvgBoardBackground.Definitions />
@@ -153,10 +205,22 @@ class App extends Component {
         ) : null}
         <NavigationalTab menu={{pointing: true, attached: false}} panes={[
           client.available ? {menuItem: 'Lobby', path: 'lobby', render: () => (
-            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} /></Tab.Pane>
+            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} /></Tab.Pane>
           )} : null,
           client.available ? {menuItem: onlineGameLabel, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
             <Tab.Pane><OnlineGame game={liveGame} selectLiveGame={this.selectLiveGame} /></Tab.Pane>
+          )} : null,
+          client.available ? {menuItem: onlineTournamentLabel, path: 'tournament', navigate: liveTournament ? `tournament/${liveTournament.id}` : 'tournament', render: () => (
+            <Tab.Pane>
+              <OnlineTournament
+                tournament={liveTournament}
+                selectLiveTournament={this.selectLiveTournament}
+                selectLiveGame={this.selectLiveGame}
+                toggleParticipation={this.toggleParticipation}
+                startTournament={this.startTournament}
+                abortTournament={this.abortTournament}
+              />
+            </Tab.Pane>
           )} : null,
           {menuItem: 'Hotseat', path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>

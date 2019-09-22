@@ -1,0 +1,10 @@
+.tournament-game.player-a.player-a-won,
+.tournament-game.player-b.player-b-won {
+    background-color: #21ba45 !important;
+    color: white;
+}
+.tournament-game.player-a.player-b-won,
+.tournament-game.player-b.player-a-won {
+    background-color: #db2828 !important;
+    color: white;
+}

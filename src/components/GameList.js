@@ -8,13 +8,15 @@ import Board from "./Board";
 import HashedIcon from "./HashedIcon";
 import classNames from "classnames";
 
-class GameCard extends Component {
+export class GameCard extends Component {
   selectLiveGame = () => {
     this.props.selectLiveGame(this.props.game);
   };
 
   render() {
-    const {user, usersById, game, terse, live, currentGameId} = this.props;
+    const {user, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
+
+    const tournament = tournamentsById[game.tournamentId];
 
     const gameGame = Game.deserialize(game.game);
     const playerA = usersById[game.userIds[0]];
@@ -77,6 +79,8 @@ class GameCard extends Component {
               <Label content={`Move ${game.move}`} icon={'play'} />
               {" "}
               <Label content={moment(game.endDatetime || game.startDatetime).from()} icon={'calendar'} />
+              {" "}
+              {tournament ? <Label content={tournament.name} icon={'sitemap'} /> : null}
             </Card.Meta>
           ) : null}
         </Card.Content>
@@ -88,6 +92,7 @@ class GameCard extends Component {
 GameCard.propTypes = {
   user: PropTypes.object,
   usersById: PropTypes.object.isRequired,
+  tournamentsById: PropTypes.object.isRequired,
   game: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,
@@ -110,7 +115,7 @@ class GameList extends Component {
   };
 
   render() {
-    const {user, usersById, games, terse, live, selectLiveGame, currentGameId, pageSize} = this.props;
+    const {user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -132,6 +137,7 @@ class GameList extends Component {
               key={game.id}
               user={user}
               usersById={usersById}
+              tournamentsById={tournamentsById}
               game={game}
               selectLiveGame={selectLiveGame}
               terse={terse}
@@ -161,6 +167,7 @@ class GameList extends Component {
 GameList.propTypes = {
   user: PropTypes.object,
   usersById: PropTypes.object.isRequired,
+  tournamentsById: PropTypes.object.isRequired,
   games: PropTypes.array.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,

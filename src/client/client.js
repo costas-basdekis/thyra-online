@@ -67,6 +67,9 @@ class Client {
     this.gamesInfo = this.prepareGames([]);
     this.socket.on("games", this.gotGames);
 
+    this.tournamentsInfo = this.prepareTournaments([]);
+    this.socket.on("tournaments", this.gotTournaments);
+
     this.getUser();
   }
 
@@ -89,7 +92,7 @@ class Client {
   };
 
   subscribe(callbacks) {
-    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onTournaments']) {
       const callback = callbacks[name];
       if (callback) {
         this[name].push(callback);
@@ -231,8 +234,53 @@ class Client {
   submitGameMove(game, moves) {
     this.socket.emit("submit-game-moves", {id: game.id, moves});
   }
+
+  createTournament(data) {
+    this.socket.emit("create-tournament", data);
+  }
+
+  joinTournament(tournament) {
+    this.socket.emit("join-tournament", tournament.id);
+  }
+
+  leaveTournament(tournament) {
+    this.socket.emit("leave-tournament", tournament.id);
+  }
+
+  startTournament(tournament) {
+    this.socket.emit("start-tournament", tournament.id);
+  }
+
+  abortTournament(tournament) {
+    this.socket.emit("abort-tournament", tournament.id);
+  }
+
+  gotTournaments = tournaments => {
+    tournaments = _.orderBy(tournaments, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
+    this.tournamentsInfo = this.prepareTournaments(tournaments);
+    this.onTournaments.map(callback => callback(this.tournamentsInfo));
+  };
+
+  prepareTournaments(tournaments) {
+    const future = tournaments.filter(tournament => !tournament.started);
+    const live = tournaments.filter(tournament => tournament.started && !tournament.finished);
+    const finished = tournaments.filter(tournament => tournament.finished);
+    return {
+      tournaments,
+      byId: _.fromPairs(tournaments.map(game => [game.id, game])),
+      future, live, finished,
+      myFuture: this.user ? future.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+      myLive: this.user ? live.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+      myFinished: this.user ? finished.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+      otherFuture: this.user ? live.filter(tournament => !tournament.userIds.includes(this.user.id)) : live,
+      otherLive: this.user ? future.filter(tournament => !tournament.userIds.includes(this.user.id)) : future,
+      otherFinished: this.user ? finished.filter(tournament => !tournament.userIds.includes(this.user.id)) : finished,
+      mine: this.user ? tournaments.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+    };
+  }
 }
 
 export const client = new Client();
+window.client = client;
 
 export default Client;

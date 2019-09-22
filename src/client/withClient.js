@@ -20,6 +20,7 @@ class ClientWatcher extends Component {
     username: client.user ? client.user.name : null,
     usersInfo: client.usersInfo,
     gamesInfo: client.gamesInfo,
+    tournamentsInfo: client.tournamentsInfo,
   };
 
   componentDidMount() {
@@ -29,6 +30,7 @@ class ClientWatcher extends Component {
       onUser: this.gotUser,
       onUsers: this.gotUsers,
       onGames: this.gotGames,
+      onTournaments: this.gotTournaments,
     });
   }
 
@@ -57,8 +59,12 @@ class ClientWatcher extends Component {
     this.setState({gamesInfo});
   };
 
+  gotTournaments = tournamentsInfo => {
+    this.setState({tournamentsInfo});
+  };
+
   render() {
-    const {connected, disconnected, available, user, usersInfo, gamesInfo} = this.state;
+    const {connected, disconnected, available, user, usersInfo, gamesInfo, tournamentsInfo} = this.state;
     const SubComponent = this.constructor.SubComponent;
     return (
       <SubComponent
@@ -70,6 +76,7 @@ class ClientWatcher extends Component {
         user={user}
         usersInfo={usersInfo}
         gamesInfo={gamesInfo}
+        tournamentsInfo={tournamentsInfo}
       />
     )
   }

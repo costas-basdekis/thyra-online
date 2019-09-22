@@ -7,7 +7,7 @@ class Client {
     return JSON.parse(JSON.stringify({
       autoSubmitMoves: false,
       enableNotifications: false,
-      theme: {pieces: 'king', scheme: '', rotateOpponent: true, numbers: ''},
+      theme: {pieces: 'king', scheme: '', rotateOpponent: true, animations: true, arrows: true, numbers: ''},
     }));
   }
 

@@ -211,7 +211,7 @@ class ChosenOnlineTournament extends Component {
           {tournament.started ? (
             <Tab menu={{pointing: true, attached: false}} panes={[
               {menuItem: 'Rankings', render: () => (
-                <Table celled collapsing>
+                <Table celled collapsing unstackable>
                   <Table.Header>
                     <Table.Row>
                       {tournament.finished ? <Table.HeaderCell> </Table.HeaderCell> : null}
@@ -268,7 +268,7 @@ class ChosenOnlineTournament extends Component {
                 </Table>
               )},
               {menuItem: 'Games', render: () => (
-                <Table celled collapsing>
+                <Table celled collapsing unstackable>
                   <Table.Header>
                     <Table.Row>
                       <Table.HeaderCell colSpan={2}>White</Table.HeaderCell>
@@ -337,7 +337,7 @@ class ChosenOnlineTournament extends Component {
               )},
             ]} />
           ) : (
-            <Table celled collapsing>
+            <Table celled collapsing unstackable>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>User</Table.HeaderCell>

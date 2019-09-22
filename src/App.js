@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import 'fomantic-ui-css/semantic.css';
 import {Container, Header, Message, Segment, Tab} from 'semantic-ui-react';
 import './styles/App.css';
+import './styles/semantic-ui.css';
 import {client} from "./client/client";
 import NavigationalTab from "./components/NavigationalTab";
 import {withRouter} from "react-router-dom";

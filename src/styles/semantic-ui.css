@@ -1,0 +1,8 @@
+.ui.menu {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.ui.segment {
+    overflow-x: auto;
+}

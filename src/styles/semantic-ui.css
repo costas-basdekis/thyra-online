@@ -6,3 +6,7 @@
 .ui.segment {
     overflow-x: auto;
 }
+
+.ui.menu.inverted .ui.checkbox label {
+    color: white !important;
+}

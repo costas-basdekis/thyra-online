@@ -69,21 +69,21 @@
     height: calc(var(--cell-size) * var(--row-count));
 }
 
-@media all and (min-width: 601px) {
+@media all and (max-width: 1000px) {
     .svg-board {
-        --cell-size: 100px;
+        --cell-size: 60px;
     }
 }
 
-@media all and (max-width: 600px) {
+@media all and (min-width: 1000px) {
     .svg-board {
         --cell-size: 80px;
     }
 }
 
-@media all and (max-width: 500px) {
+@media all and (min-width: 1200px) {
     .svg-board {
-        --cell-size: 60px;
+        --cell-size: 100px;
     }
 }
 

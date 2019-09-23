@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Grid, Icon, Label, Menu, Modal, Segment, Tab} from "semantic-ui-react";
+import {Grid, Icon, Label, Menu, Modal, Responsive, Segment, Tab} from "semantic-ui-react";
 import { createSelector } from 'reselect';
 
 import {withClient} from "../client/withClient";
@@ -200,6 +200,34 @@ class ChosenOnlineGame extends Component {
     if (!playerA || !playerB) {
       return null;
     }
+
+    const gamesNode = (
+      <Segment>
+        <GameList
+          user={user}
+          selectLiveGame={selectLiveGame}
+          games={myLiveGames}
+          usersById={usersById}
+          tournamentsById={tournamentsById}
+          terse
+          live
+          currentGameId={game ? game.id : null}
+        />
+        {otherLiveGames.length ? (
+          <GameList
+            user={user}
+            selectLiveGame={selectLiveGame}
+            games={otherLiveGames}
+            usersById={usersById}
+            tournamentsById={tournamentsById}
+            terse
+            live
+            currentGameId={game ? game.id : null}
+          />
+        ) : null}
+      </Segment>
+    );
+
     return (
       <Fragment>
         <Settings/>
@@ -231,30 +259,9 @@ class ChosenOnlineGame extends Component {
             ]}/>
           </Grid.Row>
         </Grid>
-        <Segment>
-          <GameList
-            user={user}
-            selectLiveGame={selectLiveGame}
-            games={myLiveGames}
-            usersById={usersById}
-            tournamentsById={tournamentsById}
-            terse
-            live
-            currentGameId={game ? game.id : null}
-          />
-          {otherLiveGames.length ? (
-            <GameList
-              user={user}
-              selectLiveGame={selectLiveGame}
-              games={otherLiveGames}
-              usersById={usersById}
-              tournamentsById={tournamentsById}
-              terse
-              live
-              currentGameId={game ? game.id : null}
-            />
-          ) : null}
-        </Segment>
+        <Responsive as={Fragment} maxWidth={800}>
+          {gamesNode}
+        </Responsive>
         <Play
           user={user}
           defaultSettings={client.settings}
@@ -268,7 +275,11 @@ class ChosenOnlineGame extends Component {
           challengeUser={this.challengeUser}
           stopChallengeUser={this.stopChallengeUser}
           challengedUser={challengedUser}
-        />
+        >
+          <Responsive as={Grid.Row} minWidth={800}>
+            {gamesNode}
+          </Responsive>
+        </Play>
       </Fragment>
     );
   }

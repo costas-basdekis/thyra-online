@@ -11,7 +11,7 @@ import {
   Label,
   Menu,
   Modal,
-  Pagination,
+  Pagination, Responsive,
   Segment,
   Statistic
 } from "semantic-ui-react";
@@ -159,7 +159,7 @@ class Play extends Component {
 
   render() {
     const {
-      user, defaultSettings, names, allowControl, matchGame,
+      user, defaultSettings, names, allowControl, matchGame, children,
     } = this.props;
     const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
@@ -169,54 +169,76 @@ class Play extends Component {
     const settings = user ? user.settings : defaultSettings;
   	const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
 
+  	const controlsNode = (
+  	  <Fragment>
+        <Grid.Row>
+          <PlayPlayer
+            player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
+            canSubmit={false}
+            submit={this.props.submit ? this.submit : null}
+            changeAutoSubmitMoves={this.changeAutoSubmitMoves}
+            game={canSubmit ? game.previous : game}
+            settings={settings}
+            names={names}
+            allowControl={allowControl}
+          />
+        </Grid.Row>
+        <Grid.Row>
+          <PlayPlayer
+            player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
+            canSubmit={canSubmit}
+            submit={this.props.submit ? this.submit : null}
+            changeAutoSubmitMoves={this.changeAutoSubmitMoves}
+            game={canSubmit ? game.previous : game}
+            settings={settings}
+            names={names}
+            allowControl={allowControl}
+          />
+        </Grid.Row>
+        <Grid.Row>
+          <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
+        </Grid.Row>
+        <Grid.Row>
+          <BoardTransformation onChange={this.onTransformationChange} />
+        </Grid.Row>
+        {children}
+      </Fragment>
+    );
+  	const boardNode = (
+      <Board
+        game={displayGame}
+        transformation={transformation}
+        makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
+        minChainCount={this.props.submit ? this.props.game.chainCount : (
+          this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
+        )}
+        allowControl={displayGame === game ? allowControl : undefined}
+        settings={settings}
+        animated={settings.theme.animations}
+        showArrows={settings.theme.arrows}
+      />
+    );
+
     return (
       <Fragment>
         <Segment style={{textAlign: "center"}}>
-          <Grid centered>
-            <Grid.Row>
-              <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
-            </Grid.Row>
-            <Grid.Row>
-              <PlayPlayer
-                player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
-                canSubmit={false}
-                submit={this.props.submit ? this.submit : null}
-                changeAutoSubmitMoves={this.changeAutoSubmitMoves}
-                game={canSubmit ? game.previous : game}
-                settings={settings}
-                names={names}
-                allowControl={allowControl}
-              />
-            </Grid.Row>
-            <Grid.Row>
-              <Board
-                game={displayGame}
-                transformation={transformation}
-                makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
-                minChainCount={this.props.submit ? this.props.game.chainCount : (
-                  this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
-                )}
-                allowControl={displayGame === game ? allowControl : undefined}
-                settings={settings}
-                animated={settings.theme.animations}
-                showArrows={settings.theme.arrows}
-              />
-            </Grid.Row>
-            <Grid.Row>
-              <PlayPlayer
-                player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
-                canSubmit={canSubmit}
-                submit={this.props.submit ? this.submit : null}
-                changeAutoSubmitMoves={this.changeAutoSubmitMoves}
-                game={canSubmit ? game.previous : game}
-                settings={settings}
-                names={names}
-                allowControl={allowControl}
-              />
-            </Grid.Row>
-            <Grid.Row>
-              <BoardTransformation onChange={this.onTransformationChange} />
-            </Grid.Row>
+          <Grid centered columns={'equal'} textAlign={'center'}>
+            <Responsive as={Grid.Row} minWidth={800}>
+              <Grid.Column>{controlsNode}</Grid.Column>
+              <Grid.Column>{boardNode}</Grid.Column>
+            </Responsive>
+            <Responsive as={Fragment} maxWidth={800}>
+              <Grid.Row>
+                <Grid.Column stretched={false} textAlign={'center'}>
+                  {boardNode}
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column stretched={false} textAlign={'center'}>
+                  {controlsNode}
+                </Grid.Column>
+              </Grid.Row>
+            </Responsive>
           </Grid>
         </Segment>
         {this.props.submit && isMyGame ? (
@@ -296,6 +318,7 @@ Play.propTypes = {
   challengedUser: PropTypes.object,
   names: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
+  children: PropTypes.node,
 };
 
 Play.defaultProps = {

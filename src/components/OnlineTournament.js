@@ -441,12 +441,12 @@ class OnlineTournament extends Component {
             <CreateTournament />
             <br/><br/>
             <Tab menu={{pointing: true}} panes={[
-              {label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
-              {label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
-              {label: "My Past tournaments", items: tournamentsInfo.myFinished},
-              {label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
-            ].filter(({items}) => items.length).map(({label, items, color}) => (
-              {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+              {key: 'my-live', label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
+              {key: 'other-live', label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
+              {key: 'my-past', label: "My Past tournaments", items: tournamentsInfo.myFinished},
+              {key: 'other-past', label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
+            ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+              {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
                 <TournamentList
                   user={user}
                   usersById={usersById}

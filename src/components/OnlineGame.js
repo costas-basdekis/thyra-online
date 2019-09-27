@@ -322,12 +322,12 @@ class OnlineGame extends Component {
         <Route exact path={this.props.match.path}>
           <Segment>
             <Tab menu={{pointing: true}} panes={[
-              {label: "My Live games", items: myLive, color: 'green'},
-              {label: "Other Live games", items: otherLive, color: 'green'},
-              {label: "My Past games", items: myFinished},
-              {label: "Other Past games", items: otherFinished},
-            ].filter(({items}) => items.length).map(({label, items, color}) => (
-              {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+              {key: 'my-live', label: "My Live games", items: myLive, color: 'green'},
+              {key: 'other-live', label: "Other Live games", items: otherLive, color: 'green'},
+              {key: 'my-past', label: "My Past games", items: myFinished},
+              {key: 'other-past', label: "Other Past games", items: otherFinished},
+            ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+              {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
                 <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
               )}
             ))} />

@@ -346,12 +346,12 @@ class Lobby extends Component {
         </Card.Group>
         <Segment>
           <Tab menu={{pointing: true}} panes={[
-            {label: "My Live games", items: myLive, color: 'green'},
-            {label: "Other Live games", items: otherLive, color: 'green'},
-            {label: "My Past games", items: myFinished},
-            {label: "Other Past games", items: otherFinished},
-          ].filter(({items}) => items.length).map(({label, items, color}) => (
-            {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+            {key: 'my-live', label: "My Live games", items: myLive, color: 'green'},
+            {key: 'other-live', label: "Other Live games", items: otherLive, color: 'green'},
+            {key: 'my-past', label: "My Past games", items: myFinished},
+            {key: 'other-past', label: "Other Past games", items: otherFinished},
+          ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+            {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
               <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
             )}
           ))} />
@@ -360,12 +360,12 @@ class Lobby extends Component {
           <CreateTournament />
           <br/><br/>
           <Tab menu={{pointing: true}} panes={[
-            {label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
-            {label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
-            {label: "My Past tournaments", items: tournamentsInfo.myFinished},
-            {label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
-          ].filter(({items}) => items.length).map(({label, items, color}) => (
-            {menuItem: {content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+            {key: 'my-live', label: "My Future & Running tournaments", items: tournamentsInfo.myFutureAndLive, color: 'green'},
+            {key: 'other-live', label: "Other Future and Running tournaments", items: tournamentsInfo.otherFutureAndLive, color: 'green'},
+            {key: 'my-past', label: "My Past tournaments", items: tournamentsInfo.myFinished},
+            {key: 'other-past', label: "Other Past tournaments", items: tournamentsInfo.otherFinished},
+          ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+            {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
               <TournamentList
                 user={user}
                 usersById={usersById}
@@ -377,11 +377,11 @@ class Lobby extends Component {
         </Segment>
         <Segment>
           <Tab menu={{pointing: true}} panes={[
-            {label: "Online Users", items: online, color: 'green'},
-            {label: "Offline Users", items: offline},
-            {label: "All Users", items: users},
-          ].filter(({items}) => items.length).map(({label, items, color}) => (
-            {menuItem: {key: label, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+            {key: 'online', label: "Online Users", items: online, color: 'green'},
+            {key: 'offline', label: "Offline Users", items: offline},
+            {key: 'all', label: "All Users", items: users},
+          ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+            {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
               <UserList
                 client={client}
                 users={items}

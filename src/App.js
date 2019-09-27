@@ -209,14 +209,14 @@ class App extends Component {
             />
           )
         ) : null}
-        <NavigationalTab menu={{pointing: true, attached: false}} panes={[
-          client.available ? {menuItem: 'Lobby', path: 'lobby', render: () => (
+        <NavigationalTab menu={{pointing: true, attached: false, stackable: true}} panes={[
+          client.available ? {menuItem: {icon: 'users', content: 'Lobby'}, path: 'lobby', render: () => (
             <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} /></Tab.Pane>
           )} : null,
-          client.available ? {menuItem: onlineGameLabel, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
+          client.available ? {menuItem: {icon: 'play', content: onlineGameLabel}, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
             <Tab.Pane><OnlineGame game={liveGame} selectLiveGame={this.selectLiveGame} /></Tab.Pane>
           )} : null,
-          client.available ? {menuItem: onlineTournamentLabel, path: 'tournament', navigate: liveTournament ? `tournament/${liveTournament.id}` : 'tournament', render: () => (
+          client.available ? {menuItem: {icon: 'sitemap', content: onlineTournamentLabel}, path: 'tournament', navigate: liveTournament ? `tournament/${liveTournament.id}` : 'tournament', render: () => (
             <Tab.Pane>
               <OnlineTournament
                 tournament={liveTournament}
@@ -228,10 +228,10 @@ class App extends Component {
               />
             </Tab.Pane>
           )} : null,
-          {menuItem: 'Hotseat', path: 'hotseat', render: () => (
+          {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          {menuItem: 'Learn To Play', path: 'learn-to-play', render: () => (
+          {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>
           )},
         ]} />

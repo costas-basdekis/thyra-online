@@ -15,6 +15,7 @@ import services from "./services";
 import SvgBoardBackground from "./components/Board/SvgBoardBackground";
 import OnlineTournament from "./components/OnlineTournament";
 import Settings from "./components/Settings";
+import LearnToPlay from "./components/LearnToPlay";
 
 class App extends Component {
   state = {
@@ -229,6 +230,9 @@ class App extends Component {
           )} : null,
           {menuItem: 'Hotseat', path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
+          )},
+          {menuItem: 'Learn To Play', path: 'learn-to-play', render: () => (
+            <Tab.Pane><LearnToPlay /></Tab.Pane>
           )},
         ]} />
         <Header as={"h6"} style={{color: '#dddddd'}}>{process.env.REACT_APP_VERSION || '?'}</Header>

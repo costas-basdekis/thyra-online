@@ -7,6 +7,7 @@ import Game from "../game/game";
 import Board from "./Board";
 import HashedIcon from "./HashedIcon";
 import classNames from "classnames";
+import {NavLink} from "react-router-dom";
 
 export class GameCard extends Component {
   selectLiveGame = () => {
@@ -34,7 +35,9 @@ export class GameCard extends Component {
 
     return (
       <Card
-        onClick={this.selectLiveGame}
+        as={NavLink}
+        to={`/game/${game.id}`}
+        // onClick={this.selectLiveGame}
         style={{
           ...(!terse ? {} : {width: 'auto'}),
           ...(game.id === currentGameId ? {backgroundColor: 'lightgreen'} : {}),

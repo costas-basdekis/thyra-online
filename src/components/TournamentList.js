@@ -2,6 +2,7 @@ import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import {Label, Card, Grid, Pagination} from "semantic-ui-react";
 import moment from 'moment';
+import {NavLink} from "react-router-dom";
 
 class TournamentCard extends Component {
   selectLiveTournament = () => {
@@ -28,7 +29,9 @@ class TournamentCard extends Component {
 
     return (
       <Card
-        onClick={this.selectLiveTournament}
+        as={NavLink}
+        to={`/tournament/${tournament.id}`}
+        // onClick={this.selectLiveTournament}
         style={{
           ...(!terse ? {} : {width: 'auto'}),
           ...(tournament.id === currentTournamentId ? {backgroundColor: 'lightgreen'} : {}),

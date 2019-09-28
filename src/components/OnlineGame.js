@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import {withClient} from "../client/withClient";
 import Game from "../game/game";
 import Play from "./Play";
-import {Route, Switch, withRouter} from "react-router-dom";
+import {NavLink, Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
@@ -167,11 +167,6 @@ class ChosenOnlineGame extends Component {
     this.props.client.changeReadyToPlay(false);
   };
 
-  getEditPositionUrl = () => {
-    const {gameGame} = this;
-    return `${process.env.REACT_APP_PAGE_BASE_PATH}${process.env.REACT_APP_PAGE_BASE_PATH.endsWith('/') ? '' : '/'}hotseat?position=${gameGame.compressedFullNotation}`;
-  };
-
   render() {
     const {
       location, user, client, game, selectLiveGame,
@@ -238,8 +233,9 @@ class ChosenOnlineGame extends Component {
               {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareGame, as: 'a',
                 href: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'},
-              {key: 'edit', content: 'Edit position', icon: 'edit', as: 'a', href: this.getEditPositionUrl(),
-                color: 'green', active: true, title: 'Click to open hotseat with this game', target: '_blank'},
+              {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
+                to: `/hotseat?position=${gameGame.compressedFullNotation}`, color: 'green', active: true,
+                title: 'Click to open hotseat with this game', target: '_blank'},
             ]} />
           </Grid.Row>
           <Grid.Row>

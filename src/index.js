@@ -6,9 +6,9 @@ import * as serviceWorker from './serviceWorker';
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 
 ReactDOM.render((
-  <BrowserRouter>
+  <BrowserRouter basename={process.env.REACT_APP_PAGE_BASE_PATH}>
     <Switch>
-      <Route path={process.env.REACT_APP_PAGE_BASE_PATH}>
+      <Route>
         <App />
       </Route>
     </Switch>

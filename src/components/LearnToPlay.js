@@ -221,12 +221,27 @@ class LearnBoard extends Component {
 
   render() {
     const {user, board, canMove, canBuild, rowsAndColumns: originalRowsAndColumns} = this.props;
-    const {rowsAndColumns, arrows, won} = this.state;
+    const {rowsAndColumns, arrows, won, selectedMoveCell, selectedBuildCell} = this.state;
     const rawSettings = user ? user.settings : Client.getDefaultSettings();
     const settings = {...rawSettings, theme: {...rawSettings.theme, numbers: 'obvious'}};
 
     return (
       <Fragment>
+        {canMove || canBuild ? (
+          <Fragment>
+            <br />
+            <Label color={won ? 'green' : 'blue'} icon={won ? 'trophy' : undefined} content={(
+              won ? "You won! Press reset to start again" : (
+                !selectedMoveCell && !selectedBuildCell ? "Select one of your pieces" : (
+                  selectedMoveCell ? "Select a square to move to, or click on your piece to do something else" : (
+                    "Select a square to build on, or click on your piece to do something else"
+                  )
+                )
+              )
+            )} />
+            <br />
+          </Fragment>
+        ) : null}
         <BoardBackground
           medium
           allowControl={[]}
@@ -244,9 +259,6 @@ class LearnBoard extends Component {
         {canMove || canBuild ? (
           <div>
             <Button onClick={this.reset} disabled={rowsAndColumns === originalRowsAndColumns} primary>Reset</Button>
-            {won ? (
-              <Label icon={'trophy'} content={'You won!'} color={'green'}/>
-            ) : null}
           </div>
         ) : null}
       </Fragment>

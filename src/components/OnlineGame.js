@@ -222,6 +222,7 @@ class ChosenOnlineGame extends Component {
         ) : null}
       </Segment>
     );
+    const tournament = game ? tournamentsById[game.tournamentId] : null;
 
     return (
       <Fragment>
@@ -252,7 +253,12 @@ class ChosenOnlineGame extends Component {
                   <OnlineGamePlayer game={game} player={playerB} />
                 </Fragment>
               ), color: isUserPlayerB ? 'green' : undefined},
-            ]}/>
+              tournament ? {key: 'tournament', content: (
+                <NavLink to={`/tournament/${tournament.id}`}>
+                  <Icon name={'sitemap'} /> {tournament.name}
+                </NavLink>
+              ), as: 'span'} : null,
+            ].filter(item => item)}/>
           </Grid.Row>
         </Grid>
         <Responsive as={Fragment} maxWidth={800}>

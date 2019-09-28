@@ -85,7 +85,9 @@ export class GameCard extends Component {
               {" "}
               {tournament ? <Label content={tournament.name} icon={'sitemap'} /> : null}
             </Card.Meta>
-          ) : null}
+          ) : (
+            tournament ? <Label icon={'sitemap'} /> : null
+          )}
         </Card.Content>
       </Card>
     );

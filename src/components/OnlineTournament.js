@@ -2,10 +2,10 @@ import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import classNames from 'classnames';
-import {Button, Grid, Icon, Label, Modal, Segment, Statistic, Tab, Table} from "semantic-ui-react";
+import {Button, Grid, Icon, Label, Menu, Modal, Segment, Statistic, Tab, Table} from "semantic-ui-react";
 
 import {withClient} from "../client/withClient";
-import {Route, Switch, withRouter} from "react-router-dom";
+import {NavLink, Route, Switch, withRouter} from "react-router-dom";
 import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
 // import TournamentList from "./TournamentList";
@@ -115,6 +115,16 @@ class ChosenOnlineTournament extends Component {
 
     return (
       <Fragment>
+        <Grid centered>
+          <Grid.Row>
+            <Menu stackable size={'massive'} inverted items={[
+              {key: 'close', content: 'Close', icon: 'x', onClick: this.close, color: 'red', active: true},
+              {key: 'share', content: 'Share Tournament', icon: 'share', onClick: this.shareTournament, as: 'a',
+                href: location.pathname, color: 'green', active: true,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to tournament'},
+            ]} />
+          </Grid.Row>
+        </Grid>
         <Segment>
           <Statistic.Group widths={"three"} size={"tiny"}>
             <Statistic
@@ -147,25 +157,6 @@ class ChosenOnlineTournament extends Component {
             </Grid.Column>
           </Grid>
         </Segment>
-        {/*<Segment>*/}
-        {/*  <TournamentList*/}
-        {/*    user={user}*/}
-        {/*    usersById={usersById}*/}
-        {/*    currentTournamentId={tournament.id}*/}
-        {/*    tournaments={tournamentsInfo.myLive.concat(tournamentsInfo.myFuture)}*/}
-        {/*    selectLiveTournament={selectLiveTournament}*/}
-        {/*    terse*/}
-        {/*  />*/}
-        {/*  {(tournamentsInfo.otherLive.length || tournamentsInfo.otherFuture.length) ? (*/}
-        {/*    <TournamentList*/}
-        {/*      user={user}*/}
-        {/*      usersById={usersById}*/}
-        {/*      tournaments={tournamentsInfo.otherLive.concat(tournamentsInfo.otherFuture)}*/}
-        {/*      selectLiveTournament={selectLiveTournament}*/}
-        {/*      terse*/}
-        {/*    />*/}
-        {/*  ) : null}*/}
-        {/*</Segment>*/}
         {!tournament.started ? (
           <Segment>
             <Grid columns={'equal'}>
@@ -389,20 +380,6 @@ class ChosenOnlineTournament extends Component {
             </Grid>
           </Segment>
         ) : null}
-        {/*<Play*/}
-        {/*  user={user}*/}
-        {/*  defaultSettings={client.settings}*/}
-        {/*  otherUser={otherUser}*/}
-        {/*  changeSettings={this.changeSettings}*/}
-        {/*  game={gameGame}*/}
-        {/*  matchGame={game}*/}
-        {/*  names={{[Game.PLAYER_A]: playerA.name, [Game.PLAYER_B]: playerB.name}}*/}
-        {/*  allowControl={[userPlayer].filter(player => player)}*/}
-        {/*  submit={this.submit}*/}
-        {/*  challengeUser={this.challengeUser}*/}
-        {/*  stopChallengeUser={this.stopChallengeUser}*/}
-        {/*  challengedUser={challengedUser}*/}
-        {/*/>*/}
       </Fragment>
     );
   }

@@ -119,8 +119,8 @@ class ChosenOnlineTournament extends Component {
           <Grid.Row>
             <Menu stackable size={'massive'} inverted items={[
               {key: 'close', content: 'Close', icon: 'x', onClick: this.close, color: 'red', active: true},
-              {key: 'share', content: 'Share Tournament', icon: 'share', onClick: this.shareTournament, as: 'a',
-                href: location.pathname, color: 'green', active: true,
+              {key: 'share', content: 'Share Tournament', icon: 'share', onClick: this.shareTournament, as: NavLink,
+                to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to tournament'},
             ]} />
           </Grid.Row>
@@ -148,8 +148,8 @@ class ChosenOnlineTournament extends Component {
                 icon
                 onClick={this.shareTournament}
                 style={{width: '100%'}}
-                as={'a'}
-                href={location.pathname}
+                as={NavLink}
+                to={location.pathname}
                 title={navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to tournament'}
               >
                 <Icon name={'share'}/> Share Tournament

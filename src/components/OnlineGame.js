@@ -230,8 +230,8 @@ class ChosenOnlineGame extends Component {
           <Grid.Row>
             <Menu stackable size={'massive'} inverted items={[
               {key: 'close', content: 'Close', icon: 'x', onClick: this.close, color: 'red', active: true},
-              {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareGame, as: 'a',
-                href: location.pathname, color: 'green', active: true,
+              {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareGame, as: NavLink,
+                to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'},
               {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
                 to: `/hotseat?position=${gameGame.compressedFullNotation}`, color: 'green', active: true,

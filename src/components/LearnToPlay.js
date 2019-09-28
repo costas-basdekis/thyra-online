@@ -1377,8 +1377,8 @@ class LearnToPlay extends Component {
     </Fragment>},
     {title: 'You\'re ready to play!', body: <Fragment>
       <div>
-        You're now ready to play! You can now <NavLink to={'./hotseat'}>play with a friend on the same screen</NavLink>
-        or play online <NavLink to={'./lobby'}>at the lobby</NavLink>.
+        You're now ready to play! You can now <NavLink to={'./hotseat'}>play with a friend on the same
+        screen</NavLink> or play online <NavLink to={'./lobby'}>at the lobby</NavLink>.
       </div>
     </Fragment>}
   ];
@@ -1410,7 +1410,6 @@ class LearnToPlay extends Component {
 
     return (
       <Message>
-        <Message.Header>{stepIndex + 1}.  {step.title}</Message.Header>
         <Message.Content>
           <Grid columns={'equal'} verticalAlign={'middle'} textAlign={'center'}>
             <Grid.Row>
@@ -1421,6 +1420,7 @@ class LearnToPlay extends Component {
                 {key: 'last', icon: 'fast forward', onClick: this.goToLastStep, disabled: stepIndex === steps.length - 1},
               ]}/>
             </Grid.Row>
+            <Grid.Row><Message.Header>{stepIndex + 1}.  {step.title}</Message.Header></Grid.Row>
             <Grid.Row><Message content={<Fragment key={stepIndex}>{step.body}</Fragment>} /></Grid.Row>
             <Grid.Row>
               {stepIndex < steps.length - 1 ? (

@@ -511,9 +511,15 @@ class PlayNavigation extends Component {
   get gameIndexes() {
     const {game, selectedGame} = this.props;
     const selectedGameIndex = game.history.indexOf(selectedGame || game);
+    let mostRecentAncestorGameIndex = selectedGameIndex;
+    let ancestor = selectedGame;
+    while (mostRecentAncestorGameIndex === -1 && ancestor) {
+      ancestor = ancestor.previousInHistory;
+      mostRecentAncestorGameIndex = game.history.indexOf(ancestor);
+    }
     const lastGameIndex = game.history.length - 1;
 
-    return {selectedGameIndex, lastGameIndex};
+    return {selectedGameIndex, lastGameIndex, mostRecentAncestorGameIndex};
   }
 
   canGoToCurrentMove() {
@@ -543,6 +549,11 @@ class PlayNavigation extends Component {
     this.props.selectGame(this.props.game.history[selectedGameIndex + 1]);
   };
 
+  goToAncestor = () => {
+    const {mostRecentAncestorGameIndex} = this.gameIndexes;
+    this.props.selectGame(this.props.game.history[mostRecentAncestorGameIndex]);
+  };
+
   canGoToPreviousMove() {
     const {selectedGameIndex} = this.gameIndexes;
 
@@ -554,6 +565,10 @@ class PlayNavigation extends Component {
       return;
     }
     this.props.selectGame((this.props.selectedGame || this.props.game).previousInHistory);
+  };
+
+  goToPreviousVariationMove = () => {
+    this.props.selectGame(this.props.selectedGame.previousInHistory);
   };
 
   canGoToFirstMove() {
@@ -571,15 +586,23 @@ class PlayNavigation extends Component {
 
   render() {
     const {game, selectedGame} = this.props;
-    const {selectedGameIndex} = this.gameIndexes;
+    const {selectedGameIndex, mostRecentAncestorGameIndex} = this.gameIndexes;
 
     return (
       <Menu size={'massive'} items={[
         {key: 'current', icon: 'fast backward', onClick: this.goToCurrentMove, disabled: !this.canGoToCurrentMove()},
-        {key: 'previous', icon: 'backward', onClick: this.goToNextMove, disabled: !this.canGoToNextMove()},
-        {key: 'moveCount', content: selectedGameIndex >= 0 ? `${(selectedGame || game).moveCount}/${game.moveCount}` : selectedGame.moveCount, disabled: game.finished},
-        {key: 'next', icon: 'forward', onClick: this.goToPreviousMove, disabled: !this.canGoToPreviousMove()},
+        ...(selectedGameIndex >= 0 ? [
+          {key: 'previous', icon: 'backward', onClick: this.goToNextMove, disabled: !this.canGoToNextMove()},
+          {key: 'moveCount', content: selectedGameIndex >= 0 ? `${(selectedGame || game).moveCount}/${game.moveCount}` : selectedGame.moveCount, disabled: game.finished},
+          {key: 'next', icon: 'forward', onClick: this.goToPreviousMove, disabled: !this.canGoToPreviousMove()},
+        ] : [
+          {key: 'goToAncestor', content: `Return to ${mostRecentAncestorGameIndex}/${game.moveCount}`, onClick: this.goToAncestor},
+        ]),
         {key: 'first', icon: 'fast forward', onClick: this.goToFirstMove, disabled: !this.canGoToFirstMove()},
+        ...(selectedGameIndex >= 0 ? [] : [
+          {key: 'ancestor', content: `Variation ${mostRecentAncestorGameIndex}/${mostRecentAncestorGameIndex}`, disabled: true},
+          {key: 'next', icon: 'forward', onClick: this.goToPreviousVariationMove, disabled: selectedGame.moveCount <= 1},
+        ]),
       ]} />
     );
   }

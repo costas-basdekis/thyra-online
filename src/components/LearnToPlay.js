@@ -1377,7 +1377,7 @@ class LearnToPlay extends Component {
     </Fragment>},
     {title: 'You\'re ready to play!', body: <Fragment>
       <div>
-        You're now ready to play! You can now <NavLink to={'./hotseat'}>play with a friend on the same phone or computer</NavLink>
+        You're now ready to play! You can now <NavLink to={'./hotseat'}>play with a friend on the same screen</NavLink>
         or play online <NavLink to={'./lobby'}>at the lobby</NavLink>.
       </div>
     </Fragment>}
@@ -1422,6 +1422,16 @@ class LearnToPlay extends Component {
               ]}/>
             </Grid.Row>
             <Grid.Row><Message content={<Fragment key={stepIndex}>{step.body}</Fragment>} /></Grid.Row>
+            <Grid.Row>
+              {stepIndex < steps.length - 1 ? (
+                <Button primary onClick={this.goToNextStep} icon={'forward'} content={'Go to next step'} />
+              ) : (
+                <Fragment>
+                  <Button positive as={NavLink} to={'/lobby'} icon={'play'} content={'Play with someone online'} />
+                  <Button positive as={NavLink} to={'/hotseat'} icon={'retweet'} content={'Play with a friend on the same screen'} />
+                </Fragment>
+              )}
+            </Grid.Row>
           </Grid>
         </Message.Content>
       </Message>

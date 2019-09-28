@@ -37,7 +37,7 @@ class OnlineGamePlayer extends Component {
         {isWinner ? <Icon name={'trophy'} color={"green"} /> : null}{" "}
         <span style={isWinner ? {color: '#21BA45'} : undefined}>
           {player.name}
-          {initialPlayer ? (
+          {initialPlayer && !game.tournamentId ? (
             <Fragment>
               {" "}({resultingPlayerScore ? (
                 <Fragment>

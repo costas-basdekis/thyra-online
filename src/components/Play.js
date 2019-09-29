@@ -39,8 +39,11 @@ class Play extends Component {
   autoSubmitModal = React.createRef();
 
   makeMove = game => {
-    if (this.props.submit) {
-      this.setState({game})
+    if (!this.props.allowControl.includes(this.props.game.nextPlayer) || game.chainCount <= this.state.game.chainCount) {
+      this.setState({selectedGame: game});
+    }
+    else if (this.props.submit) {
+      this.setState({game});
     } else {
       this.props.makeMove(game);
     }

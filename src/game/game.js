@@ -49,9 +49,9 @@ class Game {
     [String.fromCharCode(index < 26 ? 65 + index : 48 + (index - 26)), this.REVERSE_NOTATION[value]]));
 
   static create() {
-    const cells = this.getInitialCells();
+    const rowsAndColumns = this.getInitialRowsAndColumns();
     const status = this.getInitialStatus();
-    return new this(cells, status, null, null, false);
+    return new this(rowsAndColumns, status, null, null, false);
   }
 
   static fromMoves(moves) {
@@ -85,17 +85,17 @@ class Game {
     return this.fromMoves(moves);
   }
 
-  createStep(cells, status, lastMove) {
-    return new this.constructor(cells, status, this, lastMove, false);
+  createStep(rowsAndColumns, status, lastMove) {
+    return new this.constructor(rowsAndColumns, status, this, lastMove, false);
   }
 
-  createNext(cells, status, lastMove) {
-    return new this.constructor(cells, status, this, lastMove, true);
+  createNext(rowsAndColumns, status, lastMove) {
+    return new this.constructor(rowsAndColumns, status, this, lastMove, true);
   }
 
-  constructor(cells, status, previous, lastMove, isNextMove) {
-    if (!cells || !status) {
-      throw new Error("You need to pass cells, status, and previous game");
+  constructor(rowsAndColumns, status, previous, lastMove, isNextMove) {
+    if (!rowsAndColumns || !status) {
+      throw new Error("You need to pass rowsAndColumns, status, and previous game");
     }
     this.previous = previous;
     this.history = (this.previous ? this.previous.history : [])
@@ -109,11 +109,7 @@ class Game {
     this.lastMove = lastMove ? lastMove : (status.resignedPlayer ? {resign: status.resignedPlayer} : lastMove);
     this.moves = this.previous ? this.previous.moves.concat([this.lastMove]) : [];
 
-    this.cells = cells;
-    this.rowsAndColumns = this.constructor.ROWS.map(y => ({
-      y,
-      cells: this.constructor.COLUMNS.map(x => this.cells[y][x]),
-    }));
+    this.rowsAndColumns = rowsAndColumns;
 
     const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer} = status;
     this.thisPlayer = previous ? previous.nextPlayer : Game.PLAYER_A;
@@ -170,7 +166,7 @@ class Game {
 
   serializeVerbose() {
     return {
-      cells: this.cells,
+      rowsAndColumns: this.rowsAndColumns,
       status: {
         nextPlayer: this.nextPlayer,
         moveType: this.moveType,
@@ -196,28 +192,26 @@ class Game {
     return this.fromMoves(moves);
   }
 
-  static deserializeVerbose({cells, status, previous, lastMove, isNextMove}) {
+  static deserializeVerbose({cells, rowsAndColumns, status, previous, lastMove, isNextMove}) {
     if (previous) {
       previous = this.deserialize(previous);
     }
-    return new this(cells, status, previous, lastMove, isNextMove);
+    // TODO: Remove `cells` after deploying
+    if (!rowsAndColumns) {
+      rowsAndColumns = this.ROWS.map(y => ({
+        y,
+        cells: this.COLUMNS.map(x => cells[y][x]),
+      }));
+    }
+    return new this(rowsAndColumns, status, previous, lastMove, isNextMove);
   }
 
-  static getInitialCells() {
-    const cells = {};
-    for (const y of this.ROWS) {
-      cells[y] = {};
-      for (const x of this.COLUMNS) {
-        cells[y][x] = {
-          x, y,
-          player: null,
-          worker: null,
-          level: 0,
-        };
-      }
-    }
-
-    return cells;
+  static getInitialRowsAndColumns() {
+    return this.ROWS.map(y => ({
+      y, cells: this.COLUMNS.map(x => ({
+        x, y, level: 0, player: null, worker: null,
+      })),
+    }));
   }
 
   static getInitialStatus() {
@@ -313,39 +307,42 @@ class Game {
     return this.ROWS.map(() => this.COLUMNS.map(() => false));
   }
 
-  getEmptyCellsAvailableMovesMatrix(cells) {
-    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => !cells[y][x].player));
+  getEmptyCellsAvailableMovesMatrix(rowsAndColumns) {
+    return this.getAvailableMovesMatrix(rowsAndColumns, cell => !cell.player);
   }
 
-  getPlayerAvailableMovesMatrix(cells, player) {
-    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => {
-      if (cells[y][x].player !== player) {
+  getPlayerAvailableMovesMatrix(rowsAndColumns, player) {
+    return this.getAvailableMovesMatrix(rowsAndColumns, cell => {
+      if (cell.player !== player) {
         return false;
       }
 
-      return this.hasAvailableMove(this.getMovableAvailableMovesMatrix(cells, {x, y}));
-    }));
+      return this.hasAvailableMove(this.getMovableAvailableMovesMatrix(rowsAndColumns, cell));
+    });
   }
 
-  getMovableAvailableMovesMatrix(cells, coordinates) {
-    const cell = cells[coordinates.y][coordinates.x];
-    const maximumLevel = cell.level + 1;
-    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => (
-      Math.abs(x - coordinates.x) <= 1
-      && Math.abs(y - coordinates.y) <= 1
-      && !cells[y][x].player
-      && cells[y][x].level <= 3
-      && cells[y][x].level <= maximumLevel
-    )));
+  getMovableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+    const maximumLevel = rowsAndColumns[coordinates.y].cells[coordinates.x].level + 1;
+    return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
+      Math.abs(cell.x - coordinates.x) <= 1
+      && Math.abs(cell.y - coordinates.y) <= 1
+      && !cell.player
+      && cell.level <= 3
+      && cell.level <= maximumLevel
+    ));
   }
 
-  getBuildableAvailableMovesMatrix(cells, coordinates) {
-    return this.constructor.ROWS.map(y => this.constructor.COLUMNS.map(x => (
-      Math.abs(x - coordinates.x) <= 1
-      && Math.abs(y - coordinates.y) <= 1
-      && !cells[y][x].player
-      && cells[y][x].level < 4
-    )));
+  getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+    return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
+      Math.abs(cell.x - coordinates.x) <= 1
+      && Math.abs(cell.y - coordinates.y) <= 1
+      && !cell.player
+      && cell.level < 4
+    ));
+  }
+
+  getAvailableMovesMatrix(rowsAndColumns, isMoveAvailable) {
+    return rowsAndColumns.map(row => row.cells.map(isMoveAvailable));
   }
 
   checkCanMakeMove(expectedMoveType, coordinates, targetCoordinates) {
@@ -365,13 +362,28 @@ class Game {
   }
 
   resign(player) {
-    return this.createStep(this.cells, {
+    return this.createStep(this.rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.moveType,
       availableMovesMatrix: this.availableMovesMatrix,
       canUndo: false,
       resignedPlayer: player,
     }, {resign: player});
+  }
+
+  static updateCells(rowsAndColumns, ...newCells) {
+    const updates = {};
+    for (const update of newCells) {
+      updates[update.y] = updates[update.y] || {};
+      updates[update.y][update.x] = update;
+    }
+    return rowsAndColumns.map(row => !updates[row.y] ? row : ({
+      ...row,
+      cells: row.cells.map(cell => !updates[cell.y][cell.x] ? cell : ({
+        ...cell,
+        ...updates[cell.y][cell.x],
+      })),
+    }));
   }
 
   makeMove(coordinates) {
@@ -412,21 +424,15 @@ class Game {
   placeFirstWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER, {x, y});
 
-    const cells = {
-      ...this.cells,
-      [y]: {
-        ...this.cells[y],
-        [x]: {
-          ...this.cells[y][x],
-          player: this.nextPlayer,
-          worker: this.constructor.WORKER_FIRST,
-        },
-      },
-    };
-    return this.createStep(cells, {
+    const rowsAndColumns = this.constructor.updateCells(this.rowsAndColumns, {
+      x, y,
+      player: this.nextPlayer,
+      worker: this.constructor.WORKER_FIRST,
+    });
+    return this.createStep(rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
-      availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(cells),
+      availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -435,26 +441,20 @@ class Game {
   placeSecondWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER, {x, y});
 
-    const cells = {
-      ...this.cells,
-      [y]: {
-        ...this.cells[y],
-        [x]: {
-          ...this.cells[y][x],
-          player: this.nextPlayer,
-          worker: this.constructor.WORKER_SECOND,
-        },
-      },
-    };
+    const rowsAndColumns = this.constructor.updateCells(this.rowsAndColumns, {
+      x, y,
+      player: this.nextPlayer,
+      worker: this.constructor.WORKER_SECOND,
+    });
     const nextPlayer = this.constructor.OTHER_PLAYER[this.nextPlayer];
-    return this.createNext(cells, {
+    return this.createNext(rowsAndColumns, {
       nextPlayer: nextPlayer,
       moveType: nextPlayer === this.constructor.PLAYER_A
         ? this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE
         : this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER,
       availableMovesMatrix: nextPlayer === this.constructor.PLAYER_A
-        ? this.getPlayerAvailableMovesMatrix(cells, nextPlayer)
-        : this.getEmptyCellsAvailableMovesMatrix(cells),
+        ? this.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer)
+        : this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});
@@ -463,13 +463,13 @@ class Game {
   selectWorkerToMove({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE, {x, y});
 
-    const cell = this.cells[y][x];
-    return this.createStep(this.cells, {
+    const cell = this.rowsAndColumns[y].cells[x];
+    return this.createStep(this.rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: cell.worker === this.constructor.WORKER_FIRST
         ? this.constructor.MOVE_TYPE_MOVE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
-      availableMovesMatrix: this.getMovableAvailableMovesMatrix(this.cells, {x, y}),
+      availableMovesMatrix: this.getMovableAvailableMovesMatrix(this.rowsAndColumns, {x, y}),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -477,33 +477,15 @@ class Game {
 
   moveWorker(to, worker) {
     const fromCell = this.findCell(cell => cell.player === this.nextPlayer && cell.worker === worker);
-    const toCell = this.cells[to.y][to.x];
-    let cells = {
-      ...this.cells,
-      [fromCell.y]: {
-        ...this.cells[fromCell.y],
-        [fromCell.x]: {
-          ...fromCell,
-          player: null,
-          worker: null,
-        },
-      },
-    };
-    cells = {
-      ...cells,
-      [to.y]: {
-        ...cells[to.y],
-        [to.x]: {
-          ...toCell,
-          player: fromCell.player,
-          worker: fromCell.worker,
-        },
-      },
-    };
-    return this.createStep(cells, {
+    const toCell = this.rowsAndColumns[to.y].cells[to.x];
+    const rowsAndColumns = this.constructor.updateCells(this.rowsAndColumns, ...[
+      {x: fromCell.x, y: fromCell.y, player: null, worker: null},
+      {x: toCell.x, y: toCell.y, player: fromCell.player, worker: fromCell.worker},
+    ]);
+    return this.createStep(rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
-      availableMovesMatrix: this.getBuildableAvailableMovesMatrix(cells, to),
+      availableMovesMatrix: this.getBuildableAvailableMovesMatrix(rowsAndColumns, to),
       canUndo: true,
       resignedPlayer: null,
     }, {x: to.x, y: to.y});
@@ -524,21 +506,14 @@ class Game {
   buildAroundWorker({x, y}) {
     this.checkCanMakeMove(this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER, {x, y});
 
-    const cells = {
-      ...this.cells,
-      [y]: {
-        ...this.cells[y],
-        [x]: {
-          ...this.cells[y][x],
-          level: this.cells[y][x].level + 1,
-        },
-      },
-    };
+    const rowsAndColumns = this.constructor.updateCells(this.rowsAndColumns, {
+      x, y, level: this.rowsAndColumns[y].cells[x].level + 1,
+    });
     const nextPlayer = this.constructor.OTHER_PLAYER[this.nextPlayer];
-    return this.createNext(cells, {
+    return this.createNext(rowsAndColumns, {
       nextPlayer: nextPlayer,
       moveType: this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-      availableMovesMatrix: this.getPlayerAvailableMovesMatrix(cells, nextPlayer),
+      availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});

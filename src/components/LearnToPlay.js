@@ -114,14 +114,10 @@ class LearnBoard extends Component {
     if (selectedMoveCell) {
       this.setState(({rowsAndColumns}) => ({
         selectedMoveCell: null,
-        rowsAndColumns: rowsAndColumns.map(row => ({
-          ...row,
-          cells: row.cells.map(originalCell => ({
-            ...originalCell,
-            ...(originalCell === selectedMoveCell ? {player: null, worker: null} : null),
-            ...(originalCell === cell ? {player: selectedMoveCell.player, worker: selectedMoveCell.worker} : null),
-          })),
-        })),
+        rowsAndColumns: Game.updateCells(rowsAndColumns, ...[
+          {x: selectedMoveCell.x, y: selectedMoveCell.y, player: null, worker: null},
+          {x: cell.x, y: cell.y, player: selectedMoveCell.player, worker: selectedMoveCell.worker},
+        ]),
         arrows: [
           {from: selectedMoveCell, to: cell, type: 'move', colour: 'white'},
         ],
@@ -136,14 +132,10 @@ class LearnBoard extends Component {
     this.setState(({rowsAndColumns}) => ({
       selectedMoveCell: movedFromCell,
       selectedBuildCell: null,
-      rowsAndColumns: rowsAndColumns.map(row => ({
-        ...row,
-        cells: row.cells.map(originalCell => ({
-          ...originalCell,
-          ...(originalCell.x === selectedBuildCell.x && originalCell.y === selectedBuildCell.y ? {player: null, worker: null} : null),
-          ...(originalCell.x === movedFromCell.x && originalCell.y === movedFromCell.y ? {player: movedFromCell.player, worker: movedFromCell.worker} : null),
-        })),
-      })),
+      rowsAndColumns: Game.updateCells(rowsAndColumns, ...[
+        {x: selectedBuildCell.x, y: selectedBuildCell.y, player: null, worker: null},
+        {x: movedFromCell.x, y: movedFromCell.y, player: movedFromCell.player, worker: movedFromCell.worker},
+      ]),
       arrows: null,
       won: false,
     }));
@@ -153,13 +145,9 @@ class LearnBoard extends Component {
     if (selectedBuildCell) {
       this.setState(({rowsAndColumns}) => ({
         selectedBuildCell: null,
-        rowsAndColumns: rowsAndColumns.map(row => ({
-          ...row,
-          cells: row.cells.map(originalCell => ({
-            ...originalCell,
-            ...(originalCell === cell ? {level: originalCell.level + 1} : null),
-          })),
-        })),
+        rowsAndColumns: Game.updateCells(rowsAndColumns, {
+          x: cell.x, y: cell.y, level: rowsAndColumns[cell.y].cells[cell.x].level + 1,
+        }),
         arrows: [
           {from: selectedBuildCell, to: cell, type: 'build', colour: 'white'},
         ],

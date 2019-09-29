@@ -70,8 +70,14 @@ class Game {
     return new this(rowsAndColumns, status, null, null, false);
   }
 
-  static fromMoves(moves) {
+  static fromMoves(moves, useCheck) {
+    if (useCheck === undefined) {
+      throw new Error(`Expected useCheck is not set`);
+    }
     let game = this.create();
+    if (!useCheck) {
+      game.useCheck = false;
+    }
     for (const move of moves) {
       game = game.makeMove(move);
     }
@@ -119,6 +125,7 @@ class Game {
             availableMovesMatrix: this.allMovesAreAvailableMatrix(),
             canUndo: false,
             resignedPlayer: null,
+            useCheck: true,
           };
         } else if (playerACount === 1) {
           status = {
@@ -127,6 +134,7 @@ class Game {
             availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
             canUndo: false,
             resignedPlayer: null,
+            useCheck: true,
           };
         } else {
           const playerAFirstWorker = this.findCell(
@@ -142,6 +150,7 @@ class Game {
             availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
             canUndo: false,
             resignedPlayer: null,
+            useCheck: true,
           };
         }
       } else {
@@ -155,6 +164,7 @@ class Game {
             availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
             canUndo: false,
             resignedPlayer: null,
+            useCheck: true,
           };
         } else {
           const playerBFirstWorker = this.findCell(
@@ -167,9 +177,10 @@ class Game {
           status = {
             nextPlayer: this.PLAYER_A,
             moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-            availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A),
+            availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A, true),
             canUndo: false,
             resignedPlayer: null,
+            useCheck: true,
           };
         }
       }
@@ -190,17 +201,19 @@ class Game {
         status = {
           nextPlayer: this.PLAYER_A,
           moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A),
+          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A, true),
           canUndo: false,
           resignedPlayer: null,
+          useCheck: true,
         };
       } else {
         status = {
           nextPlayer: this.PLAYER_B,
           moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_B),
+          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_B, true),
           canUndo: false,
           resignedPlayer: null,
+          useCheck: true,
         };
       }
     }
@@ -215,7 +228,7 @@ class Game {
       return null;
     }
 
-    return this.fromMoves(moves);
+    return this.fromMoves(moves, true);
   }
 
   static fromCompressedMoveNotation(compressedFullNotation) {
@@ -226,7 +239,7 @@ class Game {
       return null;
     }
 
-    return this.fromMoves(moves);
+    return this.fromMoves(moves, true);
   }
 
   static getPositionNotation(rowsAndColumns) {
@@ -297,7 +310,14 @@ class Game {
 
     this.rowsAndColumns = rowsAndColumns;
 
-    const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer} = status;
+    const missingStatusKeys =
+      ['nextPlayer', 'moveType', 'availableMovesMatrix', 'canUndo', 'resignedPlayer', 'useCheck']
+      .filter(key => status[key] === undefined);
+    if (missingStatusKeys.length) {
+      throw new Error(`Some status keys were missing: ${missingStatusKeys.join(', ')}`);
+    }
+    const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer, useCheck} = status;
+    this.useCheck = useCheck;
     this.thisPlayer = previous ? previous.nextPlayer : Game.PLAYER_A;
     this.nextPlayer = nextPlayer;
     this.thisMoveType = previous ? previous.moveType : null;
@@ -375,8 +395,8 @@ class Game {
     }
   }
 
-  static deserializeCompact({moves}) {
-    return this.fromMoves(moves);
+  static deserializeCompact({moves, useCheck = false}) {
+    return this.fromMoves(moves, useCheck);
   }
 
   static deserializeVerbose({cells, rowsAndColumns, status, previous, lastMove, isNextMove}) {
@@ -408,6 +428,7 @@ class Game {
       availableMovesMatrix: this.allMovesAreAvailableMatrix(),
       canUndo: false,
       resignedPlayer: null,
+      useCheck: true,
     };
   }
 
@@ -498,7 +519,7 @@ class Game {
       return winningCell.player;
     }
 
-    if (!this.canUndo && this.constructor.canPlayerWin(this.rowsAndColumns, this.nextPlayer)) {
+    if (this.useCheck && !this.canUndo && this.constructor.canPlayerWin(this.rowsAndColumns, this.nextPlayer)) {
       return this.nextPlayer;
     }
 
@@ -517,17 +538,23 @@ class Game {
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => !cell.player);
   }
 
-  static getPlayerAvailableMovesMatrix(rowsAndColumns, player) {
+  static getPlayerAvailableMovesMatrix(rowsAndColumns, player, useCheck) {
+    if (useCheck === undefined) {
+      throw new Error(`Expected useCheck`);
+    }
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => {
       if (cell.player !== player) {
         return false;
       }
 
-      return this.hasAvailableMove(this.getMovableAvailableMovesMatrix(rowsAndColumns, cell));
+      return this.hasAvailableMove(this.getMovableAvailableMovesMatrix(rowsAndColumns, cell, useCheck));
     });
   }
 
-  static getMovableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+  static getMovableAvailableMovesMatrix(rowsAndColumns, coordinates, useCheck) {
+    if (useCheck === undefined) {
+      throw new Error(`Expected useCheck`);
+    }
     const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
     const maximumLevel = fromCell.level + 1;
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
@@ -536,23 +563,26 @@ class Game {
       && !cell.player
       && cell.level <= 3
       && cell.level <= maximumLevel
-      && this.hasAvailableMove(this.getBuildableAvailableMovesMatrix(this.updateCells(rowsAndColumns, ...[
+      && (!useCheck || this.hasAvailableMove(this.getBuildableAvailableMovesMatrix(this.updateCells(rowsAndColumns, ...[
         {x: fromCell.x, y: fromCell.y, player: null, worker: null},
         {x: cell.x, y: cell.y, player: fromCell.player, worker: fromCell.worker}
-      ]), cell))
+      ]), cell, useCheck)))
     ));
   }
 
-  static getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+  static getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates, useCheck) {
+    if (useCheck === undefined) {
+      throw new Error(`Expected useCheck`);
+    }
     const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
       Math.abs(cell.x - coordinates.x) <= 1
       && Math.abs(cell.y - coordinates.y) <= 1
       && !cell.player
       && cell.level < 4
-      && !this.canPlayerWin(this.updateCells(rowsAndColumns, ...[
+      && (!useCheck || !this.canPlayerWin(this.updateCells(rowsAndColumns, ...[
         {x: cell.x, y: cell.y, level: cell.level + 1},
-      ]), this.OTHER_PLAYER[fromCell.player])
+      ]), this.OTHER_PLAYER[fromCell.player]))
     ));
   }
 
@@ -583,6 +613,7 @@ class Game {
       availableMovesMatrix: this.availableMovesMatrix,
       canUndo: false,
       resignedPlayer: player,
+      useCheck: this.useCheck,
     }, {resign: player});
   }
 
@@ -650,6 +681,7 @@ class Game {
       availableMovesMatrix: this.constructor.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: true,
       resignedPlayer: null,
+      useCheck: this.useCheck,
     }, {x, y});
   }
 
@@ -668,10 +700,11 @@ class Game {
         ? this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE
         : this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER,
       availableMovesMatrix: nextPlayer === this.constructor.PLAYER_A
-        ? this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer)
+        ? this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer, this.useCheck)
         : this.constructor.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: false,
       resignedPlayer: null,
+      useCheck: this.useCheck,
     }, {x, y});
   }
 
@@ -684,9 +717,11 @@ class Game {
       moveType: cell.worker === this.constructor.WORKER_FIRST
         ? this.constructor.MOVE_TYPE_MOVE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
-      availableMovesMatrix: this.constructor.getMovableAvailableMovesMatrix(this.rowsAndColumns, {x, y}),
+      availableMovesMatrix: this.constructor.getMovableAvailableMovesMatrix(
+        this.rowsAndColumns, {x, y}, this.useCheck),
       canUndo: true,
       resignedPlayer: null,
+      useCheck: this.useCheck,
     }, {x, y});
   }
 
@@ -700,9 +735,10 @@ class Game {
     return this.createStep(rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
-      availableMovesMatrix: this.constructor.getBuildableAvailableMovesMatrix(rowsAndColumns, to),
+      availableMovesMatrix: this.constructor.getBuildableAvailableMovesMatrix(rowsAndColumns, to, this.useCheck),
       canUndo: true,
       resignedPlayer: null,
+      useCheck: this.useCheck,
     }, {x: to.x, y: to.y});
   }
 
@@ -728,9 +764,10 @@ class Game {
     return this.createNext(rowsAndColumns, {
       nextPlayer: nextPlayer,
       moveType: this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-      availableMovesMatrix: this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer),
+      availableMovesMatrix: this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer, this.useCheck),
       canUndo: false,
       resignedPlayer: null,
+      useCheck: this.useCheck,
     }, {x, y});
   }
 }

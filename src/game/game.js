@@ -17,6 +17,7 @@ class Game {
 
   static WORKER_FIRST = 'first-worker';
   static WORKER_SECOND = 'second-worker';
+  static WORKERS = [this.WORKER_FIRST, this.WORKER_SECOND];
 
   static MOVE_TYPE_PLACE_FIRST_WORKER = 'place-first-worker';
   static MOVE_TYPE_PLACE_SECOND_WORKER = 'place-second-worker';
@@ -33,20 +34,35 @@ class Game {
   static COLUMNS = Array.from({length: 5}, (value, index) => index);
   static MOVE_NOTATION = this.ROWS.map(y => this.COLUMNS.map(x =>
     `${['A', 'B', 'C', 'D', 'E'][x]}${['1', '2', '3', '4', '5'][y]}`));
-  static RESIGNED_NOTATION = {
+  static MOVE_RESIGNED_NOTATION = {
     [this.PLAYER_A]: 'RA',
     [this.PLAYER_B]: 'RB',
   };
-  static REVERSE_NOTATION = {
+  static MOVE_REVERSE_NOTATION = {
     ..._.fromPairs(_.flatten(this.ROWS.map(y => this.COLUMNS.map(x =>
       [`${['A', 'B', 'C', 'D', 'E'][x]}${['1', '2', '3', '4', '5'][y]}`, {x, y}])))),
     'RA': [{resign: this.PLAYER_A}],
     'RB': [{resign: this.PLAYER_B}],
   };
-  static NOTATION_COMPRESSION = _.fromPairs(Object.keys(this.REVERSE_NOTATION).sort().map((value, index) =>
+  static MOVE_NOTATION_COMPRESSION = _.fromPairs(Object.keys(this.MOVE_REVERSE_NOTATION).sort().map((value, index) =>
     [value, String.fromCharCode(index < 26 ? 65 + index : 48 + (index - 26))]));
-  static NOTATION_DECOMPRESSION = _.fromPairs(Object.keys(this.REVERSE_NOTATION).sort().map((value, index) =>
-    [String.fromCharCode(index < 26 ? 65 + index : 48 + (index - 26)), this.REVERSE_NOTATION[value]]));
+  static MOVE_NOTATION_DECOMPRESSION = _.fromPairs(Object.keys(this.MOVE_REVERSE_NOTATION).sort().map((value, index) =>
+    [String.fromCharCode(index < 26 ? 65 + index : 48 + (index - 26)), this.MOVE_REVERSE_NOTATION[value]]));
+
+  static POSITION_NOTATION = _.fromPairs([0, 1, 2, 3, 4].map(
+    level => [level, _.fromPairs([null, this.PLAYER_A, this.PLAYER_B].map(
+      player => [player, `${level}-${player}`]))]));
+  static POSITION_REVERSE_NOTATION = _.fromPairs(_.flatten(Object.entries(this.POSITION_NOTATION).map(
+    ([levelStr, notations]) => Object.entries(notations).map(
+      ([playerStr, notation]) => [notation, {level: parseInt(levelStr), player: playerStr === "null" ? null : playerStr}]))));
+  static POSITION_NOTATION_COMPRESSION_MAP = _.fromPairs(_.flatten(Object.entries(this.POSITION_NOTATION).map(
+    ([, notations]) => Object.entries(notations).map(
+      ([, notation]) => notation))).map((notation, index) => [notation, String.fromCharCode(65 + index)]));
+  static POSITION_NOTATION_COMPRESSION = _.fromPairs(Object.entries(this.POSITION_NOTATION).map(
+    ([levelStr, notations]) => [levelStr, _.fromPairs(Object.entries(notations).map(
+      ([playerStr, notation]) => [playerStr, this.POSITION_NOTATION_COMPRESSION_MAP[notation]]))]));
+  static POSITION_NOTATION_DECOMPRESSION = _.fromPairs(Object.entries(this.POSITION_NOTATION_COMPRESSION_MAP).map(
+    ([notation, compressedNotation]) => [compressedNotation, this.POSITION_REVERSE_NOTATION[notation]]));
 
   static create() {
     const rowsAndColumns = this.getInitialRowsAndColumns();
@@ -63,10 +79,138 @@ class Game {
     return game;
   }
 
-  static fromNotation(fullNotation) {
+  static fromRowsAndColumns(rowsAndColumns) {
+    if (rowsAndColumns.length !== 5) {
+      throw new Error(`Expected 5 rows but got ${rowsAndColumns.length}`);
+    }
+    if (rowsAndColumns.find(row => row.cells.length !== 5)) {
+      throw new Error(`Expected 5 columns but some rows had a different number`);
+    }
+    if (rowsAndColumns.find((row, y) => row.y !== y)) {
+      throw new Error(`Some rows had invalid \`y\``);
+    }
+    if (rowsAndColumns.find(row => row.cells.find((cell, x) => cell.x !== x || cell.y !== row.y))) {
+      throw new Error(`Some cells had invalid \`x\` or \`y\``);
+    }
+    const hasInvalidPlayerOrWorker = cell => (
+      (cell.player && !this.PLAYERS.includes(cell.player))
+      || (cell.worker && !this.WORKERS.includes(cell.worker))
+    );
+    if (this.findCell(rowsAndColumns, hasInvalidPlayerOrWorker)) {
+      throw new Error(`Some cells had invalid player or worker`);
+    }
+    if (this.findCell(rowsAndColumns, cell => ![0, 1, 2, 3, 4].includes(cell.level))) {
+      throw new Error(`Some cells have invalid level`);
+    }
+    const playerACount = this.findCells(rowsAndColumns, cell => cell.player === this.PLAYER_A).length;
+    const playerBCount = this.findCells(rowsAndColumns, cell => cell.player === this.PLAYER_B).length;
+    if (playerACount > 2 || playerBCount > 2) {
+      throw new Error(
+        `Players can have at most 2 workers, but player A has ${playerACount} and player B has ${playerBCount}`);
+    }
+    let status;
+    const maxLevel = Math.max(..._.flatten(rowsAndColumns.map(row => row.cells.map(cell => cell.level))));
+    if (maxLevel === 0) {
+      if (playerBCount === 0) {
+        if (playerACount === 0) {
+          status = {
+            nextPlayer: this.PLAYER_A,
+            moveType: this.MOVE_TYPE_PLACE_FIRST_WORKER,
+            availableMovesMatrix: this.allMovesAreAvailableMatrix(),
+            canUndo: false,
+            resignedPlayer: null,
+          };
+        } else if (playerACount === 1) {
+          status = {
+            nextPlayer: this.PLAYER_A,
+            moveType: this.MOVE_TYPE_PLACE_SECOND_WORKER,
+            availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
+            canUndo: false,
+            resignedPlayer: null,
+          };
+        } else {
+          const playerAFirstWorker = this.findCell(
+            cell => cell.player === this.PLAYER_A && cell.worker === this.WORKER_FIRST);
+          const playerASecondWorker = this.findCell(
+            cell => cell.player === this.PLAYER_A && cell.worker === this.WORKER_SECOND);
+          if (!playerAFirstWorker || !playerASecondWorker) {
+            throw new Error(`Could not find both workers of player A`);
+          }
+          status = {
+            nextPlayer: this.PLAYER_B,
+            moveType: this.MOVE_TYPE_PLACE_FIRST_WORKER,
+            availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
+            canUndo: false,
+            resignedPlayer: null,
+          };
+        }
+      } else {
+        if (playerACount !== 2) {
+          throw new Error(`Player A must put both of their workers before player B can place theirs`);
+        }
+        if (playerBCount === 1) {
+          status = {
+            nextPlayer: this.PLAYER_B,
+            moveType: this.MOVE_TYPE_PLACE_SECOND_WORKER,
+            availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
+            canUndo: false,
+            resignedPlayer: null,
+          };
+        } else {
+          const playerBFirstWorker = this.findCell(
+            cell => cell.player === this.PLAYER_B && cell.worker === this.WORKER_FIRST);
+          const playerBSecondWorker = this.findCell(
+            cell => cell.player === this.PLAYER_B && cell.worker === this.WORKER_SECOND);
+          if (!playerBFirstWorker || !playerBSecondWorker) {
+            throw new Error(`Could not find both workers of player B`);
+          }
+          status = {
+            nextPlayer: this.PLAYER_A,
+            moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
+            availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A),
+            canUndo: false,
+            resignedPlayer: null,
+          };
+        }
+      }
+    } else {
+      if (playerACount !== 2 || playerBCount !== 2) {
+        throw new Error(`Both players must have placed both of their workers before they can move and build`);
+      }
+
+      if (this.findCell(rowsAndColumns, cell => cell.level === 4 && cell.player)) {
+        throw new Error(`Some workers are on the 4th level`);
+      }
+      const wonWorkers = this.findCells(rowsAndColumns, cell => cell.level === 3 && cell.player);
+      if (wonWorkers.length > 1) {
+        throw new Error(`Too many workers have won`);
+      }
+      const buildCount = _.sum(_.flatten(rowsAndColumns.map(row => row.cells.map(cell => cell.level))));
+      if (buildCount % 2 === 0) {
+        status = {
+          nextPlayer: this.PLAYER_A,
+          moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
+          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_A),
+          canUndo: false,
+          resignedPlayer: null,
+        };
+      } else {
+        status = {
+          nextPlayer: this.PLAYER_B,
+          moveType: this.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
+          availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, this.PLAYER_B),
+          canUndo: false,
+          resignedPlayer: null,
+        };
+      }
+    }
+    return new this(rowsAndColumns, status, null, null, false);
+  }
+
+  static fromMoveNotation(fullNotation) {
     const moves = fullNotation
       .split('')
-      .map(part => this.REVERSE_NOTATION[part]);
+      .map(part => this.MOVE_REVERSE_NOTATION[part]);
     if (moves.filter(move => !move).length) {
       return null;
     }
@@ -74,15 +218,57 @@ class Game {
     return this.fromMoves(moves);
   }
 
-  static fromCompressedNotation(compressedFullNotation) {
+  static fromCompressedMoveNotation(compressedFullNotation) {
     const moves = compressedFullNotation
       .split('')
-      .map(part => this.NOTATION_DECOMPRESSION[part]);
+      .map(part => this.MOVE_NOTATION_DECOMPRESSION[part]);
     if (moves.filter(move => !move).length) {
       return null;
     }
 
     return this.fromMoves(moves);
+  }
+
+  static getPositionNotation(rowsAndColumns) {
+    return _.flatten(rowsAndColumns.map(
+      row => row.cells.map(
+        cell => this.POSITION_NOTATION_COMPRESSION[cell.level][cell.player])))
+      .join('');
+  }
+
+  static fromPositionNotation(notation) {
+    const rowsAndColumns = this.ROWS.map(y => ({
+      y, cells: this.COLUMNS.map(x => ({
+        x, y, ...this.POSITION_REVERSE_NOTATION[notation[y * 5 + x]],
+      })),
+    }));
+    return this.fromPosition(rowsAndColumns);
+  }
+
+  static fromCompressedPositionNotation(notation) {
+    const rowsAndColumns = this.ROWS.map(y => ({
+      y, cells: this.COLUMNS.map(x => ({
+        x, y, ...this.POSITION_NOTATION_DECOMPRESSION[notation[y * 5 + x]],
+      })),
+    }));
+    return this.fromPosition(rowsAndColumns);
+  }
+
+  static fromPosition(rowsAndColumns) {
+    let playerACount = 0, playerBCount = 0;
+    for (const x of this.ROWS) {
+      for (const y of this.COLUMNS) {
+        const cell = rowsAndColumns[y].cells[x];
+        if (cell.player === this.PLAYER_A) {
+          cell.worker = this.WORKERS[playerACount % 2];
+          playerACount += 1;
+        } else if (cell.player === this.PLAYER_B) {
+          cell.worker = this.WORKERS[playerBCount % 2];
+          playerBCount += 1;
+        }
+      }
+    }
+    return this.fromRowsAndColumns(rowsAndColumns);
   }
 
   createStep(rowsAndColumns, status, lastMove) {
@@ -121,7 +307,7 @@ class Game {
     this.canTakeMoveBack = !!this.previous;
     this.resignedPlayer = resignedPlayer;
     this.moveNotation = resignedPlayer
-      ? this.constructor.RESIGNED_NOTATION[resignedPlayer]
+      ? this.constructor.MOVE_RESIGNED_NOTATION[resignedPlayer]
       : (lastMove
         ? this.constructor.MOVE_NOTATION[lastMove.y][lastMove.x]
         : '');
@@ -129,13 +315,14 @@ class Game {
     this.compressedFullNotation = this.fullNotation
       .split(/(..)/)
       .filter(part => part)
-      .map(part => this.constructor.NOTATION_COMPRESSION[part])
+      .map(part => this.constructor.MOVE_NOTATION_COMPRESSION[part])
       .join('');
+    this.positionNotation = this.constructor.getPositionNotation(this.rowsAndColumns);
 
     this.winner = this.getWinner();
     if (this.winner) {
       this.finished = true;
-    } else if (!this.hasAvailableMove(this.availableMovesMatrix)) {
+    } else if (!this.constructor.hasAvailableMove(this.availableMovesMatrix)) {
       this.finished = true;
       this.winner = this.constructor.OTHER_PLAYER[this.nextPlayer];
     } else {
@@ -147,7 +334,7 @@ class Game {
     }
   }
 
-  getAvailableMoves(availableMovesMatrix = this.availableMovesMatrix) {
+  static getAvailableMoves(availableMovesMatrix) {
     return _.flatten(availableMovesMatrix
       .map((row, y) => row
         .map((available, x) => available ? {x, y} : null)))
@@ -218,10 +405,9 @@ class Game {
     return  {
       nextPlayer: this.PLAYER_A,
       moveType: this.MOVE_TYPE_PLACE_FIRST_WORKER,
-      finished: false,
-      winner: null,
       availableMovesMatrix: this.allMovesAreAvailableMatrix(),
       canUndo: false,
+      resignedPlayer: null,
     };
   }
 
@@ -262,7 +448,7 @@ class Game {
     }
   }
 
-  hasAvailableMove(availableMovesMatrix = this.availableMovesMatrix) {
+  static hasAvailableMove(availableMovesMatrix) {
     return this.getAvailableMoves(availableMovesMatrix).length > 0;
   }
 
@@ -307,11 +493,11 @@ class Game {
     return this.ROWS.map(() => this.COLUMNS.map(() => false));
   }
 
-  getEmptyCellsAvailableMovesMatrix(rowsAndColumns) {
+  static getEmptyCellsAvailableMovesMatrix(rowsAndColumns) {
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => !cell.player);
   }
 
-  getPlayerAvailableMovesMatrix(rowsAndColumns, player) {
+  static getPlayerAvailableMovesMatrix(rowsAndColumns, player) {
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => {
       if (cell.player !== player) {
         return false;
@@ -321,7 +507,7 @@ class Game {
     });
   }
 
-  getMovableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+  static getMovableAvailableMovesMatrix(rowsAndColumns, coordinates) {
     const maximumLevel = rowsAndColumns[coordinates.y].cells[coordinates.x].level + 1;
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
       Math.abs(cell.x - coordinates.x) <= 1
@@ -332,7 +518,7 @@ class Game {
     ));
   }
 
-  getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+  static getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
       Math.abs(cell.x - coordinates.x) <= 1
       && Math.abs(cell.y - coordinates.y) <= 1
@@ -341,7 +527,7 @@ class Game {
     ));
   }
 
-  getAvailableMovesMatrix(rowsAndColumns, isMoveAvailable) {
+  static getAvailableMovesMatrix(rowsAndColumns, isMoveAvailable) {
     return rowsAndColumns.map(row => row.cells.map(isMoveAvailable));
   }
 
@@ -432,7 +618,7 @@ class Game {
     return this.createStep(rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_PLACE_SECOND_WORKER,
-      availableMovesMatrix: this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
+      availableMovesMatrix: this.constructor.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -453,8 +639,8 @@ class Game {
         ? this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE
         : this.constructor.MOVE_TYPE_PLACE_FIRST_WORKER,
       availableMovesMatrix: nextPlayer === this.constructor.PLAYER_A
-        ? this.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer)
-        : this.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
+        ? this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer)
+        : this.constructor.getEmptyCellsAvailableMovesMatrix(rowsAndColumns),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});
@@ -469,7 +655,7 @@ class Game {
       moveType: cell.worker === this.constructor.WORKER_FIRST
         ? this.constructor.MOVE_TYPE_MOVE_FIRST_WORKER
         : this.constructor.MOVE_TYPE_MOVE_SECOND_WORKER,
-      availableMovesMatrix: this.getMovableAvailableMovesMatrix(this.rowsAndColumns, {x, y}),
+      availableMovesMatrix: this.constructor.getMovableAvailableMovesMatrix(this.rowsAndColumns, {x, y}),
       canUndo: true,
       resignedPlayer: null,
     }, {x, y});
@@ -485,7 +671,7 @@ class Game {
     return this.createStep(rowsAndColumns, {
       nextPlayer: this.nextPlayer,
       moveType: this.constructor.MOVE_TYPE_BUILD_AROUND_WORKER,
-      availableMovesMatrix: this.getBuildableAvailableMovesMatrix(rowsAndColumns, to),
+      availableMovesMatrix: this.constructor.getBuildableAvailableMovesMatrix(rowsAndColumns, to),
       canUndo: true,
       resignedPlayer: null,
     }, {x: to.x, y: to.y});
@@ -513,7 +699,7 @@ class Game {
     return this.createNext(rowsAndColumns, {
       nextPlayer: nextPlayer,
       moveType: this.constructor.MOVE_TYPE_SELECT_WORKER_TO_MOVE,
-      availableMovesMatrix: this.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer),
+      availableMovesMatrix: this.constructor.getPlayerAvailableMovesMatrix(rowsAndColumns, nextPlayer),
       canUndo: false,
       resignedPlayer: null,
     }, {x, y});

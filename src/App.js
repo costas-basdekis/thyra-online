@@ -16,6 +16,7 @@ import SvgBoardBackground from "./components/Board/SvgBoardBackground";
 import OnlineTournament from "./components/OnlineTournament";
 import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
+import EditPosition from "./components/EditPosition";
 
 class App extends Component {
   state = {
@@ -230,6 +231,9 @@ class App extends Component {
           )} : null,
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
+          )},
+          {menuItem: {icon: 'edit', content: 'Edit position'}, path: 'edit-position', render: () => (
+            <Tab.Pane><EditPosition /></Tab.Pane>
           )},
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>

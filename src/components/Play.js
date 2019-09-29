@@ -118,6 +118,7 @@ class Play extends Component {
         !this.props.game
         || !prevProps.game
         || this.props.game.compressedFullNotation !== prevProps.game.compressedFullNotation
+        || this.props.game.positionNotation !== prevProps.game.positionNotation
       );
       if (gameChanged) {
         this.selectGame(null);

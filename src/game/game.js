@@ -228,7 +228,11 @@ class Game {
       return null;
     }
 
-    return this.fromMoves(moves, true);
+    try {
+      return this.fromMoves(moves, true);
+    } catch (e) {
+      return this.fromMoves(moves, false);
+    }
   }
 
   static fromCompressedMoveNotation(compressedFullNotation) {
@@ -239,7 +243,11 @@ class Game {
       return null;
     }
 
-    return this.fromMoves(moves, true);
+    try {
+      return this.fromMoves(moves, true);
+    } catch (e) {
+      return this.fromMoves(moves, false);
+    }
   }
 
   static getPositionNotation(rowsAndColumns) {

@@ -219,7 +219,7 @@ class SvgBoardAvailableMovesArrows extends PureComponent {
     }
 
     let from = game.lastMove;
-    let availableCells = _.flatten(game.rowsAndColumns.map(row => row.cells.filter(isCellAvailable)));
+    let availableCells = game.findCells(isCellAvailable);
     if (transformation) {
       from = transformation.reverseCoordinates(game.rowsAndColumns, from);
       availableCells = availableCells.map(cell => transformation.reverseCoordinates(game.rowsAndColumns, cell));
@@ -243,7 +243,7 @@ class SvgBoardPieces extends PureComponent {
   render() {
     const {rowsAndColumns, theme, allowControl} = this.props;
 
-    const pieces = _.sortBy(_.flatten(rowsAndColumns.map(row => row.cells.filter(cell => cell.player))), ['player', 'worker']);
+    const pieces = _.sortBy(Game.findCells(rowsAndColumns, cell => cell.player), ['player', 'worker']);
 
     return (
       <g data-key={'pieces'} style={{pointerEvents: 'none'}}>

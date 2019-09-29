@@ -110,9 +110,6 @@ class Game {
     this.moves = this.previous ? this.previous.moves.concat([this.lastMove]) : [];
 
     this.cells = cells;
-    this.allCells = Object.values(this.cells)
-      .map(row => Object.values(row))
-      .reduce((total, current) => total.concat(current));
     this.rowsAndColumns = this.constructor.ROWS.map(y => ({
       y,
       cells: this.constructor.COLUMNS.map(x => this.cells[y][x]),
@@ -279,12 +276,28 @@ class Game {
     return this.availableMovesMatrix[y][x];
   }
 
+  static findCell(rowsAndColumns, condition) {
+    return rowsAndColumns.map(row => row.cells.find(condition)).find(cell => cell);
+  }
+
+  static findCells(rowsAndColumns, condition) {
+    return _.flatten(rowsAndColumns.map(row => row.cells.filter(condition)));
+  }
+
+  findCell(condition) {
+    return this.constructor.findCell(this.rowsAndColumns, condition);
+  }
+
+  findCells(condition) {
+    return this.constructor.findCells(this.rowsAndColumns, condition);
+  }
+
   getWinner() {
     if (this.resignedPlayer) {
       return this.constructor.OTHER_PLAYER[this.resignedPlayer];
     }
 
-    const winningCell = this.allCells.find(cell => cell.player && cell.level === 3);
+    const winningCell = this.findCell(cell => cell.player && cell.level === 3);
     if (!winningCell) {
       return null;
     }
@@ -463,7 +476,7 @@ class Game {
   }
 
   moveWorker(to, worker) {
-    const fromCell = this.allCells.find(cell => cell.player === this.nextPlayer && cell.worker === worker);
+    const fromCell = this.findCell(cell => cell.player === this.nextPlayer && cell.worker === worker);
     const toCell = this.cells[to.y][to.x];
     let cells = {
       ...this.cells,

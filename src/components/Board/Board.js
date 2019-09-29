@@ -39,7 +39,7 @@ class Board extends PureComponent {
   };
 
   isGameUndoable() {
-    return !!this.props.game.rowsAndColumns.find(row => row.cells.find(cell => this.isCellUndoable(cell)));
+    return !!this.props.game.findCell(this.isCellUndoable);
   }
 
   render() {

@@ -600,7 +600,7 @@ class PlayNavigation extends Component {
         ]),
         {key: 'first', icon: 'fast forward', onClick: this.goToFirstMove, disabled: !this.canGoToFirstMove()},
         ...(selectedGameIndex >= 0 ? [] : [
-          {key: 'ancestor', content: `Variation ${mostRecentAncestorGameIndex}/${mostRecentAncestorGameIndex}`, disabled: true},
+          {key: 'ancestor', content: `Variation ${selectedGame.moveCount}/${mostRecentAncestorGameIndex}`, disabled: true},
           {key: 'next', icon: 'forward', onClick: this.goToPreviousVariationMove, disabled: selectedGame.moveCount <= 1},
         ]),
       ]} />

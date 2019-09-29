@@ -40,7 +40,7 @@ class Play extends Component {
 
   makeMove = game => {
     if (!this.props.allowControl.includes(this.props.game.nextPlayer) || game.chainCount <= this.state.game.chainCount) {
-      this.setState({selectedGame: game});
+      this.selectGame(game);
     }
     else if (this.props.submit) {
       this.setState({game});
@@ -62,7 +62,11 @@ class Play extends Component {
   };
 
   selectGame = game => {
-    this.setState({selectedGame: game === this.state.game ? null : game});
+    const selectedGame = game === this.state.game ? null : game;
+    this.setState({selectedGame});
+    if (this.props.onSelectedGameChange) {
+      this.props.onSelectedGameChange(selectedGame);
+    }
   };
 
   makeMoveToSelected = game => {
@@ -116,7 +120,8 @@ class Play extends Component {
         || this.props.game.compressedFullNotation !== prevProps.game.compressedFullNotation
       );
       if (gameChanged) {
-        this.setState({selectedGame: null, game: this.props.game, resigning: false});
+        this.selectGame(null);
+        this.setState({game: this.props.game, resigning: false});
       }
     }
     if (this.props.user && this.props.user.settings.autoSubmitMoves) {
@@ -322,6 +327,7 @@ Play.propTypes = {
   names: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
   children: PropTypes.node,
+  onSelectedGameChange: PropTypes.func,
 };
 
 Play.defaultProps = {

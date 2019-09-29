@@ -8,6 +8,7 @@ import {withClient} from "../client/withClient";
 
 class Hotseat extends Component {
   state = {
+    selectedGame: null,
     error: false,
     ...this.constructor.getGameAndErrorFromUrlPosition(),
   };
@@ -18,15 +19,15 @@ class Hotseat extends Component {
     if (position) {
       let game, error;
       try {
-        game = Game.fromCompressedNotation(position);
+        game = Game.fromCompressedMoveNotation(position);
         if (!game) {
           error = 'The position was not valid';
         }
       } catch (e) {
         game = null;
-        error = 'The series of moves where not valid'
+        error = 'The series of moves where not valid';
       }
-      if (error) {
+      if (!game) {
         return {game: Game.create(), error};
       }
       return {game, error: false};
@@ -61,8 +62,12 @@ class Hotseat extends Component {
     }
   };
 
+  onSelectedGameChange = selectedGame => {
+    this.setState({selectedGame});
+  };
+
   render() {
-    const {game, error} = this.state;
+    const {game, error, selectedGame} = this.state;
     const {user, client} = this.props;
 
     return (
@@ -73,18 +78,24 @@ class Hotseat extends Component {
           onClose={this.dismissUrlPositionError}
           header={'Could not load shared position'}
           content={`${error}. Please check that you copied the full URL`}
-          actions={[{content: 'OK', positive: true}]}
+          actions={[{key: 'ok', content: 'OK', positive: true}]}
         />
         <Grid centered>
           <Grid.Row>
             <Menu inverted size={'massive'} items={[
               {key: 'share', icon: 'share', content: 'Share position', color: 'green', active: true, as: 'a',
-                href: `?position=${game.compressedFullNotation}`,
+                href: `?position=${(selectedGame || game).compressedFullNotation}`,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
             ]} />
           </Grid.Row>
         </Grid>
-        <Play user={user} defaultSettings={client.settings} game={game} makeMove={this.makeMove} />
+        <Play
+          user={user}
+          defaultSettings={client.settings}
+          game={game}
+          makeMove={this.makeMove}
+          onSelectedGameChange={this.onSelectedGameChange}
+        />
       </Fragment>
     );
   }

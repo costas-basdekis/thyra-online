@@ -66,6 +66,10 @@ OnlineGamePlayer.propTypes = {
 };
 
 class ChosenOnlineGame extends Component {
+  state = {
+    selectedGame: null,
+  };
+
   gameSelector = createSelector([
     props => props.match.params.id,
     props => props.gamesInfo.byId,
@@ -167,12 +171,17 @@ class ChosenOnlineGame extends Component {
     this.props.client.changeReadyToPlay(false);
   };
 
+  onSelectedGameChange = selectedGame => {
+    this.setState({selectedGame});
+  };
+
   render() {
     const {
       location, user, client, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
       tournamentsInfo: {byId: tournamentsById},
     } = this.props;
+    const {selectedGame} = this.state;
     const {gameGame} = this;
 
     if (!gameGame) {
@@ -234,8 +243,8 @@ class ChosenOnlineGame extends Component {
               {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareGame, as: NavLink,
                 to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'},
-              {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
-                to: `/hotseat?position=${gameGame.compressedFullNotation}`, color: 'green', active: true,
+              {key: 'play', content: 'Play position', icon: 'retweet', as: NavLink,
+                to: `/hotseat?position=${(selectedGame || gameGame).compressedFullNotation}`, color: 'green', active: true,
                 title: 'Click to open hotseat with this game', target: '_blank'},
             ]} />
           </Grid.Row>
@@ -277,6 +286,7 @@ class ChosenOnlineGame extends Component {
           challengeUser={this.challengeUser}
           stopChallengeUser={this.stopChallengeUser}
           challengedUser={challengedUser}
+          onSelectedGameChange={this.onSelectedGameChange}
         >
           <Responsive as={Grid.Row} minWidth={800}>
             {gamesNode}

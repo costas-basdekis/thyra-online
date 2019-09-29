@@ -3,11 +3,14 @@ import PropTypes from 'prop-types';
 import BoardBackground from "./Board/BoardBackground";
 import Game from "../game/game";
 import {withClient} from "../client/withClient";
-import {Grid, Menu, Message, Modal, Segment} from "semantic-ui-react";
+import {Button, Grid, Menu, Message, Modal, Segment} from "semantic-ui-react";
 import keydown from "react-keydown";
 import Play from "./Play";
+import * as utils from "../utils";
 
 class EditPosition extends Component {
+  static initialPositionNotation = Game.getPositionNotation(Game.getInitialRowsAndColumns());
+
   state = {
     paletteSelectedItem: {x: 0, y: 1},
     paletteUpdate: {player: Game.PLAYER_A, worker: Game.WORKER_FIRST},
@@ -15,6 +18,8 @@ class EditPosition extends Component {
     positionError: null,
     urlError: false,
     ...this.constructor.getGameAndErrorFromUrlPosition(),
+    selectedGame: null,
+    previousPosition: null,
   };
 
   static getGameAndErrorFromUrlPosition() {
@@ -57,18 +62,52 @@ class EditPosition extends Component {
       game = Game.create();
       positionError = e.message;
     }
-    this.setState({position, game, positionError});
+    this.setState(state => ({
+      position,
+      game,
+      positionError,
+      previousPosition: state.position,
+    }));
   };
 
   makeMove = newGame => {
     this.setState({game: newGame});
   };
 
+  onSelectedGameChange = selectedGame => {
+    this.setState({selectedGame});
+  };
+
+  copyGame = () => {
+    const {game, selectedGame} = this.state;
+    const visibleGame = selectedGame || game;
+    this.onPositionChange(visibleGame.rowsAndColumns);
+  };
+
+  resetBoard = () => {
+    this.onPositionChange(Game.getInitialRowsAndColumns());
+  };
+
+  undo = () => {
+    this.onPositionChange(this.state.previousPosition);
+  };
+
+  copyPosition = () => {
+    utils.copyToClipboard(Game.getPositionNotation(this.state.position));
+    alert('Position copied to clipboard');
+  };
+
+  copyPlayPosition = () => {
+    utils.copyToClipboard((this.state.selectedGame || this.state.game).positionNotation);
+    alert('Play position copied to clipboard');
+  };
+
   render() {
     const {user, client, keydown} = this.props;
-    const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game} = this.state;
+    const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game, selectedGame, previousPosition} = this.state;
     const settings = user ? user.settings : client.settings;
 
+    const positionNotation = Game.getPositionNotation(position);
     return (
       <Fragment>
         <Modal
@@ -83,8 +122,12 @@ class EditPosition extends Component {
           <Grid.Row>
             <Menu inverted size={'massive'} items={[
               {key: 'share', icon: 'share', content: 'Share position', color: 'green', active: true, as: 'a',
-                href: `?position=${Game.getPositionNotation(position)}`,
-                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to position'}
+                href: `?position=${positionNotation}`,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to position'},
+              {key: 'copy', icon: 'clipboard', content: 'Copy position', color: 'green', active: true,
+                title: 'Click to copy position to position', onClick: this.copyPosition},
+              {key: 'copy-play', icon: 'clipboard', content: 'Copy play position', color: 'green', active: true,
+                title: 'Click to copy play position to position', onClick: this.copyPlayPosition},
             ]} />
           </Grid.Row>
         </Grid>
@@ -96,13 +139,33 @@ class EditPosition extends Component {
             defaultSettings={client.settings}
             game={game}
             makeMove={this.makeMove}
+            onSelectedGameChange={this.onSelectedGameChange}
           >
             <EditPositionPalette
               selectedItem={paletteSelectedItem}
               onSelectedItemChange={this.onPaletteSelectedItemChange}
               keydown={keydown}
             />
-            <br />
+            <div>
+              <Button
+                content={'Copy from game'}
+                primary
+                disabled={(selectedGame || game).positionNotation === positionNotation}
+                onClick={this.copyGame}
+              />
+              <Button
+                content={'Reset'}
+                negative
+                disabled={positionNotation === this.constructor.initialPositionNotation}
+                onClick={this.resetBoard}
+              />
+              <Button
+                content={'Undo'}
+                secondary
+                disabled={!previousPosition}
+                onClick={this.undo}
+              />
+            </div>
             <EditPositionBoard
               position={position}
               update={paletteUpdate}

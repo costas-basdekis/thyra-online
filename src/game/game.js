@@ -472,17 +472,37 @@ class Game {
     return this.constructor.findCells(this.rowsAndColumns, condition);
   }
 
+  static canPlayerWin(rowsAndColumns, player) {
+    const playerCells = this.findCells(rowsAndColumns, cell => cell.player === player && cell.level === 2);
+    if (!playerCells.length) {
+      return false;
+    }
+    const playerWinningMoves = this.findCells(rowsAndColumns, cell => (
+      cell.level === 3
+      && playerCells.find(playerCell => (
+        Math.abs(cell.x - playerCell.x) <= 1
+        && Math.abs(cell.y - playerCell.y) <= 1
+      ))
+    ));
+
+    return playerWinningMoves.length > 0;
+  }
+
   getWinner() {
     if (this.resignedPlayer) {
       return this.constructor.OTHER_PLAYER[this.resignedPlayer];
     }
 
     const winningCell = this.findCell(cell => cell.player && cell.level === 3);
-    if (!winningCell) {
-      return null;
+    if (winningCell) {
+      return winningCell.player;
     }
 
-    return winningCell.player;
+    if (!this.canUndo && this.constructor.canPlayerWin(this.rowsAndColumns, this.nextPlayer)) {
+      return this.nextPlayer;
+    }
+
+    return null;
   }
 
   static allMovesAreAvailableMatrix() {
@@ -508,22 +528,31 @@ class Game {
   }
 
   static getMovableAvailableMovesMatrix(rowsAndColumns, coordinates) {
-    const maximumLevel = rowsAndColumns[coordinates.y].cells[coordinates.x].level + 1;
+    const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
+    const maximumLevel = fromCell.level + 1;
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
       Math.abs(cell.x - coordinates.x) <= 1
       && Math.abs(cell.y - coordinates.y) <= 1
       && !cell.player
       && cell.level <= 3
       && cell.level <= maximumLevel
+      && this.hasAvailableMove(this.getBuildableAvailableMovesMatrix(this.updateCells(rowsAndColumns, ...[
+        {x: fromCell.x, y: fromCell.y, player: null, worker: null},
+        {x: cell.x, y: cell.y, player: fromCell.player, worker: fromCell.worker}
+      ]), cell))
     ));
   }
 
   static getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
+    const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
       Math.abs(cell.x - coordinates.x) <= 1
       && Math.abs(cell.y - coordinates.y) <= 1
       && !cell.player
       && cell.level < 4
+      && !this.canPlayerWin(this.updateCells(rowsAndColumns, ...[
+        {x: cell.x, y: cell.y, level: cell.level + 1},
+      ]), this.OTHER_PLAYER[fromCell.player])
     ));
   }
 

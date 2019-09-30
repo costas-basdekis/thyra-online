@@ -44,6 +44,9 @@ class Play extends Component {
     } else {
       this.props.makeMove(game);
     }
+    if (this.props.onDisplayPositionChange) {
+      this.props.onDisplayPositionChange(game);
+    }
   };
 
   takeMoveBack = () => {
@@ -85,7 +88,7 @@ class Play extends Component {
   submit = () => {
     const moves = this.getMovesToSubmit();
     if (moves.length) {
-      this.props.submit(moves);
+      this.props.submit(moves, this.state.game);
     }
   };
 
@@ -326,6 +329,7 @@ Play.propTypes = {
   allowControl: PropTypes.array.isRequired,
   children: PropTypes.node,
   onSelectedGameChange: PropTypes.func,
+  onDisplayPositionChange: PropTypes.func,
 };
 
 Play.defaultProps = {

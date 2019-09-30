@@ -78,9 +78,7 @@ class Game {
     if (!useCheck) {
       game.useCheck = false;
     }
-    for (const move of moves) {
-      game = game.makeMove(move);
-    }
+    game.makeMoves(moves);
 
     return game;
   }
@@ -638,6 +636,15 @@ class Game {
         ...updates[cell.y][cell.x],
       })),
     }));
+  }
+
+  makeMoves(moves) {
+    let game = this;
+    for (const move of moves) {
+      game = game.makeMove(move);
+    }
+
+    return game;
   }
 
   makeMove(coordinates) {

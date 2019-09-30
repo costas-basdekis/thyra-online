@@ -17,6 +17,7 @@ import OnlineTournament from "./components/OnlineTournament";
 import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
 import EditPosition from "./components/EditPosition";
+import Challenges from "./components/Challenges";
 
 class App extends Component {
   state = {
@@ -234,6 +235,9 @@ class App extends Component {
           )},
           {menuItem: {icon: 'edit', content: 'Edit position'}, path: 'edit-position', render: () => (
             <Tab.Pane><EditPosition /></Tab.Pane>
+          )},
+          {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenges', render: () => (
+            <Tab.Pane><Challenges /></Tab.Pane>
           )},
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>

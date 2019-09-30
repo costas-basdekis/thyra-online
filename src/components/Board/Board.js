@@ -30,6 +30,10 @@ class Board extends PureComponent {
       if (!this.props.game.canUndo) {
         return false;
       }
+    } else {
+      if (this.props.game.chainCount <= this.props.minChainCount) {
+        return false;
+      }
     }
     const lastMove = this.props.game.lastMove;
     if (!lastMove) {

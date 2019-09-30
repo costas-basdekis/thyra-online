@@ -233,12 +233,12 @@ class App extends Component {
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          {menuItem: {icon: 'edit', content: 'Edit position'}, path: 'edit-position', render: () => (
+          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'edit', content: 'Edit position'}, path: 'edit-position', render: () => (
             <Tab.Pane><EditPosition /></Tab.Pane>
-          )},
-          {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenges', render: () => (
+          )} : null,
+          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenges', render: () => (
             <Tab.Pane><Challenges /></Tab.Pane>
-          )},
+          )} : null,
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>
           )},

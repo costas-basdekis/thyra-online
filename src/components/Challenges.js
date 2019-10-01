@@ -123,22 +123,29 @@ class Challenges extends Component {
   render() {
     const {challenge, game, wrongMove, won} = this.state;
     const {user, client} = this.props;
+    const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
+    const message = (
+      wrongMove ? (
+        <Message error icon={'warning'} content={"That's not the right answer"} />
+      ) : won ? (
+        <Message success icon={'check'} content={"Correct! You solved it!"} />
+      ) : (
+        <Message content={challengePrompt} />
+      )
+    );
     return (
       <Fragment>
         <Grid centered>
           <Grid.Row>
             <Segment>
-              <Header as={'h1'}>{challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge'}</Header>
+              <Header as={'h1'}>{challengePrompt}</Header>
               <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
               <Header as={'h4'}>{challenge.meta.source}</Header>
             </Segment>
           </Grid.Row>
-          {wrongMove || won ? (
-            <Grid.Row>
-              {wrongMove ? <Message error icon={'warning'} content={"That's not the right answer"} /> : null}
-              {won ? <Message success icon={'check'} content={"Correct! You solved it!"} /> : null}
-            </Grid.Row>
-          ) : null}
+          <Grid.Row>
+            {message}
+          </Grid.Row>
         </Grid>
         <Play
           user={user}
@@ -151,12 +158,7 @@ class Challenges extends Component {
           submit={this.submit}
           onDisplayPositionChange={this.onDisplayPositionChange}
         >
-          {wrongMove ? (
-            <Message error icon={'warning'} content={"That's not the right answer"} />
-          ) : null}
-          {won ? (
-            <Message success icon={'check'} content={"Correct! You solved it!"} />
-          ) : null}
+          {message}
         </Play>
       </Fragment>
     );

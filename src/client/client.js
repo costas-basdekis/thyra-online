@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-const appVersion = 3;
+const appVersion = 4;
 
 class Client {
   static getDefaultSettings() {

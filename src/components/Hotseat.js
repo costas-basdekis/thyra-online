@@ -22,6 +22,8 @@ class Hotseat extends Component {
         game = Game.fromCompressedMoveNotation(position);
         if (!game) {
           error = 'The position was not valid';
+        } else {
+          error = null;
         }
       } catch (e) {
         game = null;

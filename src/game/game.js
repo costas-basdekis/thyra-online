@@ -78,7 +78,7 @@ class Game {
     if (!useCheck) {
       game.useCheck = false;
     }
-    game.makeMoves(moves);
+    game = game.makeMoves(moves);
 
     return game;
   }

@@ -7,6 +7,10 @@ import {Menu} from "semantic-ui-react";
 
 class Board extends PureComponent {
   makeMove = (cell) => {
+    const {game: {rowsAndColumns}, transformation} = this.props;
+    if (transformation) {
+      cell = transformation.coordinates(rowsAndColumns, cell);
+    }
     this.props.makeMove(this.props.game.makeMove({x: cell.x, y: cell.y}));
   };
 
@@ -19,10 +23,18 @@ class Board extends PureComponent {
   };
 
   isCellAvailable = cell => {
+    const {game: {rowsAndColumns}, transformation} = this.props;
+    if (transformation) {
+      cell = transformation.coordinates(rowsAndColumns, cell);
+    }
     return this.props.game.isMoveAvailable(cell);
   };
 
   isCellUndoable = cell => {
+    const {game: {rowsAndColumns}, transformation} = this.props;
+    if (transformation) {
+      cell = transformation.coordinates(rowsAndColumns, cell);
+    }
     if (this.props.minChainCount === undefined || this.props.minChainCount === null) {
       if (this.props.allowControl.length === 2) {
         return true;
@@ -118,6 +130,9 @@ class BoardTransformation extends PureComponent {
   static makeTransformRowsAndColumns(config) {
     const transformRowsAndColumns = rowsAndColumns => {
       return this.transformRowsAndColumns(rowsAndColumns, config);
+    };
+    transformRowsAndColumns.coordinates = (rowsAndColumns, coordinates) => {
+      return this.reverseTransformCoordinates(rowsAndColumns, coordinates, config);
     };
     // We can tell if the board is flipped (horizontally or vertically)
     const flipped = config.transpose ^ config.flipX ^ config.flipY;

@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/thyra-online/precache-manifest.d7c228013d8bc91524a9641fae4df094.js"
+  "/thyra-online/precache-manifest.fdcf1e1b66ec725896f2f0697abf8d06.js"
 );
 
 self.addEventListener('message', (event) => {

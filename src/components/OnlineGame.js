@@ -175,6 +175,11 @@ class ChosenOnlineGame extends Component {
     this.setState({selectedGame});
   };
 
+  copyPlayPosition = () => {
+    utils.copyToClipboard((this.state.selectedGame || this.state.game).positionNotation);
+    alert('Play position copied to clipboard');
+  };
+
   render() {
     const {
       location, user, client, game, selectLiveGame,
@@ -249,6 +254,8 @@ class ChosenOnlineGame extends Component {
               process.env.REACT_APP_DEBUG ? {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
                 to: `/edit-position?position=${(selectedGame || gameGame).positionNotation}`, color: 'green', active: true,
                 title: 'Click to edit the position for this game', target: '_blank'} : null,
+              process.env.REACT_APP_DEBUG ? {key: 'copy-play', icon: 'clipboard', content: 'Copy play position', color: 'green', active: true,
+                title: 'Click to copy play position to position', onClick: this.copyPlayPosition} : null,
             ].filter(item => item)} />
           </Grid.Row>
           <Grid.Row>

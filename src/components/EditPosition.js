@@ -56,7 +56,7 @@ class EditPosition extends Component {
   onPositionChange = position => {
     let game, positionError;
     try {
-      game = Game.fromRowsAndColumns(position);
+      game = Game.fromPosition(position);
       positionError = null;
     } catch (e) {
       game = Game.create();

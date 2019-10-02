@@ -11,7 +11,7 @@ class Challenges extends Component {
   static challenges = [
     {
       position: 'AABMAAAJAIAAEFMAJADMADAAD',
-      player: Game.PLAYER_B,
+      initialPlayer: Game.PLAYER_B,
       type: 'mate',
       options: {
         mateIn: 5,
@@ -153,8 +153,8 @@ class Challenges extends Component {
           changeSettings={this.changeSettings}
           game={game}
           matchGame={game}
-          allowControl={[challenge.player]}
-          names={{[challenge.player]: 'You', [Game.OTHER_PLAYER[challenge.player]]: 'Challenge'}}
+          allowControl={[challenge.initialPlayer]}
+          names={{[challenge.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.initialPlayer]]: 'Challenge'}}
           submit={this.submit}
           onDisplayPositionChange={this.onDisplayPositionChange}
         >

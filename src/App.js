@@ -18,6 +18,7 @@ import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
 import EditPosition from "./components/EditPosition";
 import Challenges from "./components/Challenges";
+import CreateChallenge from "./components/CreateChallenge";
 
 class App extends Component {
   state = {
@@ -225,6 +226,9 @@ class App extends Component {
           )},
           process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'edit', content: 'Edit position'}, path: 'edit-position', render: () => (
             <Tab.Pane><EditPosition /></Tab.Pane>
+          )} : null,
+          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Create Challenge'}, path: 'create-challenge', render: () => (
+            <Tab.Pane><CreateChallenge /></Tab.Pane>
           )} : null,
           process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenges', render: () => (
             <Tab.Pane><Challenges /></Tab.Pane>

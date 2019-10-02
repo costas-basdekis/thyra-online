@@ -261,6 +261,15 @@ class Game {
     return this.fromPosition(rowsAndColumns);
   }
 
+  static isValidCompressedPositionNotation(notation) {
+    try {
+      this.fromCompressedPositionNotation(notation);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
   static fromPosition(rowsAndColumns) {
     let playerACount = 0, playerBCount = 0;
     for (const x of this.ROWS) {

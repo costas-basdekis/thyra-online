@@ -128,9 +128,9 @@ class Game {
             resignedPlayer: null,
           };
         } else {
-          const playerAFirstWorker = this.findCell(
+          const playerAFirstWorker = this.findCell(rowsAndColumns,
             cell => cell.player === this.PLAYER_A && cell.worker === this.WORKER_FIRST);
-          const playerASecondWorker = this.findCell(
+          const playerASecondWorker = this.findCell(rowsAndColumns,
             cell => cell.player === this.PLAYER_A && cell.worker === this.WORKER_SECOND);
           if (!playerAFirstWorker || !playerASecondWorker) {
             throw new Error(`Could not find both workers of player A`);
@@ -156,9 +156,9 @@ class Game {
             resignedPlayer: null,
           };
         } else {
-          const playerBFirstWorker = this.findCell(
+          const playerBFirstWorker = this.findCell(rowsAndColumns,
             cell => cell.player === this.PLAYER_B && cell.worker === this.WORKER_FIRST);
-          const playerBSecondWorker = this.findCell(
+          const playerBSecondWorker = this.findCell(rowsAndColumns,
             cell => cell.player === this.PLAYER_B && cell.worker === this.WORKER_SECOND);
           if (!playerBFirstWorker || !playerBSecondWorker) {
             throw new Error(`Could not find both workers of player B`);

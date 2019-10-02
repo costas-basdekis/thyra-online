@@ -92,6 +92,10 @@ class EditPosition extends Component {
     this.onPositionChange(this.state.previousPosition);
   };
 
+  resetGame = () => {
+    this.onPositionChange(this.state.position);
+  };
+
   copyPosition = () => {
     utils.copyToClipboard(Game.getPositionNotation(this.state.position));
     alert('Position copied to clipboard');
@@ -141,6 +145,13 @@ class EditPosition extends Component {
             makeMove={this.makeMove}
             onSelectedGameChange={this.onSelectedGameChange}
           >
+            <div>
+              <Button
+                content={'Reset game'}
+                primary
+                onClick={this.resetGame}
+              />
+            </div>
             <EditPositionPalette
               selectedItem={paletteSelectedItem}
               onSelectedItemChange={this.onPaletteSelectedItemChange}

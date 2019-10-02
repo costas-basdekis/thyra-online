@@ -37,7 +37,7 @@ export class GameCard extends Component {
       <Card
         as={NavLink}
         to={`/game/${game.id}`}
-        // onClick={this.selectLiveGame}
+        onClick={this.selectLiveGame}
         style={{
           ...(!terse ? {} : {width: 'auto'}),
           ...(game.id === currentGameId ? {backgroundColor: 'lightgreen'} : {}),

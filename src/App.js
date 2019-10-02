@@ -24,17 +24,12 @@ class App extends Component {
     liveGame: null,
     liveTournament: null,
   };
-
-  getLiveGameUrl(game) {
-    return `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/game/${game.id}`;
-  }
-
   selectLiveGame = liveGame => {
     let gameUrl;
     if (liveGame) {
-      gameUrl = this.getLiveGameUrl(liveGame);
+      gameUrl = `/game/${liveGame.id}`;
     } else {
-      gameUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/lobby`;
+      gameUrl = '/lobby';
     }
     if (gameUrl !== this.props.location.pathname) {
       this.props.history.push(gameUrl);
@@ -44,17 +39,12 @@ class App extends Component {
     }
     this.setState({liveGame});
   };
-
-  getLiveTournamentUrl(tournament) {
-    return `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/tournament/${tournament.id}`;
-  }
-
   selectLiveTournament = liveTournament => {
     let tournamentUrl;
     if (liveTournament) {
-      tournamentUrl = this.getLiveTournamentUrl(liveTournament);
+      tournamentUrl = `/tournament/${liveTournament.id}`;
     } else {
-      tournamentUrl = `${this.props.match.url.endsWith('/') ? this.props.match.url.slice(0, -1) : this.props.match.url}/lobby`;
+      tournamentUrl = `/lobby`;
     }
     if (tournamentUrl !== this.props.location.pathname) {
       this.props.history.push(tournamentUrl);

@@ -1,11 +1,78 @@
 import React, {Component, Fragment} from 'react';
-import {Form, Header, Input, Segment} from "semantic-ui-react";
+import PropTypes from 'prop-types';
+import {Card, Form, Grid, Header, Icon, Input, Segment} from "semantic-ui-react";
 import Game from "../game/game";
+import _ from "lodash";
+import Board from "./Board";
+import {withClient} from "../client/withClient";
 
 class CreateChallenge extends Component {
+  state = {
+    challenge: null,
+    path: null,
+  };
+
+  onCreateChallenge = challenge => {
+    this.setState({challenge, path: []});
+  };
+
+  getDifficultyStars(difficulty, maxDifficulty) {
+    return _.range(maxDifficulty).map(index => (
+      <Icon
+        key={index}
+        name={difficulty > index ? 'star' : 'star outline'}
+        color={'yellow'}
+      />
+    ));
+  }
+
+  onBoardSelect = game => {
+
+  };
+
+  render() {
+    const {user, client} = this.props;
+    const {challenge} = this.state;
+    const settings = user ? user.settings : client.settings;
+
+    if (!challenge) {
+      return (
+        <ChallengeEditor onCreateChallenge={this.onCreateChallenge} />
+      )
+    }
+    const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
+
+    return (
+      <Fragment>
+        <Grid centered>
+          <Grid.Row>
+            <Segment>
+              <Header as={'h1'}>{challengePrompt}</Header>
+              <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
+              <Header as={'h4'}>{challenge.meta.source}</Header>
+            </Segment>
+          </Grid.Row>
+        </Grid>
+        <Segment>
+          <Card.Group style={{/*maxHeight: '300px', */overflowY: 'auto', flexWrap: 'unset'}}>
+            <Card>
+              <Board
+                medium onSelect={this.onBoardSelect}
+                settings={settings}
+                game={challenge.game}
+              />
+            </Card>
+          </Card.Group>
+        </Segment>
+      </Fragment>
+    );
+  }
+}
+
+class ChallengeEditor extends Component {
   getNewChallenge() {
     return {
-      newChallenge: {
+      challenge: {
         position: '',
         initialPlayer: Game.PLAYER_A,
         type: 'mate',
@@ -18,39 +85,38 @@ class CreateChallenge extends Component {
           maxDifficulty: 5,
         },
       },
-      newChallengeError: {
+      error: {
         position: null,
       },
     };
   }
 
   state = {
-    challenge: null,
     ...this.getNewChallenge(),
   };
 
   setValue = (e, {name, value}) => {
     this.setState(state => {
-      const newChallenge = {
-        ...state.newChallenge,
+      const challenge = {
+        ...state.challenge,
       };
-      let newChallengeToChange = newChallenge;
+      let newChallengeToChange = challenge;
       const parts = name.split('.');
       for (const part of parts.slice(0, parts.length - 1)) {
         newChallengeToChange = newChallengeToChange[part] || {};
       }
       newChallengeToChange[parts[parts.length - 1]] = value;
-      return {newChallenge};
+      return {challenge};
     });
     this.onValueSet(name, value);
   };
 
-  onValueSet = (name, value) => {
+  onValueSet = name => {
     if (name === 'position') {
       this.setState(state => ({
-        newChallengeError: {
-          ...state.newChallengeError,
-          position: !state.newChallenge.position || Game.isValidCompressedPositionNotation(state.newChallenge.position)
+        error: {
+          ...state.error,
+          position: !state.challenge.position || Game.isValidCompressedPositionNotation(state.challenge.position)
             ? null : 'This is not a valid position',
         },
       }));
@@ -58,106 +124,104 @@ class CreateChallenge extends Component {
   };
 
   createChallenge = () => {
-    this.setState(state => {
-      if (state.newChallengeError.position) {
-        return null;
-      }
-      return {
-        ...this.getNewChallenge(),
-        challenge: state.newChallenge,
-      };
+    const {challenge, error} = this.state;
+    if (error.position) {
+      return;
+    }
+    this.props.onCreateChallenge({
+      ...challenge,
+      responses: [],
+      game: Game.fromCompressedPositionNotation(challenge.position),
     });
   };
 
   render() {
-    const {challenge, newChallenge, newChallengeError} = this.state;
-
-    if (!challenge) {
-      return (
-        <Fragment>
-          <Header>Create a chanllenge</Header>
-          <Segment>
-            <Form onSubmit={this.createChallenge}>
-              <Form.Group>
-                <Form.Field
-                  name={'position'}
-                  control={Input}
-                  label={'Initial position'}
-                  placeholder={'Game position'}
-                  onChange={this.setValue}
-                  value={newChallenge.position}
-                  required
-                  error={newChallengeError.position}
-                />
-              </Form.Group>
-              <Form.Group inline>
-                <label>Starting player</label>
-                <Form.Radio
-                  name={'initialPlayer'}
-                  label={'Player A'}
-                  onChange={this.setValue}
-                  value={Game.PLAYER_A}
-                  checked={newChallenge.initialPlayer === Game.PLAYER_A}
-                />
-                <Form.Radio
-                  name={'initialPlayer'}
-                  label={'Player B'}
-                  onChange={this.setValue}
-                  value={Game.PLAYER_B}
-                  checked={newChallenge.initialPlayer === Game.PLAYER_B}
-                />
-              </Form.Group>
-              <Form.Select
-                options={[
-                  {key: 'mate', value: 'mate', text: 'Mate'},
-                ]}
-                name={'type'}
-                label={'Type'}
-                onChange={this.setValue}
-                value={newChallenge.type}
-              />
-              <Form.Group>
-                <Form.Field
-                  control={Input}
-                  type={'range'}
-                  label={`Mate In: ${newChallenge.options.mateIn}`}
-                  min={1}
-                  max={10}
-                  name={'options.mateIn'}
-                  onChange={this.setValue}
-                  value={newChallenge.options.mateIn}
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Field
-                  control={Input}
-                  label={'Source'}
-                  name={'meta.source'}
-                  onChange={this.setValue}
-                  value={newChallenge.meta.source}
-                />
-                <Form.Field
-                  control={Input}
-                  type={'range'}
-                  label={`Difficulty: ${newChallenge.meta.difficulty}/${newChallenge.meta.maxDifficulty}`}
-                  min={1}
-                  max={newChallenge.meta.maxDifficulty}
-                  name={'meta.difficulty'}
-                  onChange={this.setValue}
-                  value={newChallenge.meta.difficulty}
-                />
-              </Form.Group>
-              <Form.Button content='Create' />
-            </Form>
-          </Segment>
-        </Fragment>
-      )
-    }
+    const {challenge, error} = this.state;
 
     return (
-      null
+      <Fragment>
+        <Header>Create a chanllenge</Header>
+        <Segment>
+          <Form onSubmit={this.createChallenge}>
+            <Form.Group>
+              <Form.Field
+                name={'position'}
+                control={Input}
+                label={'Initial position'}
+                placeholder={'Game position'}
+                onChange={this.setValue}
+                value={challenge.position}
+                required
+                error={error.position}
+              />
+            </Form.Group>
+            <Form.Group inline>
+              <label>Starting player</label>
+              <Form.Radio
+                name={'initialPlayer'}
+                label={'Player A'}
+                onChange={this.setValue}
+                value={Game.PLAYER_A}
+                checked={challenge.initialPlayer === Game.PLAYER_A}
+              />
+              <Form.Radio
+                name={'initialPlayer'}
+                label={'Player B'}
+                onChange={this.setValue}
+                value={Game.PLAYER_B}
+                checked={challenge.initialPlayer === Game.PLAYER_B}
+              />
+            </Form.Group>
+            <Form.Select
+              options={[
+                {key: 'mate', value: 'mate', text: 'Mate'},
+              ]}
+              name={'type'}
+              label={'Type'}
+              onChange={this.setValue}
+              value={challenge.type}
+            />
+            <Form.Group>
+              <Form.Field
+                control={Input}
+                type={'range'}
+                label={`Mate In: ${challenge.options.mateIn}`}
+                min={1}
+                max={10}
+                name={'options.mateIn'}
+                onChange={this.setValue}
+                value={challenge.options.mateIn}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Field
+                control={Input}
+                label={'Source'}
+                name={'meta.source'}
+                onChange={this.setValue}
+                value={challenge.meta.source}
+              />
+              <Form.Field
+                control={Input}
+                type={'range'}
+                label={`Difficulty: ${challenge.meta.difficulty}/${challenge.meta.maxDifficulty}`}
+                min={1}
+                max={challenge.meta.maxDifficulty}
+                name={'meta.difficulty'}
+                onChange={this.setValue}
+                value={challenge.meta.difficulty}
+              />
+            </Form.Group>
+            <Form.Button content='Create' />
+          </Form>
+        </Segment>
+      </Fragment>
     );
   }
 }
 
-export default CreateChallenge;
+ChallengeEditor.propTypes = {
+  onCreateChallenge: PropTypes.func.isRequired,
+};
+
+export default withClient(CreateChallenge);

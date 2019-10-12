@@ -18,9 +18,9 @@ class CreateChallenge extends Component {
   onCreateChallenge = challenge => {
     this.setState({
       challenge,
-      currentStep: challenge,
-      tree: this.getTree(challenge),
-      game: challenge.game,
+      currentStep: challenge.startingPosition,
+      tree: this.getTree(challenge.startingPosition),
+      game: challenge.startingPosition.game,
     });
   };
 
@@ -58,7 +58,7 @@ class CreateChallenge extends Component {
     treePath = treePath.slice(0, treePath.findIndex(treePathStep => treePathStep === currentStep) + 1);
     const pathIndexes = treePath.map((treePathStep, index) =>
       index === 0
-        ? ['challenge']
+        ? ['challenge', 'startingPosition']
         : (
           treePath[index - 1].playerResponses
             ? ['playerResponses', treePath[index - 1].playerResponses.indexOf(treePathStep)]
@@ -72,8 +72,11 @@ class CreateChallenge extends Component {
   duplicateChallenge(pathIndexes) {
     const {challenge} = this.state;
 
-    const newChallenge = {...challenge};
-    let newModifyingStep = newChallenge;
+    const newChallenge = {
+      ...challenge,
+      startingPosition: {...challenge.startingPosition},
+    };
+    let newModifyingStep = newChallenge.startingPosition;
     for (const index of _.flatten(pathIndexes.slice(1))) {
       const oldStep = newModifyingStep[index];
       const newStep = Array.isArray(oldStep) ? oldStep.slice() : {...oldStep};
@@ -138,13 +141,13 @@ class CreateChallenge extends Component {
     this.setState({
       challenge: newChallenge,
       currentStep: newStep,
-      tree: this.getTree(newChallenge),
+      tree: this.getTree(newChallenge.startingPosition),
       game: newStep.game,
     });
   };
 
-  getTree(challenge = this.state.challenge) {
-    let tree = [[challenge]];
+  getTree(startingPosition = this.state.challenge.startingPosition) {
+    let tree = [[startingPosition]];
     while (tree !== (tree = this.getNextTree(tree))) {}
 
     return tree;
@@ -187,7 +190,7 @@ class CreateChallenge extends Component {
     this.setState({
       challenge: newChallenge,
       currentStep: newStep,
-      tree: this.getTree(newChallenge),
+      tree: this.getTree(newChallenge.startingPosition),
       game: newStep.game,
     });
   };
@@ -199,7 +202,7 @@ class CreateChallenge extends Component {
 
     if (!challenge) {
       return (
-        <ChallengeEditor onCreateChallenge={this.onCreateChallenge} />
+        <ChallengeForm onCreateChallenge={this.onCreateChallenge} />
       )
     }
     const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
@@ -268,22 +271,27 @@ class CreateChallenge extends Component {
   }
 }
 
-class ChallengeEditor extends Component {
+class ChallengeForm extends Component {
   getNewChallenge() {
     return {
       challenge: {
-        position: '',
-        initialPlayer: null,
-        type: 'mate',
         options: {
-          mateIn: 1,
+          initialPlayer: null,
+          type: 'mate',
+          typeOptions: {
+            mateIn: 1,
+          },
         },
         meta: {
           source: '',
           difficulty: 1,
           maxDifficulty: 5,
         },
-        game: null,
+        startingPosition: {
+          position: '',
+          game: null,
+          playerResponses: [],
+        },
       },
       error: {
         position: null,
@@ -312,20 +320,27 @@ class ChallengeEditor extends Component {
   };
 
   onValueSet = name => {
-    if (name === 'position') {
+    if (name === 'startingPosition.position') {
       this.setState(state => {
-        const isPositionValid = state.challenge.position
-          ? Game.isValidCompressedPositionNotation(state.challenge.position) : false;
-        const game = isPositionValid ? Game.fromCompressedPositionNotation(state.challenge.position) : null;
+        const position = state.challenge.startingPosition.position;
+        const isPositionValid = position
+          ? Game.isValidCompressedPositionNotation(position) : false;
+        const game = isPositionValid ? Game.fromCompressedPositionNotation(position) : null;
         return {
           error: {
             ...state.error,
-            position: !state.challenge.position || isPositionValid ? null : 'This is not a valid position',
+            position: !position || isPositionValid ? null : 'This is not a valid position',
           },
           challenge: {
             ...state.challenge,
-            game,
-            initialPlayer: game ? game.nextPlayer : null,
+            options: {
+              ...state.challenge.options,
+              initialPlayer: game ? game.nextPlayer : null,
+            },
+            startingPosition: {
+              ...state.challenge.startingPosition,
+              game,
+            }
           },
         };
       });
@@ -337,10 +352,7 @@ class ChallengeEditor extends Component {
     if (error.position) {
       return;
     }
-    this.props.onCreateChallenge({
-      ...challenge,
-      playerResponses: [],
-    });
+    this.props.onCreateChallenge(challenge);
   };
 
   render() {
@@ -355,12 +367,12 @@ class ChallengeEditor extends Component {
           <Form onSubmit={this.createChallenge}>
             <Form.Group>
               <Form.Field
-                name={'position'}
+                name={'startingPosition.position'}
                 control={Input}
                 label={'Initial position'}
                 placeholder={'Game position'}
                 onChange={this.setValue}
-                value={challenge.position}
+                value={challenge.startingPosition.position}
                 required
                 error={error.position}
               />
@@ -368,48 +380,48 @@ class ChallengeEditor extends Component {
             <Form.Group inline>
               <label>Starting player</label>
               <Form.Radio
-                name={'initialPlayer'}
+                name={'options.initialPlayer'}
                 label={'Player A'}
                 onChange={this.setValue}
                 value={Game.PLAYER_A}
-                checked={challenge.initialPlayer === Game.PLAYER_A}
-                disabled={challenge.initialPlayer !== Game.PLAYER_A}
+                checked={challenge.options.initialPlayer === Game.PLAYER_A}
+                disabled={challenge.options.initialPlayer !== Game.PLAYER_A}
               />
               <Form.Radio
-                name={'initialPlayer'}
+                name={'options.initialPlayer'}
                 label={'Player B'}
                 onChange={this.setValue}
                 value={Game.PLAYER_B}
-                checked={challenge.initialPlayer === Game.PLAYER_B}
-                disabled={challenge.initialPlayer !== Game.PLAYER_B}
+                checked={challenge.options.initialPlayer === Game.PLAYER_B}
+                disabled={challenge.options.initialPlayer !== Game.PLAYER_B}
               />
             </Form.Group>
-            {challenge.game ? (
+            {challenge.startingPosition.game ? (
               <Board
                 medium
                 settings={settings}
-                game={challenge.game}
+                game={challenge.startingPosition.game}
               />
             ) : null}
             <Form.Select
               options={[
                 {key: 'mate', value: 'mate', text: 'Mate'},
               ]}
-              name={'type'}
+              name={'options.type'}
               label={'Type'}
               onChange={this.setValue}
-              value={challenge.type}
+              value={challenge.options.type}
             />
             <Form.Group>
               <Form.Field
                 control={Input}
                 type={'range'}
-                label={`Mate In: ${challenge.options.mateIn}`}
+                label={`Mate In: ${challenge.options.typeOptions.mateIn}`}
                 min={1}
                 max={10}
-                name={'options.mateIn'}
+                name={'options.typeOptions.mateIn'}
                 onChange={this.setValue}
-                value={challenge.options.mateIn}
+                value={challenge.options.typeOptions.mateIn}
               />
             </Form.Group>
             <Form.Group>
@@ -439,12 +451,12 @@ class ChallengeEditor extends Component {
   }
 }
 
-ChallengeEditor.propTypes = {
+ChallengeForm.propTypes = {
   onCreateChallenge: PropTypes.func.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
 };
 
-ChallengeEditor = withClient(ChallengeEditor);
+ChallengeForm = withClient(ChallengeForm);
 
 export default withClient(CreateChallenge);

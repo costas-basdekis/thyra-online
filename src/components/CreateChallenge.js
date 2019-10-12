@@ -1,19 +1,27 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Card, Form, Grid, Header, Icon, Input, Segment} from "semantic-ui-react";
+import {Button, Form, Grid, Header, Icon, Input, Segment} from "semantic-ui-react";
 import Game from "../game/game";
 import _ from "lodash";
 import Board from "./Board";
 import {withClient} from "../client/withClient";
+import Play from "./Play";
 
 class CreateChallenge extends Component {
   state = {
     challenge: null,
-    path: null,
+    currentStep: null,
+    tree: null,
+    game: null,
   };
 
   onCreateChallenge = challenge => {
-    this.setState({challenge, path: []});
+    this.setState({
+      challenge,
+      currentStep: challenge,
+      tree: this.getTree(challenge),
+      game: challenge.game,
+    });
   };
 
   getDifficultyStars(difficulty, maxDifficulty) {
@@ -26,13 +34,167 @@ class CreateChallenge extends Component {
     ));
   }
 
-  onBoardSelect = game => {
+  makeMove = newGame => {
+    this.setState({game: newGame});
+  };
 
+  getExistingResponse(newGame) {
+    const {currentStep} = this.state;
+    if (currentStep.playerResponses) {
+      return currentStep.playerResponses
+        .find(response => response.position === newGame.positionNotation);
+    } else {
+      if (currentStep.challengeResponse && currentStep.challengeResponse.position === newGame.positionNotation) {
+        return currentStep.challengeResponse;
+      }
+    }
+
+    return null;
+  }
+
+  getPathIndexes() {
+    const {currentStep, tree} = this.state;
+    let treePath = tree.find(treePath => treePath.find(treePathStep => treePathStep === currentStep));
+    treePath = treePath.slice(0, treePath.findIndex(treePathStep => treePathStep === currentStep) + 1);
+    const pathIndexes = treePath.map((treePathStep, index) =>
+      index === 0
+        ? ['challenge']
+        : (
+          treePath[index - 1].playerResponses
+            ? ['playerResponses', treePath[index - 1].playerResponses.indexOf(treePathStep)]
+            : ['challengeResponse']
+        )
+    );
+
+    return pathIndexes;
+  }
+
+  duplicateChallenge(pathIndexes) {
+    const {challenge} = this.state;
+
+    const newChallenge = {...challenge};
+    let newModifyingStep = newChallenge;
+    for (const index of _.flatten(pathIndexes.slice(1))) {
+      const oldStep = newModifyingStep[index];
+      const newStep = Array.isArray(oldStep) ? oldStep.slice() : {...oldStep};
+      newModifyingStep[index] = newStep;
+      newModifyingStep = newStep;
+    }
+
+    return {newChallenge, newModifyingStep};
+  }
+
+  addGameToStep(newModifyingStep, newGame) {
+    let newStep = null;
+    if (newModifyingStep.playerResponses) {
+      newModifyingStep.playerResponses = newModifyingStep.playerResponses.slice();
+      newModifyingStep = newModifyingStep.playerResponses;
+      newStep = {
+        position: newGame.positionNotation,
+        moves: newGame.lastMovesInHistory,
+        game: newGame,
+        challengeResponse: null,
+      };
+      newModifyingStep.push(newStep);
+    } else {
+      newStep = {
+        position: newGame.positionNotation,
+        moves: newGame.lastMovesInHistory,
+        game: newGame,
+        playerResponses: [],
+      };
+      newModifyingStep.challengeResponse = newStep;
+    }
+
+    return newStep;
+  }
+
+  removeStep(newModifyingStep, step) {
+    if (newModifyingStep.playerResponses) {
+      newModifyingStep.playerResponses = newModifyingStep.playerResponses.filter(response => response !== step);
+    } else {
+      newModifyingStep.challengeResponse = null;
+    }
+
+    return newModifyingStep;
+  }
+
+  submit = moves => {
+    const {currentStep} = this.state;
+    const newGame = currentStep.game.makeMoves(moves);
+
+    const existingResponse = this.getExistingResponse(newGame);
+    if (existingResponse) {
+      this.setState({
+        currentStep: existingResponse,
+        game: existingResponse.game,
+      });
+      return;
+    }
+
+    const pathIndexes = this.getPathIndexes();
+    let {newChallenge, newModifyingStep} = this.duplicateChallenge(pathIndexes);
+    let newStep = this.addGameToStep(newModifyingStep, newGame);
+    this.setState({
+      challenge: newChallenge,
+      currentStep: newStep,
+      tree: this.getTree(newChallenge),
+      game: newStep.game,
+    });
+  };
+
+  getTree(challenge = this.state.challenge) {
+    let tree = [[challenge]];
+    while (tree !== (tree = this.getNextTree(tree))) {}
+
+    return tree;
+  }
+
+  getNextTree(tree) {
+    const nextTree = _.flatten(tree.map(this.getNextTreePath));
+    if (nextTree.length !== tree.length) {
+      return nextTree;
+    }
+    if (tree.find((treePath, index) => treePath !== nextTree[index])) {
+      return nextTree;
+    }
+
+    return tree;
+  }
+
+  getNextTreePath = treePath => {
+    const lastTreeStep = treePath[treePath.length - 1];
+    if (lastTreeStep.playerResponses) {
+      if (lastTreeStep.playerResponses.length) {
+        return lastTreeStep.playerResponses.map(nextStep => treePath.concat(nextStep));
+      } else {
+        return [treePath];
+      }
+    } else {
+      if (lastTreeStep.challengeResponse) {
+        return [treePath.concat(lastTreeStep.challengeResponse)];
+      } else {
+        return [treePath];
+      }
+    }
+  };
+
+  deleteCurrentStep = () => {
+    const {currentStep} = this.state;
+    const pathIndexes = this.getPathIndexes().slice(0, -1);
+    let {newChallenge, newModifyingStep} = this.duplicateChallenge(pathIndexes);
+    let newStep = this.removeStep(newModifyingStep, currentStep);
+    this.setState({
+      challenge: newChallenge,
+      currentStep: newStep,
+      tree: this.getTree(newChallenge),
+      game: newStep.game,
+    });
   };
 
   render() {
     const {user, client} = this.props;
-    const {challenge} = this.state;
+    const {challenge, game, tree, currentStep} = this.state;
     const settings = user ? user.settings : client.settings;
 
     if (!challenge) {
@@ -54,16 +216,53 @@ class CreateChallenge extends Component {
           </Grid.Row>
         </Grid>
         <Segment>
-          <Card.Group style={{/*maxHeight: '300px', */overflowY: 'auto', flexWrap: 'unset'}}>
-            <Card>
-              <Board
-                medium onSelect={this.onBoardSelect}
-                settings={settings}
-                game={challenge.game}
-              />
-            </Card>
-          </Card.Group>
+          <Header as={'h3'}>Tree</Header>
+          <table>
+            <tbody>
+            {tree.map((treePath, rowIndex) => (
+              <tr key={rowIndex}>
+                {treePath.map((treePathStep, columnIndex) => (
+                  <td key={columnIndex}>
+                    {rowIndex === 0 || treePathStep !== tree[rowIndex - 1][columnIndex] ? (
+                      <Board
+                        small
+                        selected={game === treePathStep.game}
+                        onSelect={() => {
+                          this.setState({
+                            currentStep: treePathStep,
+                            game: treePathStep.game,
+                          });
+                        }}
+                        settings={settings}
+                        game={treePathStep.game}
+                      />
+                    ) : null}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            </tbody>
+          </table>
         </Segment>
+        {currentStep.game ? <Segment>
+          <Header as={'h3'}>Current step</Header>
+          <Play
+            user={user}
+            defaultSettings={client.settings}
+            changeSettings={this.changeSettings}
+            game={game}
+            matchGame={currentStep.game}
+            allowControl={[currentStep.game.nextPlayer]}
+            names={{[challenge.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.initialPlayer]]: 'Challenge'}}
+            submit={this.submit}
+            onDisplayPositionChange={this.onDisplayPositionChange}
+            makeMove={this.makeMove}
+          >
+            <Button negative disabled={currentStep === challenge} onClick={this.deleteCurrentStep}>
+              <Icon name={'delete'}/>Delete response
+            </Button>
+          </Play>
+        </Segment> : null}
       </Fragment>
     );
   }
@@ -74,7 +273,7 @@ class ChallengeEditor extends Component {
     return {
       challenge: {
         position: '',
-        initialPlayer: Game.PLAYER_A,
+        initialPlayer: null,
         type: 'mate',
         options: {
           mateIn: 1,
@@ -84,6 +283,7 @@ class ChallengeEditor extends Component {
           difficulty: 1,
           maxDifficulty: 5,
         },
+        game: null,
       },
       error: {
         position: null,
@@ -113,13 +313,22 @@ class ChallengeEditor extends Component {
 
   onValueSet = name => {
     if (name === 'position') {
-      this.setState(state => ({
-        error: {
-          ...state.error,
-          position: !state.challenge.position || Game.isValidCompressedPositionNotation(state.challenge.position)
-            ? null : 'This is not a valid position',
-        },
-      }));
+      this.setState(state => {
+        const isPositionValid = state.challenge.position
+          ? Game.isValidCompressedPositionNotation(state.challenge.position) : false;
+        const game = isPositionValid ? Game.fromCompressedPositionNotation(state.challenge.position) : null;
+        return {
+          error: {
+            ...state.error,
+            position: !state.challenge.position || isPositionValid ? null : 'This is not a valid position',
+          },
+          challenge: {
+            ...state.challenge,
+            game,
+            initialPlayer: game ? game.nextPlayer : null,
+          },
+        };
+      });
     }
   };
 
@@ -130,17 +339,18 @@ class ChallengeEditor extends Component {
     }
     this.props.onCreateChallenge({
       ...challenge,
-      responses: [],
-      game: Game.fromCompressedPositionNotation(challenge.position),
+      playerResponses: [],
     });
   };
 
   render() {
+    const {user, client} = this.props;
     const {challenge, error} = this.state;
+    const settings = user ? user.settings : client.settings;
 
     return (
       <Fragment>
-        <Header>Create a chanllenge</Header>
+        <Header>Create a challenge</Header>
         <Segment>
           <Form onSubmit={this.createChallenge}>
             <Form.Group>
@@ -163,6 +373,7 @@ class ChallengeEditor extends Component {
                 onChange={this.setValue}
                 value={Game.PLAYER_A}
                 checked={challenge.initialPlayer === Game.PLAYER_A}
+                disabled={challenge.initialPlayer !== Game.PLAYER_A}
               />
               <Form.Radio
                 name={'initialPlayer'}
@@ -170,8 +381,16 @@ class ChallengeEditor extends Component {
                 onChange={this.setValue}
                 value={Game.PLAYER_B}
                 checked={challenge.initialPlayer === Game.PLAYER_B}
+                disabled={challenge.initialPlayer !== Game.PLAYER_B}
               />
             </Form.Group>
+            {challenge.game ? (
+              <Board
+                medium
+                settings={settings}
+                game={challenge.game}
+              />
+            ) : null}
             <Form.Select
               options={[
                 {key: 'mate', value: 'mate', text: 'Mate'},
@@ -222,6 +441,10 @@ class ChallengeEditor extends Component {
 
 ChallengeEditor.propTypes = {
   onCreateChallenge: PropTypes.func.isRequired,
+  user: PropTypes.object,
+  client: PropTypes.object.isRequired,
 };
+
+ChallengeEditor = withClient(ChallengeEditor);
 
 export default withClient(CreateChallenge);

@@ -433,7 +433,7 @@ class PlayHistory extends Component {
   };
 
   render() {
-    const {game, selectedGame, user, defaultSettings, selectGame, pageSize} = this.props;
+    const {game, selectedGame, user, defaultSettings, selectGame, pageSize, moveNotation} = this.props;
     const {activePage} = this.state;
 
     const totalPages = Math.ceil((game.history.length - 1) / pageSize);
@@ -461,6 +461,12 @@ class PlayHistory extends Component {
                   selected={previousGame === selectedGame}
                   settings={user ? user.settings : defaultSettings}
                 />
+                {moveNotation ? (
+                  <Label color={'green'}>
+                    {previousGame.lastMovesInHistory.map(({x, y, resign}) => resign
+                      ? 'R' : `${['A', 'B', 'C', 'D', 'E'][x]}${y + 1}`).join('/')}
+                  </Label>
+                ) : null}
               </Fragment>
             ))}
             {lastVisibleGame && (lastVisibleGame.moveCount % 2 === 0) ? (
@@ -489,10 +495,12 @@ PlayHistory.propTypes = {
   defaultSettings: PropTypes.object.isRequired,
   selectGame: PropTypes.func,
   pageSize: PropTypes.number.isRequired,
+  moveNotation: PropTypes.bool.isRequired,
 };
 
 PlayHistory.defaultProps = {
   pageSize: 10,
+  moveNotation: false,
 };
 
 class PlayNavigation extends Component {

@@ -91,7 +91,6 @@ class Challenges extends Component {
     const playerResponse = challengePlayerResponses.find(
       playerResponse => playerResponse.playerMoves.includes(newGame.positionNotation));
     if (!playerResponse) {
-      console.log(_.flatten(challengePlayerResponses.map(pR => pR.playerMoves)), newGame.positionNotation);
       this.setState({wrongMove: true});
       return;
     }

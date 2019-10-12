@@ -310,6 +310,9 @@ class Game {
     this.chainCount = this.previous ? this.previous.chainCount + 1 : 0;
     this.lastMove = lastMove ? lastMove : (status.resignedPlayer ? {resign: status.resignedPlayer} : lastMove);
     this.moves = this.previous ? this.previous.moves.concat([this.lastMove]) : [];
+    this.lastMovesInHistory = this.fullHistory
+      .slice(this.fullHistory.indexOf(this.previousInHistory) + 1)
+      .map(game => game.lastMove);
 
     this.rowsAndColumns = rowsAndColumns;
 

@@ -195,6 +195,26 @@ class CreateChallenge extends Component {
     });
   };
 
+  createChallenge = () => {
+    const cleanedChallenge = JSON.parse(JSON.stringify(this.state.challenge, (key, value) => {
+      if (value instanceof Game) {
+        return undefined;
+      } else {
+        return value;
+      }
+    }));
+    this.props.client.createChallenge(cleanedChallenge);
+  };
+
+  discardChallenge = () => {
+    this.setState({
+      challenge: null,
+      currentStep: null,
+      tree: null,
+      game: null,
+    });
+  };
+
   render() {
     const {user, client} = this.props;
     const {challenge, game, tree, currentStep} = this.state;
@@ -216,6 +236,10 @@ class CreateChallenge extends Component {
               <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
               <Header as={'h4'}>{challenge.meta.source}</Header>
             </Segment>
+          </Grid.Row>
+          <Grid.Row>
+            <Button positive onClick={this.createChallenge}>Create</Button>
+            <Button negative onClick={this.discardChallenge}>Discard</Button>
           </Grid.Row>
         </Grid>
         <Segment>

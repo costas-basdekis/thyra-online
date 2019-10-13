@@ -46,6 +46,7 @@ class Client {
     this.onUsers = [];
     this.onGames = [];
     this.onTournaments = [];
+    this.onChallenges = [];
 
     this.bindSocket();
   }
@@ -70,6 +71,9 @@ class Client {
     this.tournamentsInfo = this.prepareTournaments([]);
     this.socket.on("tournaments", this.gotTournaments);
 
+    this.challengesInfo = this.prepareChallenges([]);
+    this.socket.on("challenges", this.gotChallenges);
+
     this.getUser();
   }
 
@@ -92,7 +96,7 @@ class Client {
   };
 
   subscribe(callbacks) {
-    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onTournaments']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onTournaments', 'onChallenges']) {
       const callback = callbacks[name];
       if (callback) {
         this[name].push(callback);
@@ -101,7 +105,7 @@ class Client {
   }
 
   unsubscribe(callbacks) {
-    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onChallenges']) {
       const callback = callbacks[name];
       if (callback) {
         _.pull(this[name], callback);
@@ -282,6 +286,25 @@ class Client {
       otherFutureAndLive: this.user ? futureAndLive.filter(tournament => !tournament.userIds.includes(this.user.id)) : future,
       otherFinished: this.user ? finished.filter(tournament => !tournament.userIds.includes(this.user.id)) : finished,
       mine: this.user ? tournaments.filter(tournament => tournament.userIds.includes(this.user.id)) : [],
+    };
+  }
+
+  createChallenge(challenge) {
+    this.socket.emit('create-challenge', challenge);
+  }
+
+  gotChallenges = challenges => {
+    challenges = _.sortBy(challenges, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
+    this.challengesInfo = this.prepareChallenges(challenges);
+    this.onChallenges.map(callback => callback(this.challengesInfo));
+  };
+
+  prepareChallenges(challenges) {
+    return {
+      challenges,
+      byId: _.fromPairs(challenges.map(game => [game.id, game])),
+      mine: this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [],
+      other: this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges,
     };
   }
 }

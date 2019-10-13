@@ -1,94 +1,83 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../game/game";
-import {Grid, Header, Icon, Message, Segment} from "semantic-ui-react";
+import {Grid, Header, Icon, Message, Modal, Segment} from "semantic-ui-react";
 import Play from "./Play";
 import {withClient} from "../client/withClient";
 import _ from 'lodash';
 import "../styles/challenges.css";
+import ChallengeList from "./ChallengeList";
+import {Route, Switch, withRouter} from "react-router-dom";
 
 class Challenges extends Component {
-  static challenges = [
-    {
-      position: 'AABMAAAJAIAAEFMAJADMADAAD',
-      initialPlayer: Game.PLAYER_B,
-      type: 'mate',
-      options: {
-        mateIn: 5,
-      },
-      meta: {
-        source: 'From the first tournament on Thyra Online, Tommy vs Costas',
-        difficulty: 4,
-        maxDifficulty: 5,
-      },
-      playerResponses: [
-        {
-          playerMoves: [
-            'AABMDAAJCGAAEFMAJADMADAAD',
-          ],
-          response: [{x: 2, y: 0}, {x: 1, y: 1}, {x: 1, y: 2}],
-          playerResponses: [
-            {
-              playerMoves: [
-                'AAAMGABJCIADEDMAJADMADAAD',
-              ],
-              response: [{x: 1, y: 1}, {x: 0, y: 2}, {x: 1, y: 2}],
-              playerResponses: [
-                {
-                  playerMoves: [
-                    'AAAMGAAMCGBGEFMAJADMADAAD',
-                    'AAAMGAAMAIBGEFMAJADMADAAD',
-                  ],
-                  response: [{x: 2, y: 2}, {x: 1, y: 2}, {x: 1, y: 1}],
-                  playerResponses: [
-                    {
-                      playerMoves: [
-                        'AAAMGADMAIBHFDMAMADMADAAD',
-                        'AAAMGADMAGBHFFMAMADMADAAD',
-                      ],
-                      response: [{x: 0, y: 2}, {x: 0, y: 1}, {x: 1, y: 1}],
-                      playerResponses: [
-                        {
-                          playerMoves: [
-                            'AAAMJBGMAIAHFDMAMADMADAAD',
-                          ],
-                        },
-                        {
-                          playerMoves: [
-                            'AAAMJBGMCIAHDDMAMADMADAAD',
-                          ],
-                        },
-                        {
-                          playerMoves: [
-                            'AAAMIBGMAJAHFDMAMADMADAAD',
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                }
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  render() {
+    const {challengesInfo: {challenges}} = this.props;
 
+    return (
+      <Switch>
+        <Route exact path={this.props.match.path}>
+          <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={challenges} />
+        </Route>
+        <Route path={`${this.props.match.path}/:id`}>
+          <ChallengePlayer selectLiveChallenge={this.props.selectLiveChallenge}
+          />
+        </Route>
+      </Switch>
+    );
+  }
+}
+
+Challenges.propTypes = {
+  user: PropTypes.object,
+  client: PropTypes.object.isRequired,
+  liveChallenge: PropTypes.object,
+  selectLiveChallenge: PropTypes.func.isRequired,
+};
+
+class ChallengePlayer extends Component {
   state = {
-    challenge: this.constructor.challenges[0],
-    challengePlayerResponses: this.constructor.challenges[0].playerResponses,
-    game: Game.fromCompressedPositionNotation(this.constructor.challenges[0].position),
+    playerResponses: this.challenge ? this.challenge.startingPosition.playerResponses : null,
+    game: this.challenge ? Game.fromCompressedPositionNotation(this.challenge.startingPosition.position) : null,
     wrongMove: false,
     won: false,
   };
 
+  get challenge() {
+    const {match, challengesInfo: {byId}} = this.props;
+    const challenge = byId[match.params.id];
+    return challenge;
+  }
+
+  componentDidMount() {
+    const challenge = this.challenge;
+
+    if (challenge) {
+      this.props.selectLiveChallenge(challenge);
+    }
+  }
+
+  componentDidUpdate() {
+    const challenge = this.challenge;
+
+    if (challenge) {
+      this.props.selectLiveChallenge(challenge);
+      if (!this.state.game) {
+        this.setState({
+          playerResponses: challenge.startingPosition.playerResponses,
+          game: Game.fromCompressedPositionNotation(challenge.startingPosition.position),
+          wrongMove: false,
+          won: false,
+        });
+      }
+    }
+  }
+
   submit = (moves, newGame) => {
-    const {challengePlayerResponses, won} = this.state;
+    const {playerResponses, won} = this.state;
     if (won) {
       return;
     }
-    const playerResponse = challengePlayerResponses.find(
+    const playerResponse = playerResponses.find(
       playerResponse => playerResponse.playerMoves.includes(newGame.positionNotation));
     if (!playerResponse) {
       this.setState({wrongMove: true});
@@ -97,7 +86,7 @@ class Challenges extends Component {
     const challengeResponse = playerResponse.response ? newGame.makeMoves(playerResponse.response) : newGame;
     this.setState({
       game: challengeResponse,
-      challengePlayerResponses: playerResponse.playerResponses || null,
+      playerResponses: playerResponse.playerResponses || null,
       wrongMove: false,
       won: !playerResponse.response,
     });
@@ -119,10 +108,40 @@ class Challenges extends Component {
     ));
   }
 
+  dismissUrlChallengeError = () => {
+    this.props.selectLiveChallenge(null);
+  };
+
   render() {
-    const {challenge, game, wrongMove, won} = this.state;
+    if (!this.props.user) {
+      return null;
+    }
+    const challenge = this.challenge;
+    if (!challenge) {
+      return (
+        <Fragment>
+          <Modal
+            open={true}
+            size={'mini'}
+            onClose={this.dismissUrlChallengeError}
+            header={'Could not find challenge'}
+            content={'This challenge cannot be found. Please check that you copied the full URL, or perhaps the challenge was removed'}
+            actions={[{key: 'ok', content: 'OK', positive: true}]}
+          />
+          Could not find challenge
+        </Fragment>
+      );
+    }
+
+    const {game, wrongMove, won} = this.state;
+    if (!game) {
+      return null;
+    }
+
     const {user, client} = this.props;
-    const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
+    const challengePrompt = challenge.options.type === 'mate'
+      ? `Find mate in ${challenge.options.typeOptions.mateIn}`
+      : 'Unknown challenge';
     const message = (
       wrongMove ? (
         <Message error icon={'warning'} content={"That's not the right answer"} />
@@ -152,8 +171,8 @@ class Challenges extends Component {
           changeSettings={this.changeSettings}
           game={game}
           matchGame={game}
-          allowControl={[challenge.initialPlayer]}
-          names={{[challenge.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.initialPlayer]]: 'Challenge'}}
+          allowControl={[challenge.options.initialPlayer]}
+          names={{[challenge.options.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Challenge'}}
           submit={this.submit}
           onDisplayPositionChange={this.onDisplayPositionChange}
         >
@@ -164,9 +183,12 @@ class Challenges extends Component {
   }
 }
 
-Challenges.propTypes = {
+ChallengePlayer.propTypes = {
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
+  selectLiveChallenge: PropTypes.func.isRequired
 };
 
-export default withClient(Challenges);
+ChallengePlayer = withRouter(withClient(ChallengePlayer));
+
+export default withRouter(withClient(Challenges));

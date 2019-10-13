@@ -24,7 +24,9 @@ class App extends Component {
   state = {
     liveGame: null,
     liveTournament: null,
+    liveChallenge: null,
   };
+
   selectLiveGame = liveGame => {
     let gameUrl;
     if (liveGame) {
@@ -40,6 +42,7 @@ class App extends Component {
     }
     this.setState({liveGame});
   };
+
   selectLiveTournament = liveTournament => {
     let tournamentUrl;
     if (liveTournament) {
@@ -54,6 +57,22 @@ class App extends Component {
       return;
     }
     this.setState({liveTournament});
+  };
+
+  selectLiveChallenge = liveChallenge => {
+    let challengeUrl;
+    if (liveChallenge) {
+      challengeUrl = `/challenge/${liveChallenge.id}`;
+    } else {
+      challengeUrl = `/lobby`;
+    }
+    if (challengeUrl !== this.props.location.pathname) {
+      this.props.history.push(challengeUrl);
+    }
+    if (this.state.liveChallenge === liveChallenge) {
+      return;
+    }
+    this.setState({liveChallenge});
   };
 
   toggleParticipation = tournament => {
@@ -157,7 +176,7 @@ class App extends Component {
   }
 
   render() {
-    const {liveGame, liveTournament} = this.state;
+    const {liveGame, liveTournament, liveChallenge} = this.state;
     const {connected, disconnected, available, user, usersInfo: {byId: usersById}} = this.props;
     const playerA = liveGame ? usersById[liveGame.userIds[0]] : null;
     const playerB = liveGame ? usersById[liveGame.userIds[1]] : null;
@@ -230,8 +249,8 @@ class App extends Component {
           process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Create Challenge'}, path: 'create-challenge', render: () => (
             <Tab.Pane><CreateChallenge /></Tab.Pane>
           )} : null,
-          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenges', render: () => (
-            <Tab.Pane><Challenges /></Tab.Pane>
+          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: 'Challenges'}, path: 'challenge', render: () => (
+            <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
           )} : null,
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>

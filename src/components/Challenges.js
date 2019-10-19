@@ -36,7 +36,8 @@ Challenges.propTypes = {
 
 class ChallengePlayer extends Component {
   state = {
-    game: this.challenge ? Game.fromCompressedPositionNotation(this.challenge.startingPosition.position) : null,
+    challengeId: this.challenge ? this.challenge.id : null,
+    game: this.getResumedChallengeGame(),
     submittedGame: null,
     path: this.challenge ? [] : null,
     wrongMove: false,
@@ -47,6 +48,26 @@ class ChallengePlayer extends Component {
     const {match, challengesInfo: {byId}} = this.props;
     const challenge = byId[match.params.id];
     return challenge;
+  }
+
+  get userChallenge() {
+    const challenge = this.challenge;
+    if (!challenge) {
+      return null;
+    }
+    const {user} = this.props;
+    return user.challenges[challenge.id] || {
+      meta: {
+        started: false,
+        mistakes: 0,
+        won: false,
+      },
+      startingPosition: {
+        position: challenge.startingPosition.position,
+        invalidPlayerPositions: [],
+        playerResponses: [],
+      },
+    };
   }
 
   componentDidMount() {
@@ -60,20 +81,29 @@ class ChallengePlayer extends Component {
   componentDidUpdate(prevProps, prevState) {
     const challenge = this.challenge;
 
-    if (challenge) {
+    if (challenge && prevState.challengeId !== challenge.id) {
       this.props.selectLiveChallenge(challenge);
-      if (!this.state.game) {
-        this.setState({
-          game: Game.fromCompressedPositionNotation(challenge.startingPosition.position),
+      this.setState({
+        challengeId: challenge.id,
+        game: this.getResumedChallengeGame(),
+        submittedGame: null,
+        path: [],
+        wrongMove: false,
+        won: false,
+      });
+    }
+    if (!challenge && this.state.challengeId) {
+      this.setState({
+          challengeId: null,
+          game: null,
           submittedGame: null,
           path: [],
           wrongMove: false,
           won: false,
-        });
-      }
-      if (this.props.user && this.state.submittedGame) {
-        this.updateChallenge(this.state.submittedGame, {askServer: false});
-      }
+      });
+    }
+    if (challenge && this.props.user && this.state.submittedGame) {
+      this.updateChallenge(this.state.submittedGame, {askServer: false});
     }
   }
 
@@ -85,19 +115,39 @@ class ChallengePlayer extends Component {
     this.updateChallenge(newGame, {askServer: true});
   };
 
+  getResumedChallengeGame() {
+    const userChallenge = this.userChallenge;
+    if (!userChallenge) {
+      return null;
+    }
+    let resultingGame = Game.fromCompressedPositionNotation(userChallenge.startingPosition.position);
+    let userChallengeStep = userChallenge.startingPosition;
+    while (userChallengeStep) {
+      const lastPlayerResponse = userChallengeStep.playerResponses[userChallengeStep.playerResponses.length - 1];
+      if (!lastPlayerResponse) {
+        break;
+      }
+      resultingGame = resultingGame.makeMoves(lastPlayerResponse.moves);
+      if (!lastPlayerResponse.challengeResponse) {
+        break;
+      }
+      resultingGame = resultingGame.makeMoves(lastPlayerResponse.challengeResponse.moves);
+      userChallengeStep = lastPlayerResponse.challengeResponse;
+    }
+
+    return resultingGame;
+  }
+
   updateChallenge(gameToUpdate, {askServer = true} = {}) {
     const {user} = this.props;
     if (!user) {
       return;
     }
     const challenge = this.challenge;
-    const userChallenge = user.challenges[challenge.id] || {
-      invalidPlayerPositions: [],
-      playerResponses: [],
-    };
+    const userChallenge = this.userChallenge;
 
     const history = gameToUpdate.history;
-    let userChallengeStep = userChallenge;
+    let userChallengeStep = userChallenge.startingPosition;
     let remainingHistory = history.slice(1).filter((game, index) => index % 2 === 0);
     if (!remainingHistory.length) {
       return;

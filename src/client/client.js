@@ -293,6 +293,10 @@ class Client {
     this.socket.emit('create-challenge', challenge);
   }
 
+  submitChallengeMove(challenge, path) {
+    this.socket.emit("submit-challenge-moves", {id: challenge.id, path});
+  }
+
   gotChallenges = challenges => {
     challenges = _.sortBy(challenges, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
     this.challengesInfo = this.prepareChallenges(challenges);

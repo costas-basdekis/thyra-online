@@ -36,8 +36,9 @@ Challenges.propTypes = {
 
 class ChallengePlayer extends Component {
   state = {
-    playerResponses: this.challenge ? this.challenge.startingPosition.playerResponses : null,
     game: this.challenge ? Game.fromCompressedPositionNotation(this.challenge.startingPosition.position) : null,
+    submittedGame: null,
+    path: this.challenge ? [] : null,
     wrongMove: false,
     won: false,
   };
@@ -56,45 +57,93 @@ class ChallengePlayer extends Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     const challenge = this.challenge;
 
     if (challenge) {
       this.props.selectLiveChallenge(challenge);
       if (!this.state.game) {
         this.setState({
-          playerResponses: challenge.startingPosition.playerResponses,
           game: Game.fromCompressedPositionNotation(challenge.startingPosition.position),
+          submittedGame: null,
+          path: [],
           wrongMove: false,
           won: false,
         });
+      }
+      if (this.props.user && this.state.submittedGame) {
+        this.updateChallenge(this.state.submittedGame, {askServer: false});
       }
     }
   }
 
   submit = (moves, newGame) => {
-    const {playerResponses, won} = this.state;
-    if (won) {
+    if (this.state.won) {
       return;
     }
-    const playerResponse = playerResponses.find(
-      playerResponse => playerResponse.playerMoves.includes(newGame.positionNotation));
-    if (!playerResponse) {
-      this.setState({wrongMove: true});
-      return;
-    }
-    const challengeResponse = playerResponse.response ? newGame.makeMoves(playerResponse.response) : newGame;
-    this.setState({
-      game: challengeResponse,
-      playerResponses: playerResponse.playerResponses || null,
-      wrongMove: false,
-      won: !playerResponse.response,
-    });
+
+    this.updateChallenge(newGame, {askServer: true});
   };
+
+  updateChallenge(gameToUpdate, {askServer = true} = {}) {
+    const {user} = this.props;
+    if (!user) {
+      return;
+    }
+    const challenge = this.challenge;
+    const userChallenge = user.challenges[challenge.id] || {
+      invalidPlayerPositions: [],
+      playerResponses: [],
+    };
+
+    const history = gameToUpdate.history;
+    let userChallengeStep = userChallenge;
+    let remainingHistory = history.slice(1).filter((game, index) => index % 2 === 0);
+    if (!remainingHistory.length) {
+      return;
+    }
+    while (remainingHistory.length) {
+      const historyGame = remainingHistory.shift();
+      if (userChallengeStep.invalidPlayerPositions.includes(historyGame.positionNotation)) {
+        this.setState({
+          wrongMove: true,
+          won: false,
+          submittedGame: null,
+        });
+        return;
+      }
+      const validPlayerResponse = userChallengeStep.playerResponses
+        .find(response => response.position === historyGame.positionNotation);
+      if (!validPlayerResponse) {
+        if (askServer) {
+          this.props.client.submitChallengeMove(challenge, gameToUpdate.path.filter((item, index) => index % 2 === 0));
+          this.setState({submittedGame: gameToUpdate});
+        }
+        return;
+      }
+      if (!validPlayerResponse.challengeResponse) {
+        this.setState({
+          wrongMove: false,
+          won: true,
+          game: historyGame.positionNotation !== this.state.game.positionNotation ? historyGame : this.state.game,
+          submittedGame: null,
+        });
+        return;
+      }
+      userChallengeStep = validPlayerResponse.challengeResponse;
+    }
+
+    this.setState({
+      game: gameToUpdate.makeMoves(userChallengeStep.moves),
+      wrongMove: false,
+      won: false,
+      submittedGame: null,
+    });
+  }
 
   onDisplayPositionChange = () => {
     if (this.state.wrongMove) {
-      this.setState({wrongMove: false});
+      this.setState({wrongMove: false, submittedGame: null});
     }
   };
 

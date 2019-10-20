@@ -6,6 +6,7 @@ import _ from "lodash";
 import Board from "./Board";
 import {withClient} from "../client/withClient";
 import Play from "./Play";
+import EditPosition from "./EditPosition";
 
 class CreateChallenge extends Component {
   state = {
@@ -325,7 +326,17 @@ class ChallengeForm extends Component {
 
   state = {
     ...this.getNewChallenge(),
+    editingPosition: false,
   };
+
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    const position = params.get('position');
+    if (position) {
+      this.setValue(null, {name: 'startingPosition.position', value: position});
+      this.setState({editingPosition: true});
+    }
+  }
 
   setValue = (e, {name, value}) => {
     this.setState(state => {
@@ -379,10 +390,30 @@ class ChallengeForm extends Component {
     this.props.onCreateChallenge(challenge);
   };
 
+  usePosition = positionNotation => {
+    this.setState({
+      editingPosition: false,
+    });
+    this.setValue(null, {name: 'startingPosition.position', value: positionNotation});
+  };
+
+  editPosition = () => {
+    this.setState({editingPosition: true});
+  };
+
   render() {
     const {user, client} = this.props;
-    const {challenge, error} = this.state;
+    const {editingPosition, challenge, error} = this.state;
     const settings = user ? user.settings : client.settings;
+
+    if (editingPosition) {
+      return (
+        <EditPosition
+          usePosition={this.usePosition}
+          initialPositionNotation={challenge.startingPosition.position}
+        />
+      );
+    }
 
     return (
       <Fragment>
@@ -399,6 +430,11 @@ class ChallengeForm extends Component {
                 value={challenge.startingPosition.position}
                 required
                 error={error.position}
+              />
+              <Button
+                content={'Edit position'}
+                secondary
+                onClick={this.editPosition}
               />
             </Form.Group>
             <Form.Group inline>

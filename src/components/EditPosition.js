@@ -17,14 +17,14 @@ class EditPosition extends Component {
     position: Game.getInitialRowsAndColumns(),
     positionError: null,
     urlError: false,
-    ...this.constructor.getGameAndErrorFromUrlPosition(),
+    ...this.getGameAndErrorFromUrlPosition(),
     selectedGame: null,
     previousPosition: null,
   };
 
-  static getGameAndErrorFromUrlPosition() {
+  getGameAndErrorFromUrlPosition() {
     const params = new URLSearchParams(window.location.search);
-    const position = params.get('position');
+    const position = params.get('position') || this.props.initialPositionNotation;
     if (position) {
       let game, urlError;
       try {
@@ -106,8 +106,12 @@ class EditPosition extends Component {
     alert('Play position copied to clipboard');
   };
 
+  usePosition = () => {
+    this.props.usePosition(Game.fromPosition(this.state.position).positionNotation);
+  };
+
   render() {
-    const {user, client, keydown} = this.props;
+    const {user, client, keydown, usePosition} = this.props;
     const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game, selectedGame, previousPosition} = this.state;
     const settings = user ? user.settings : client.settings;
 
@@ -182,6 +186,16 @@ class EditPosition extends Component {
               update={paletteUpdate}
               onPositionChange={this.onPositionChange}
             />
+            {usePosition ? (
+              <div>
+                <Button
+                  content={'Use position'}
+                  primary
+                  onClick={this.usePosition}
+                  disabled={!!positionError}
+                />
+              </div>
+            ) : null}
           </Play>
         </Segment>
       </Fragment>
@@ -193,6 +207,8 @@ EditPosition.propTypes = {
   keydown: PropTypes.object.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
+  usePosition: PropTypes.func,
+  initialPositionNotation: PropTypes.string,
 };
 
 class EditPositionPalette extends Component {

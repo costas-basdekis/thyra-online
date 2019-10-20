@@ -1,13 +1,14 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../game/game";
-import {Grid, Header, Icon, Message, Modal, Segment} from "semantic-ui-react";
+import {Button, Grid, Header, Icon, Message, Modal, Segment} from "semantic-ui-react";
 import Play from "./Play";
 import {withClient} from "../client/withClient";
 import _ from 'lodash';
 import "../styles/challenges.css";
 import ChallengeList from "./ChallengeList";
-import {Route, Switch, withRouter} from "react-router-dom";
+import {Link, Route, Switch, withRouter} from "react-router-dom";
+import CreateChallenge from "./CreateChallenge";
 
 class Challenges extends Component {
   render() {
@@ -16,11 +17,20 @@ class Challenges extends Component {
     return (
       <Switch>
         <Route exact path={this.props.match.path}>
-          <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={challenges} />
+          <Fragment>
+            <Segment>
+              <Link to={`${this.props.match.path}/create`}><Button content={'Create Challenge'} /></Link>
+            </Segment>
+            <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={challenges} />
+          </Fragment>
         </Route>
+        {process.env.REACT_APP_DEBUG ? (
+          <Route path={`${this.props.match.path}/create`}>
+            <CreateChallenge />
+          </Route>
+        ) : null}
         <Route path={`${this.props.match.path}/:id`}>
-          <ChallengePlayer selectLiveChallenge={this.props.selectLiveChallenge}
-          />
+          <ChallengePlayer selectLiveChallenge={this.props.selectLiveChallenge} />
         </Route>
       </Switch>
     );

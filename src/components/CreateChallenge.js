@@ -305,6 +305,11 @@ class CreateChallenge extends Component {
 }
 
 class ChallengeForm extends Component {
+  static valueConversion = {
+    'options.typeOptions.mateIn': parseInt,
+    'meta.difficulty': parseInt,
+  };
+
   state = {
     challenge: this.props.initialChallenge || {
       options: {
@@ -355,6 +360,9 @@ class ChallengeForm extends Component {
       newChallengeToChange[parts[parts.length - 1]] = value;
       return {challenge};
     });
+    if (name in this.constructor.valueConversion) {
+      value = this.constructor.valueConversion[name](value);
+    }
     this.onValueSet(name, value);
   };
 

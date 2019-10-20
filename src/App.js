@@ -221,7 +221,7 @@ class App extends Component {
         ) : null}
         <NavigationalTab menu={{pointing: true, attached: false, stackable: true}} panes={[
           client.available ? {menuItem: {icon: 'users', content: 'Lobby'}, path: 'lobby', render: () => (
-            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} /></Tab.Pane>
+            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
           )} : null,
           client.available ? {menuItem: {icon: 'play', content: onlineGameLabel}, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
             <Tab.Pane><OnlineGame game={liveGame} selectLiveGame={this.selectLiveGame} /></Tab.Pane>

@@ -8,6 +8,7 @@ import HashedIcon from "./HashedIcon";
 import GameList from "./GameList";
 import CreateTournament from "./CreateTournament";
 import TournamentList from "./TournamentList";
+import ChallengeList, {ChallengeCard} from "./ChallengeList";
 
 class UserList extends Component {
   render() {
@@ -322,6 +323,7 @@ class Lobby extends Component {
       client, user,
       usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe},
       gamesInfo: {myLive, otherLive, myFinished, otherFinished}, selectLiveGame, selectLiveTournament,
+      challengesInfo: {otherUnsolved, challenges, otherStarted, otherNotStarted, otherSolved},
       tournamentsInfo,
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
@@ -343,6 +345,15 @@ class Lobby extends Component {
               readyToPlayMeUsers={readyToPlayMe}
             />
           ) : null}
+          {otherUnsolved.length ? (
+            <ChallengeCard
+              user={user}
+              usersById={usersById}
+              challenge={otherUnsolved[0]}
+              selectChallenge={this.props.selectLiveChallenge}
+              currentChallengeId={null}
+            />
+          ) : null}
         </Card.Group>
         <Segment>
           <Tab menu={{pointing: true}} panes={[
@@ -356,6 +367,26 @@ class Lobby extends Component {
             )}
           ))} />
         </Segment>
+        {challenges ? (<Segment>
+          <Tab menu={{pointing: true}} panes={(() => {
+            let challengesList = [
+              {key: 'other-started', label: "Started Challenges", items: otherStarted, color: 'green'},
+              {key: 'other-not-started', label: "New Challenges", items: otherNotStarted},
+              {key: 'other-solved', label: "Solved Challenges", items: otherSolved},
+            ].filter(({items}) => items.length);
+            if (!challengesList.length) {
+              challengesList = [
+                {key: 'challenges', label: "Challenges", items: challenges},
+              ];
+            }
+            return challengesList;
+          })().map(({key, label, items, color}) => (
+              {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+                  <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={items} />
+                )}
+            ))
+          } />
+        </Segment>) : null}
         <Segment>
           <CreateTournament />
           <br/><br/>
@@ -406,6 +437,7 @@ Lobby.propTypes = {
   tournamentsInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   selectLiveTournament: PropTypes.func.isRequired,
+  selectLiveChallenge: PropTypes.func.isRequired,
 };
 
 export default withClient(Lobby);

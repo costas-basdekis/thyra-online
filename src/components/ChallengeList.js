@@ -12,9 +12,22 @@ export class ChallengeCard extends Component {
     this.props.selectChallenge(this.props.challenge);
   };
 
+  get userChallenge() {
+    const {user, challenge} = this.props;
+    if (!user) {
+      return null;
+    }
+    if (!challenge) {
+      return null;
+    }
+    return user.challenges[challenge.id] || null;
+  }
+
   render() {
     const {user, usersById, challenge, currentChallengeId} = this.props;
+    const userChallenge = this.userChallenge;
 
+    const creator = usersById[challenge.userId];
     return (
       <Card
         as={NavLink}
@@ -25,20 +38,35 @@ export class ChallengeCard extends Component {
         }}
       >
         <Card.Content>
-          <Board
-            className={'ui image floated right mini'}
-            game={Game.fromCompressedPositionNotation(challenge.startingPosition.position)}
-            small
-            settings={user ? user.settings : undefined}
-          />
           <Card.Header>
             {challenge.options.type === 'mate'
               ? `Find mate in ${challenge.options.typeOptions.mateIn}`
               : 'Unknown challenge'}
           </Card.Header>
           <Card.Meta>
-            <Label icon={{name: 'star', color: 'yellow'}} content={`${challenge.meta.difficulty}/${challenge.meta.maxDifficulty}`} />
-            <Label icon={'user'} content={usersById[challenge.userId].name} />
+            <Label
+              icon={{
+                name: {1: 'smile outline', 2: 'meh outline', 3: 'frown outline'}[challenge.meta.difficulty],
+                color: {1: 'green', 2: 'orange', 3: 'red'}[challenge.meta.difficulty],
+              }}
+              content={`${challenge.meta.difficulty}/${challenge.meta.maxDifficulty}`}
+              title={{1: 'Easy', 2: 'Medium', 3: 'Hard'}[challenge.meta.difficulty]}
+            />
+            <Label icon={'user'} content={`By ${creator.name}`} />
+            {userChallenge && userChallenge.meta.started && !userChallenge.meta.won ? (
+              <Label icon={{name: 'play', color: 'green'}} content={'Started'} />
+            ) : null}
+            {userChallenge && userChallenge.meta.won ? (
+              <Label icon={{name: 'trophy', color: 'green'}} content={'Won'} />
+            ) : null}
+            {userChallenge && userChallenge.meta.mistakes ? (
+              <Label icon={{name: 'exclamation', color: 'red'}} content={`${userChallenge.meta.mistakes} mistakes`} />
+            ) : null}
+            <Board
+              game={Game.fromCompressedPositionNotation(challenge.startingPosition.position)}
+              medium
+              settings={user ? user.settings : undefined}
+            />
           </Card.Meta>
         </Card.Content>
       </Card>
@@ -80,7 +108,7 @@ class ChallengeList extends Component {
 
     return (
       <Fragment>
-        <Card.Group style={{maxHeight: '300px', overflowY: 'auto'}}>
+        <Card.Group style={{maxHeight: '400px', overflowY: 'auto'}}>
           {visibleChallenges.map(challenge => (
             <ChallengeCard
               key={challenge.id}

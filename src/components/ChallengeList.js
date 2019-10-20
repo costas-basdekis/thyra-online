@@ -57,7 +57,7 @@ export class ChallengeCard extends Component {
               <Label icon={{name: 'play', color: 'green'}} content={'Started'} />
             ) : null}
             {userChallenge && userChallenge.meta.won ? (
-              <Label icon={{name: 'trophy', color: 'green'}} content={'Won'} />
+              <Label icon={{name: 'trophy', color: 'green'}} content={'Solved'} />
             ) : null}
             {userChallenge && userChallenge.meta.mistakes ? (
               <Label icon={{name: 'exclamation', color: 'red'}} content={`${userChallenge.meta.mistakes} mistakes`} />

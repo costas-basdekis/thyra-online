@@ -304,11 +304,16 @@ class Client {
   };
 
   prepareChallenges(challenges) {
+    const otherChallenges = this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges;
     return {
       challenges,
       byId: _.fromPairs(challenges.map(game => [game.id, game])),
       mine: this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [],
-      other: this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges,
+      other: otherChallenges,
+      otherSolved: this.user ? otherChallenges.filter(challenge => this.user.challenges[challenge.id] && this.user.challenges[challenge.id].meta.won) : [],
+      otherUnsolved: this.user ? otherChallenges.filter(challenge => !this.user.challenges[challenge.id] || !this.user.challenges[challenge.id].meta.won) : otherChallenges,
+      otherStarted: this.user ? otherChallenges.filter(challenge => this.user.challenges[challenge.id] && this.user.challenges[challenge.id].meta.started && !this.user.challenges[challenge.id].meta.won) : [],
+      otherNotStarted: this.user ? otherChallenges.filter(challenge => !this.user.challenges[challenge.id] || !this.user.challenges[challenge.id].meta.started) : otherChallenges,
     };
   }
 }

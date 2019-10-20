@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../game/game";
-import {Button, Grid, Header, Icon, Message, Modal, Segment} from "semantic-ui-react";
+import {Button, Grid, Header, Icon, Label, Message, Modal, Segment, Tab} from "semantic-ui-react";
 import Play from "./Play";
 import {withClient} from "../client/withClient";
 import _ from 'lodash';
@@ -12,7 +12,7 @@ import CreateChallenge from "./CreateChallenge";
 
 class Challenges extends Component {
   render() {
-    const {challengesInfo: {challenges}} = this.props;
+    const {challengesInfo: {otherStarted, otherNotStarted, otherSolved, mine}} = this.props;
 
     return (
       <Switch>
@@ -21,7 +21,16 @@ class Challenges extends Component {
             <Segment>
               <Link to={`${this.props.match.path}/create`}><Button content={'Create Challenge'} /></Link>
             </Segment>
-            <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={challenges} />
+            <Tab menu={{pointing: true}} panes={[
+              {key: 'other-started', label: "Started Challenges", items: otherStarted, color: 'green'},
+              {key: 'other-not-started', label: "New Challenges", items: otherNotStarted},
+              {key: 'other-solved', label: "Solved Challenges", items: otherSolved},
+              {key: 'mine', label: "My Challenges", items: mine},
+            ].filter(({items}) => items.length).map(({key, label, items, color}) => (
+              {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
+                <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={items} />
+              )}
+            ))} />
           </Fragment>
         </Route>
         {process.env.REACT_APP_DEBUG ? (

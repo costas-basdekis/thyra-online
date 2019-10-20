@@ -435,6 +435,7 @@ Lobby.propTypes = {
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
   tournamentsInfo: PropTypes.object.isRequired,
+  challengesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   selectLiveTournament: PropTypes.func.isRequired,
   selectLiveChallenge: PropTypes.func.isRequired,

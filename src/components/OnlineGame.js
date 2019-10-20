@@ -332,7 +332,7 @@ class OnlineGame extends Component {
 
   render() {
     const {
-      selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {myLive, otherLive, myFinished, otherFinished},
+      selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {games, myLive, otherLive, myFinished, otherFinished},
       tournamentsInfo: {byId: tournamentsById},
     } = this.props;
     if (!Object.values(byId).length) {
@@ -348,6 +348,7 @@ class OnlineGame extends Component {
               {key: 'other-live', label: "Other Live games", items: otherLive, color: 'green'},
               {key: 'my-past', label: "My Past games", items: myFinished},
               {key: 'other-past', label: "Other Past games", items: otherFinished},
+              {key: 'all', label: "All games", items: games},
             ].filter(({items}) => items.length).map(({key, label, items, color}) => (
               {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
                 <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />

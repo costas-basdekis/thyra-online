@@ -233,7 +233,7 @@ class CreateChallenge extends Component {
         <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
       )
     }
-    const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
+    const challengePrompt = challenge.options.type === 'mate' ? `Find mate in ${challenge.options.typeOptions.mateIn}` : 'Unknown challenge';
 
     return (
       <Fragment>

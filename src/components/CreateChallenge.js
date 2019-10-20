@@ -10,6 +10,7 @@ import EditPosition from "./EditPosition";
 
 class CreateChallenge extends Component {
   state = {
+    editing: true,
     challenge: null,
     currentStep: null,
     tree: null,
@@ -18,6 +19,7 @@ class CreateChallenge extends Component {
 
   onCreateChallenge = challenge => {
     this.setState({
+      editing: false,
       challenge,
       currentStep: challenge.startingPosition,
       tree: this.getTree(challenge.startingPosition),
@@ -196,6 +198,10 @@ class CreateChallenge extends Component {
     });
   };
 
+  editChallenge = () => {
+    this.setState({editing: true});
+  };
+
   createChallenge = () => {
     const cleanedChallenge = JSON.parse(JSON.stringify(this.state.challenge, (key, value) => {
       if (value instanceof Game) {
@@ -209,6 +215,7 @@ class CreateChallenge extends Component {
 
   discardChallenge = () => {
     this.setState({
+      editing: true,
       challenge: null,
       currentStep: null,
       tree: null,
@@ -218,12 +225,12 @@ class CreateChallenge extends Component {
 
   render() {
     const {user, client} = this.props;
-    const {challenge, game, tree, currentStep} = this.state;
+    const {editing, challenge, game, tree, currentStep} = this.state;
     const settings = user ? user.settings : client.settings;
 
-    if (!challenge) {
+    if (editing) {
       return (
-        <ChallengeForm onCreateChallenge={this.onCreateChallenge} />
+        <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
       )
     }
     const challengePrompt = challenge.type === 'mate' ? `Find mate in ${challenge.options.mateIn}` : 'Unknown challenge';
@@ -239,6 +246,7 @@ class CreateChallenge extends Component {
             </Segment>
           </Grid.Row>
           <Grid.Row>
+            <Button secondary onClick={this.editChallenge}>Edit</Button>
             <Button positive onClick={this.createChallenge}>Create</Button>
             <Button negative onClick={this.discardChallenge}>Discard</Button>
           </Grid.Row>
@@ -297,44 +305,40 @@ class CreateChallenge extends Component {
 }
 
 class ChallengeForm extends Component {
-  getNewChallenge() {
-    return {
-      challenge: {
-        options: {
-          initialPlayer: null,
-          type: 'mate',
-          typeOptions: {
-            mateIn: 1,
-          },
-        },
-        meta: {
-          source: '',
-          difficulty: 1,
-          maxDifficulty: 3,
-        },
-        startingPosition: {
-          position: '',
-          game: null,
-          playerResponses: [],
-        },
-      },
-      error: {
-        position: null,
-      },
-    };
-  }
-
   state = {
-    ...this.getNewChallenge(),
+    challenge: this.props.initialChallenge || {
+      options: {
+        initialPlayer: null,
+        type: 'mate',
+        typeOptions: {
+          mateIn: 1,
+        },
+      },
+      meta: {
+        source: '',
+        difficulty: 1,
+        maxDifficulty: 3,
+      },
+      startingPosition: {
+        position: '',
+        game: null,
+        playerResponses: [],
+      },
+    },
+    error: {
+      position: null,
+    },
     editingPosition: false,
   };
 
   componentDidMount() {
-    const params = new URLSearchParams(window.location.search);
-    const position = params.get('position');
-    if (position) {
-      this.setValue(null, {name: 'startingPosition.position', value: position});
-      this.setState({editingPosition: true});
+    if (!this.props.initialChallenge) {
+      const params = new URLSearchParams(window.location.search);
+      const position = params.get('position');
+      if (position) {
+        this.setValue(null, {name: 'startingPosition.position', value: position});
+        this.setState({editingPosition: true});
+      }
     }
   }
 
@@ -402,7 +406,7 @@ class ChallengeForm extends Component {
   };
 
   render() {
-    const {user, client} = this.props;
+    const {user, client, initialChallenge} = this.props;
     const {editingPosition, challenge, error} = this.state;
     const settings = user ? user.settings : client.settings;
 
@@ -503,7 +507,7 @@ class ChallengeForm extends Component {
                 value={challenge.meta.difficulty}
               />
             </Form.Group>
-            <Form.Button content='Create' />
+            <Form.Button primary content={initialChallenge ? 'Update' : 'Create'} />
           </Form>
         </Segment>
       </Fragment>
@@ -512,6 +516,7 @@ class ChallengeForm extends Component {
 }
 
 ChallengeForm.propTypes = {
+  initialChallenge: PropTypes.object,
   onCreateChallenge: PropTypes.func.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,

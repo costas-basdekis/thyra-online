@@ -309,7 +309,7 @@ class ChallengeForm extends Component {
         meta: {
           source: '',
           difficulty: 1,
-          maxDifficulty: 5,
+          maxDifficulty: 3,
         },
         startingPosition: {
           position: '',

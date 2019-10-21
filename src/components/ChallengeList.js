@@ -62,6 +62,27 @@ export class ChallengeCard extends Component {
             {userChallenge && userChallenge.meta.mistakes ? (
               <Label icon={{name: 'exclamation', color: 'red'}} content={`${userChallenge.meta.mistakes} mistakes`} />
             ) : null}
+            {user && challenge.userId === user.id ? (
+              <Label
+                icon={(
+                  challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()
+                    ? {name: 'check', color: 'green'} : (
+                      challenge.meta.public
+                        ? {name: 'pause', color: 'yellow'} : {name: 'x', color: 'red'}
+                    ))}
+                content={(
+                  challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()
+                    ? challenge.meta.publishDatetime.fromNow() : (
+                      challenge.meta.public
+                        ? challenge.meta.publishDatetime.toNow() : "Private"
+                    ))}
+              />
+            ) : (
+              <Label
+                icon={'calendar'}
+                content={challenge.meta.publishDatetime.fromNow()}
+              />
+            )}
             <Board
               game={Game.fromCompressedPositionNotation(challenge.startingPosition.position)}
               medium

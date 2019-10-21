@@ -1,12 +1,13 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Button, Form, Grid, Header, Icon, Input, Segment} from "semantic-ui-react";
+import {Button, Checkbox, Form, Grid, Header, Icon, Input, Segment} from "semantic-ui-react";
 import Game from "../game/game";
 import _ from "lodash";
 import Board from "./Board";
 import {withClient} from "../client/withClient";
 import Play from "./Play";
 import EditPosition from "./EditPosition";
+import moment from "moment";
 
 class CreateChallenge extends Component {
   state = {
@@ -308,6 +309,7 @@ class ChallengeForm extends Component {
   static valueConversion = {
     'options.typeOptions.mateIn': parseInt,
     'meta.difficulty': parseInt,
+    'meta.publishDatetime': timestamp => timestamp ? moment(timestamp) : null,
   };
 
   state = {
@@ -323,6 +325,8 @@ class ChallengeForm extends Component {
         source: '',
         difficulty: 1,
         maxDifficulty: 3,
+        public: true,
+        publishDatetime: null,
       },
       startingPosition: {
         position: '',
@@ -347,7 +351,14 @@ class ChallengeForm extends Component {
     }
   }
 
-  setValue = (e, {name, value}) => {
+  setValue = (e, {name, value, checked}) => {
+    if (value === undefined && typeof checked === typeof true) {
+      value = checked;
+    }
+    let convertedValue = value;
+    if (name in this.constructor.valueConversion) {
+      convertedValue = this.constructor.valueConversion[name](convertedValue);
+    }
     this.setState(state => {
       const challenge = {
         ...state.challenge,
@@ -357,13 +368,10 @@ class ChallengeForm extends Component {
       for (const part of parts.slice(0, parts.length - 1)) {
         newChallengeToChange = newChallengeToChange[part] || {};
       }
-      newChallengeToChange[parts[parts.length - 1]] = value;
+      newChallengeToChange[parts[parts.length - 1]] = convertedValue;
       return {challenge};
     });
-    if (name in this.constructor.valueConversion) {
-      value = this.constructor.valueConversion[name](value);
-    }
-    this.onValueSet(name, value);
+    this.onValueSet(name, convertedValue);
   };
 
   onValueSet = name => {
@@ -482,6 +490,7 @@ class ChallengeForm extends Component {
               name={'options.type'}
               label={'Type'}
               onChange={this.setValue}
+              required
               value={challenge.options.type}
             />
             <Form.Group>
@@ -493,6 +502,7 @@ class ChallengeForm extends Component {
                 max={10}
                 name={'options.typeOptions.mateIn'}
                 onChange={this.setValue}
+                required
                 value={challenge.options.typeOptions.mateIn}
               />
             </Form.Group>
@@ -512,7 +522,25 @@ class ChallengeForm extends Component {
                 max={challenge.meta.maxDifficulty}
                 name={'meta.difficulty'}
                 onChange={this.setValue}
+                required
                 value={challenge.meta.difficulty}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Field
+                control={Checkbox}
+                label={'Public'}
+                name={'meta.public'}
+                onChange={this.setValue}
+                checked={challenge.meta.public}
+              />
+              <Form.Field
+                control={Input}
+                type={'datetime-local'}
+                label={'Publish On'}
+                name={'meta.publishDatetime'}
+                onChange={this.setValue}
+                value={challenge.meta.publishDatetime ? challenge.meta.publishDatetime.format("YYYY-MM-DDTHH:mm") : ''}
               />
             </Form.Group>
             <Form.Button primary content={initialChallenge ? 'Update' : 'Create'} />

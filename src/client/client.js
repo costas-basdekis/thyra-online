@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 
 const appVersion = 5
 
@@ -298,6 +299,9 @@ class Client {
   }
 
   gotChallenges = challenges => {
+    for (const challenge of challenges) {
+      challenge.meta.publishDatetime = moment(challenge.meta.publishDatetime);
+    }
     challenges = _.sortBy(challenges, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
     this.challengesInfo = this.prepareChallenges(challenges);
     this.onChallenges.map(callback => callback(this.challengesInfo));

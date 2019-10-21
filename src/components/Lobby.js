@@ -470,4 +470,5 @@ export default withClient(Lobby);
 
 export {
   ChallengeUserButton,
+  EditUser,
 };

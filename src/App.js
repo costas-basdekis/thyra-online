@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import 'fomantic-ui-css/semantic.css';
-import {Container, Header, Message, Segment, Tab} from 'semantic-ui-react';
+import {Container, Header, Label, Message, Segment, Tab} from 'semantic-ui-react';
 import './styles/App.css';
 import './styles/semantic-ui.css';
 import {client} from "./client/client";
 import NavigationalTab from "./components/NavigationalTab";
 import {withRouter} from "react-router-dom";
 import Hotseat from "./components/Hotseat";
-import Lobby, {LogIn, LogOut} from "./components/Lobby";
+import Lobby, {EditUser, LogIn, LogOut} from "./components/Lobby";
 import OnlineGame from "./components/OnlineGame";
 import {withClient} from "./client/withClient";
 import services from "./services";
@@ -203,6 +203,7 @@ class App extends Component {
           <Header as={"h1"}>Thyra Online</Header>
           <Settings/>
           <LogIn client={client} />
+          {user ? <EditUser client={client} user={user} trigger={<Label as={'a'} icon={'edit'} content={'Edit'}/>} /> : null}
           <LogOut client={client} />
         </Segment>
         {!connected ? (

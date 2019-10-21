@@ -40,7 +40,7 @@ UserList.propTypes = {
   readyToPlayMeUsers: PropTypes.array,
 };
 
-class UserCard extends Component {
+class ChallengeUserButton extends Component {
   changeReadyToPlay = () => {
     this.props.client.changeReadyToPlay(!this.props.user.readyToPlay);
   };
@@ -50,63 +50,91 @@ class UserCard extends Component {
   };
 
   render() {
-    const {client, user, otherUser, challengedUser, readyToPlayUsers, readyToPlayMeUsers} = this.props;
+    const {
+      client, user, otherUser,
+      usersInfo: {challengedUser, readyToPlay : readyToPlayUsers, readyToPlayMe : readyToPlayMeUsers},
+    } = this.props;
+    if (!client || !user || !otherUser.online) {
+      return null;
+    }
+
     let playButtonColour, playButtonAttention, playButtonIcon, playButtonOnClick, playButtonLabel;
-    if (client && user) {
-      if (user.id === otherUser.id) {
-        playButtonOnClick = this.changeReadyToPlay;
-        if (user.readyToPlay) {
-          playButtonColour = 'green';
-          playButtonIcon = {loading: true, name: 'circle notch'};
-          if (challengedUser) {
-            playButtonLabel = `Waiting for ${challengedUser.name}...`;
-          } else {
-            playButtonLabel = 'Waiting for opponent...';
-          }
+    if (user.id === otherUser.id) {
+      playButtonOnClick = this.changeReadyToPlay;
+      if (user.readyToPlay) {
+        playButtonColour = 'green';
+        playButtonIcon = {loading: true, name: 'circle notch'};
+        if (challengedUser) {
+          playButtonLabel = `Waiting for ${challengedUser.name}...`;
         } else {
-          playButtonColour = 'yellow';
-          playButtonIcon = {name: 'play'};
-          if (readyToPlayMeUsers && readyToPlayMeUsers.length) {
-            if (readyToPlayMeUsers.length === 1) {
-              playButtonLabel = `${readyToPlayMeUsers[0].name} has challenged you`;
-              playButtonAttention = true;
-            } else {
-              playButtonLabel = `${readyToPlayMeUsers.length} users have challenged you`;
-              playButtonAttention = true;
-            }
-          } else if (readyToPlayUsers && readyToPlayUsers.length) {
-            if (readyToPlayUsers.length === 1) {
-              playButtonLabel = `Play ${readyToPlayUsers[0].name}`;
-            } else {
-              playButtonLabel = `${readyToPlayUsers.length} users ready to play`;
-            }
-          } else {
-            playButtonLabel = 'Play';
-          }
+          playButtonLabel = 'Waiting for opponent...';
         }
       } else {
-        playButtonOnClick = this.challengeUser;
-        if (challengedUser && challengedUser.id === otherUser.id) {
-          playButtonColour = 'green';
-          playButtonIcon = {loading: true, name: 'circle notch'};
-          playButtonLabel = `Waiting for ${otherUser.name}...`;
-        } else if (!otherUser.online) {
-          playButtonLabel = null;
-          playButtonOnClick = null;
-        } else {
-          playButtonColour = 'yellow';
-          playButtonIcon = {name: 'play'};
-          if (otherUser.readyToPlay === user.id) {
-            playButtonLabel = `${otherUser.name} has challenged you`;
+        playButtonColour = 'yellow';
+        playButtonIcon = {name: 'play'};
+        if (readyToPlayMeUsers && readyToPlayMeUsers.length) {
+          if (readyToPlayMeUsers.length === 1) {
+            playButtonLabel = `${readyToPlayMeUsers[0].name} has challenged you`;
             playButtonAttention = true;
-          } else if (otherUser.readyToPlay === true) {
-            playButtonLabel = `${otherUser.name} is ready to Play`;
           } else {
-            playButtonLabel = `Challenge ${otherUser.name}`;
+            playButtonLabel = `${readyToPlayMeUsers.length} users have challenged you`;
+            playButtonAttention = true;
           }
+        } else if (readyToPlayUsers && readyToPlayUsers.length) {
+          if (readyToPlayUsers.length === 1) {
+            playButtonLabel = `Play ${readyToPlayUsers[0].name}`;
+          } else {
+            playButtonLabel = `${readyToPlayUsers.length} users ready to play`;
+          }
+        } else {
+          playButtonLabel = 'Play';
+        }
+      }
+    } else {
+      playButtonOnClick = this.challengeUser;
+      if (challengedUser && challengedUser.id === otherUser.id) {
+        playButtonColour = 'green';
+        playButtonIcon = {loading: true, name: 'circle notch'};
+        playButtonLabel = `Waiting for ${otherUser.name}...`;
+      } else {
+        playButtonColour = 'yellow';
+        playButtonIcon = {name: 'play'};
+        if (otherUser.readyToPlay === user.id) {
+          playButtonLabel = `${otherUser.name} has challenged you`;
+          playButtonAttention = true;
+        } else if (otherUser.readyToPlay === true) {
+          playButtonLabel = `${otherUser.name} is ready to Play`;
+        } else {
+          playButtonLabel = `Challenge ${otherUser.name}`;
         }
       }
     }
+
+    return (
+      <Button
+        className={classNames({attention: playButtonAttention})}
+        color={playButtonColour}
+        onClick={playButtonOnClick}
+      >
+        <Icon {...playButtonIcon} />
+        {playButtonLabel}
+      </Button>
+    );
+  }
+}
+
+ChallengeUserButton.propTypes = {
+  client: PropTypes.object,
+  user: PropTypes.object,
+  otherUser: PropTypes.object.isRequired,
+  usersInfo: PropTypes.object.isRequired,
+};
+
+ChallengeUserButton = withClient(ChallengeUserButton);
+
+class UserCard extends Component {
+  render() {
+    const {client, user, otherUser} = this.props;
 
     return (
       <Card>
@@ -150,12 +178,9 @@ class UserCard extends Component {
               ) : null}
           </Card.Meta>
         </Card.Content>
-        {playButtonLabel ? <Card.Content extra>
+        {client && user && otherUser.online ? <Card.Content extra>
           <div className='ui two buttons'>
-            <Button className={classNames({attention: playButtonAttention})} color={playButtonColour} onClick={playButtonOnClick}>
-              <Icon {...playButtonIcon} />
-              {playButtonLabel}
-            </Button>
+            <ChallengeUserButton otherUser={otherUser} />
           </div>
         </Card.Content> : null}
       </Card>
@@ -442,3 +467,7 @@ Lobby.propTypes = {
 };
 
 export default withClient(Lobby);
+
+export {
+  ChallengeUserButton,
+};

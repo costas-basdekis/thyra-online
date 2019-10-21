@@ -19,6 +19,8 @@ import classNames from 'classnames';
 import {BoardTransformation} from "./Board/Board";
 import keydown, {Keys} from "react-keydown";
 import PlayerColourBoard from "./Board/PlayerColourBoard";
+import {ChallengeUserButton} from "./Lobby";
+import {withClient} from "../client/withClient";
 
 class Play extends Component {
   static MOVE_TYPE_NAMES = {
@@ -168,7 +170,7 @@ class Play extends Component {
 
   render() {
     const {
-      user, defaultSettings, names, allowControl, matchGame, children,
+      user, defaultSettings, names, allowControl, matchGame, children, usersInfo: {byId: usersById},
     } = this.props;
     const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
@@ -185,6 +187,7 @@ class Play extends Component {
         <Grid.Row>
           <PlayPlayer
             player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
+            playerUser={matchGame ? usersById[matchGame.userIds[isPlayerBOpponent ? 0 : 1]] : null}
             canSubmit={canSubmit}
             canUndo={canUndo}
             canTakeBack={canTakeBack}
@@ -201,6 +204,7 @@ class Play extends Component {
         <Grid.Row>
           <PlayPlayer
             player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
+            playerUser={matchGame ? usersById[matchGame.userIds[isPlayerBOpponent ? 1 : 0]] : null}
             canSubmit={false}
             canUndo={canUndo}
             canTakeBack={canTakeBack}
@@ -340,6 +344,7 @@ Play.propTypes = {
   children: PropTypes.node,
   onSelectedGameChange: PropTypes.func,
   onDisplayPositionChange: PropTypes.func,
+  usersInfo: PropTypes.object.isRequired,
 };
 
 Play.defaultProps = {
@@ -349,6 +354,8 @@ Play.defaultProps = {
   },
   allowControl: [Game.PLAYER_A, Game.PLAYER_B],
 };
+
+Play = withClient(Play);
 
 class PlayPlayer extends Component {
   static MOVE_TYPE_NAMES = {
@@ -362,7 +369,7 @@ class PlayPlayer extends Component {
 
   render() {
     const {
-      game, player, allowControl, names, settings, changeAutoSubmitMoves,
+      game, player, allowControl, names, settings, changeAutoSubmitMoves, playerUser,
       canSubmit, canUndo, canTakeBack, submit, undo, takeBack,
     } = this.props;
     const isPlayerControlled = allowControl.includes(player);
@@ -394,13 +401,20 @@ class PlayPlayer extends Component {
                     settings.autoSubmitMoves
                       ? 'Auto-submitting'
                       : (
-                        <Button
-                          positive
-                          onClick={submit}
-                          className={'attention'}
-                        >
-                          Submit
-                        </Button>
+                        <Fragment>
+                          <Button
+                            positive
+                            onClick={submit}
+                            className={'attention'}
+                          >
+                            Submit
+                          </Button>
+                          {isPlayerControlled && canUndo ? (
+                            <Fragment>
+                              {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />
+                            </Fragment>
+                          ) : null}
+                        </Fragment>
                       )
                   ) : (
                     isPlayersTurn
@@ -431,6 +445,11 @@ class PlayPlayer extends Component {
               />
             )
           } : null,
+          game.finished && playerUser && playerUser.online ? {
+            key: 'challenge', content: (
+              <ChallengeUserButton otherUser={playerUser} />
+            ),
+          } : null,
         ].filter(item => item)}
       />
     );
@@ -443,6 +462,7 @@ PlayPlayer.propTypes = {
   names: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
   player: PropTypes.oneOf(Game.PLAYERS).isRequired,
+  playerUser: PropTypes.object,
   canSubmit: PropTypes.bool.isRequired,
   canUndo: PropTypes.bool.isRequired,
   canTakeBack: PropTypes.bool.isRequired,

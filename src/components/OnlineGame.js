@@ -11,6 +11,7 @@ import * as utils from "../utils";
 import HashedIcon from "./HashedIcon";
 import Settings from "./Settings";
 import GameList from "./GameList";
+import {ChallengeUserButton} from "./Lobby";
 
 class OnlineGamePlayer extends Component {
   render() {
@@ -212,28 +213,19 @@ class ChosenOnlineGame extends Component {
 
     const gamesNode = (
       <Segment>
+        <ChallengeUserButton otherUser={user} />
+        <br />
+        <br />
         <GameList
           user={user}
           selectLiveGame={selectLiveGame}
-          games={myLiveGames}
+          games={myLiveGames.concat(otherLiveGames)}
           usersById={usersById}
           tournamentsById={tournamentsById}
           terse
           live
           currentGameId={game ? game.id : null}
         />
-        {otherLiveGames.length ? (
-          <GameList
-            user={user}
-            selectLiveGame={selectLiveGame}
-            games={otherLiveGames}
-            usersById={usersById}
-            tournamentsById={tournamentsById}
-            terse
-            live
-            currentGameId={game ? game.id : null}
-          />
-        ) : null}
       </Segment>
     );
     const tournament = game ? tournamentsById[game.tournamentId] : null;

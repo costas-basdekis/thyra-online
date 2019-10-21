@@ -177,14 +177,20 @@ class Play extends Component {
     const tooShortToResign = matchGame ? matchGame.tooShortToResign : false;
     const settings = user ? user.settings : defaultSettings;
   	const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
+    const canUndo = !selectedGame && (this.props.submit ? game.chainCount > this.props.game.chainCount : game.canUndo);
+    const canTakeBack = !this.props.submit && !selectedGame && game.previous;
 
   	const controlsNode = (
   	  <Fragment>
         <Grid.Row>
           <PlayPlayer
-            player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
-            canSubmit={false}
+            player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
+            canSubmit={canSubmit}
+            canUndo={canUndo}
+            canTakeBack={canTakeBack}
             submit={this.props.submit ? this.submit : null}
+            undo={this.props.submit ? this.takeMoveBack : this.undo}
+            takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
             game={canSubmit ? game.previous : game}
             settings={settings}
@@ -194,9 +200,13 @@ class Play extends Component {
         </Grid.Row>
         <Grid.Row>
           <PlayPlayer
-            player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
-            canSubmit={canSubmit}
+            player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
+            canSubmit={false}
+            canUndo={canUndo}
+            canTakeBack={canTakeBack}
             submit={this.props.submit ? this.submit : null}
+            undo={this.props.submit ? this.takeMoveBack : this.undo}
+            takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
             game={canSubmit ? game.previous : game}
             settings={settings}
@@ -261,14 +271,14 @@ class Play extends Component {
                   actions={[{key: 'resign', content: tooShortToResign ? 'Abort' : 'Resign', negative: true, onClick: this.resignOrAbort}, { key: 'continue', content: 'Continue', inverted: true, secondary: true }]}
                 />
               } />
-              <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!!selectedGame || (this.props.submit ? game.chainCount <= this.props.game.chainCount : !game.canUndo)}>Undo</Button>} />
+              <Statistic value={<Button negative onClick={this.props.submit ? this.takeMoveBack : this.undo} disabled={!canUndo}>Undo</Button>} />
             </Statistic.Group>
           </Segment>
         ) : null}
         {!this.props.submit ? (
           <Segment>
             <Statistic.Group widths={"two"} size={"small"}>
-              <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!!selectedGame || !game.previous}>Take Back a Move</Button>}/>
+              <Statistic value={<Button negative onClick={this.takeMoveBack} disabled={!canTakeBack}>Take Back a Move</Button>}/>
               <Statistic value={<Button negative onClick={this.newGame} disabled={!!selectedGame || !game.previous}>New Game</Button>} />
             </Statistic.Group>
           </Segment>
@@ -351,7 +361,10 @@ class PlayPlayer extends Component {
   };
 
   render() {
-    const {game, player, allowControl, names, settings, canSubmit, submit, changeAutoSubmitMoves} = this.props;
+    const {
+      game, player, allowControl, names, settings, changeAutoSubmitMoves,
+      canSubmit, canUndo, canTakeBack, submit, undo, takeBack,
+    } = this.props;
     const isPlayerControlled = allowControl.includes(player);
     const isPlayersTurn = game.nextPlayer === player;
     const playerWon = game.winner === player;
@@ -391,11 +404,23 @@ class PlayPlayer extends Component {
                       )
                   ) : (
                     isPlayersTurn
-                      ? this.constructor.MOVE_TYPE_NAMES[game.moveType]
-                      : 'Waiting for opponent'
+                      ? (
+                        isPlayerControlled && canUndo
+                          ? (
+                            <Fragment>
+                              {this.constructor.MOVE_TYPE_NAMES[game.moveType]}
+                              {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />
+                            </Fragment>
+                          )
+                          : this.constructor.MOVE_TYPE_NAMES[game.moveType]
+                      )
+                      : `Waiting for ${names[Game.OTHER_PLAYER[player]]}`
                   )
               )
           )},
+          !canUndo && canTakeBack && !isPlayersTurn ? (
+            <Button negative content={'Take move back'} onClick={takeBack} />
+          ) : null,
           !game.finished && submit && allowControl.includes(player) ? {
             key: 'auto-submit', content: (
               <Checkbox
@@ -419,7 +444,11 @@ PlayPlayer.propTypes = {
   allowControl: PropTypes.array.isRequired,
   player: PropTypes.oneOf(Game.PLAYERS).isRequired,
   canSubmit: PropTypes.bool.isRequired,
+  canUndo: PropTypes.bool.isRequired,
+  canTakeBack: PropTypes.bool.isRequired,
   submit: PropTypes.func,
+  undo: PropTypes.func,
+  takeBack: PropTypes.func,
   changeAutoSubmitMoves: PropTypes.func.isRequired,
 };
 

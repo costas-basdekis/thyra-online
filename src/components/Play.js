@@ -402,13 +402,33 @@ class PlayPlayer extends Component {
                       ? 'Auto-submitting'
                       : (
                         <Fragment>
-                          <Button
-                            positive
-                            onClick={submit}
-                            className={'attention'}
-                          >
-                            Submit
-                          </Button>
+                          <Modal
+                            size={'mini'}
+                            trigger={
+                              <Button
+                                positive
+                                className={'attention'}
+                              >
+                                Submit
+                              </Button>
+                            }
+                            header={'Submit move'}
+                            content={
+                              <Modal.Content>
+                                Are you sure you want to submit these moves?
+                                <br />
+                                <Board
+                                  game={game}
+                                  medium
+                                  settings={settings}
+                                />
+                              </Modal.Content>
+                            }
+                            actions={[
+                              {key: 'cancel', negative: true, content: 'Cancel'},
+                              {key: 'ok', positive: true, content: 'Submit', onClick: submit},
+                            ]}
+                          />
                           {isPlayerControlled && canUndo ? (
                             <Fragment>
                               {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />

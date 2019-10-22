@@ -18,6 +18,28 @@ class CreateChallenge extends Component {
     game: null,
   };
 
+  componentDidMount() {
+    if (this.props.initialChallenge) {
+      this.onCreateChallenge(this.fillGames(this.props.initialChallenge));
+    }
+  }
+
+  fillGames(challengeStep) {
+    challengeStep = {...challengeStep};
+    if (!challengeStep.game && challengeStep.position) {
+      challengeStep.game = Game.fromCompressedPositionNotation(challengeStep.position);
+    }
+    if (challengeStep.startingPosition) {
+      challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition);
+    } else if (challengeStep.playerResponses) {
+      challengeStep.playerResponses = challengeStep.playerResponses.map(this.fillGames);
+    } else if (challengeStep.challengeResponse) {
+      challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse);
+    }
+
+    return challengeStep;
+  }
+
   onCreateChallenge = challenge => {
     this.setState({
       editing: false,
@@ -303,6 +325,10 @@ class CreateChallenge extends Component {
     );
   }
 }
+
+CreateChallenge.propTypes = {
+  initialChallenge: PropTypes.object,
+};
 
 class ChallengeForm extends Component {
   static valueConversion = {

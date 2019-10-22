@@ -9,6 +9,7 @@ import "../styles/challenges.css";
 import ChallengeList from "./ChallengeList";
 import {Link, Route, Switch, withRouter} from "react-router-dom";
 import CreateChallenge from "./CreateChallenge";
+import EditChallenge from "./EditChallenge";
 
 class Challenges extends Component {
   render() {
@@ -34,11 +35,16 @@ class Challenges extends Component {
           </Fragment>
         </Route>
         {process.env.REACT_APP_DEBUG ? (
-          <Route path={`${this.props.match.path}/create`}>
+          <Route exact path={`${this.props.match.path}/create`}>
             <CreateChallenge />
           </Route>
         ) : null}
-        <Route path={`${this.props.match.path}/:id`}>
+        {process.env.REACT_APP_DEBUG ? (
+          <Route exact path={`${this.props.match.path}/:id/edit`}>
+            <EditChallenge />
+          </Route>
+        ) : null}
+        <Route exact path={`${this.props.match.path}/:id`}>
           <ChallengePlayer selectLiveChallenge={this.props.selectLiveChallenge} />
         </Route>
       </Switch>
@@ -288,7 +294,6 @@ class ChallengePlayer extends Component {
           defaultSettings={client.settings}
           changeSettings={this.changeSettings}
           game={game}
-          matchGame={game}
           allowControl={[challenge.options.initialPlayer]}
           names={{[challenge.options.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Challenge'}}
           submit={this.submit}

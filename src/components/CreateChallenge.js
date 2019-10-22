@@ -328,8 +328,8 @@ class ChallengeForm extends Component {
         publishDatetime: null,
       },
       startingPosition: {
-        position: '',
-        game: null,
+        position: Game.create().positionNotation,
+        game: Game.create(),
         playerResponses: [],
       },
     },

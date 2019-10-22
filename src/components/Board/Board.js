@@ -36,9 +36,6 @@ class Board extends PureComponent {
       cell = transformation.coordinates(rowsAndColumns, cell);
     }
     if (this.props.minChainCount === undefined || this.props.minChainCount === null) {
-      if (this.props.allowControl.length === 2) {
-        return true;
-      }
       if (!this.props.game.canUndo) {
         return false;
       }

@@ -189,13 +189,14 @@ class Play extends Component {
             player={isPlayerBOpponent ? Game.PLAYER_A : Game.PLAYER_B}
             playerUser={matchGame ? usersById[matchGame.userIds[isPlayerBOpponent ? 0 : 1]] : null}
             canSubmit={canSubmit}
+            canAnyPlayerSubmit={canSubmit}
             canUndo={canUndo}
             canTakeBack={canTakeBack}
             submit={this.props.submit ? this.submit : null}
             undo={this.props.submit ? this.takeMoveBack : this.undo}
             takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
-            game={canSubmit ? game.previous : game}
+            game={game}
             settings={settings}
             names={names}
             allowControl={allowControl}
@@ -206,13 +207,14 @@ class Play extends Component {
             player={isPlayerBOpponent ? Game.PLAYER_B : Game.PLAYER_A}
             playerUser={matchGame ? usersById[matchGame.userIds[isPlayerBOpponent ? 1 : 0]] : null}
             canSubmit={false}
+            canAnyPlayerSubmit={canSubmit}
             canUndo={canUndo}
             canTakeBack={canTakeBack}
             submit={this.props.submit ? this.submit : null}
             undo={this.props.submit ? this.takeMoveBack : this.undo}
             takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
-            game={canSubmit ? game.previous : game}
+            game={game}
             settings={settings}
             names={names}
             allowControl={allowControl}
@@ -370,10 +372,10 @@ class PlayPlayer extends Component {
   render() {
     const {
       game, player, allowControl, names, settings, changeAutoSubmitMoves, playerUser,
-      canSubmit, canUndo, canTakeBack, submit, undo, takeBack,
+      canSubmit, canAnyPlayerSubmit, canUndo, canTakeBack, submit, undo, takeBack,
     } = this.props;
     const isPlayerControlled = allowControl.includes(player);
-    const isPlayersTurn = game.nextPlayer === player;
+    const isPlayersTurn = (canAnyPlayerSubmit ? game.previous : game).nextPlayer === player;
     const playerWon = game.winner === player;
 
     return (
@@ -421,6 +423,8 @@ class PlayPlayer extends Component {
                                   game={game}
                                   medium
                                   settings={settings}
+                                  animated
+                                  showArrows
                                 />
                               </Modal.Content>
                             }
@@ -442,11 +446,11 @@ class PlayPlayer extends Component {
                         isPlayerControlled && canUndo
                           ? (
                             <Fragment>
-                              {this.constructor.MOVE_TYPE_NAMES[game.moveType]}
+                              {this.constructor.MOVE_TYPE_NAMES[(canAnyPlayerSubmit ? game.previous : game).moveType]}
                               {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />
                             </Fragment>
                           )
-                          : this.constructor.MOVE_TYPE_NAMES[game.moveType]
+                          : this.constructor.MOVE_TYPE_NAMES[(canAnyPlayerSubmit ? game.previous : game).moveType]
                       )
                       : `Waiting for ${names[Game.OTHER_PLAYER[player]]}`
                   )
@@ -484,6 +488,7 @@ PlayPlayer.propTypes = {
   player: PropTypes.oneOf(Game.PLAYERS).isRequired,
   playerUser: PropTypes.object,
   canSubmit: PropTypes.bool.isRequired,
+  canAnyPlayerSubmit: PropTypes.bool.isRequired,
   canUndo: PropTypes.bool.isRequired,
   canTakeBack: PropTypes.bool.isRequired,
   submit: PropTypes.func,

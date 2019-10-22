@@ -41,6 +41,10 @@ class SettingsContent extends Component {
     this.props.updateSettings({autoSubmitMoves: checked});
   };
 
+  updateConfirmSubmitMoves = (e, {checked}) => {
+    this.props.updateSettings({confirmSubmitMoves: checked});
+  };
+
   updateEnableNotifications = (e, {checked}) => {
     this.props.updateSettings({enableNotifications: checked});
   };
@@ -70,7 +74,7 @@ class SettingsContent extends Component {
   };
 
   render() {
-    const {settings: {autoSubmitMoves, enableNotifications, theme}} = this.props;
+    const {settings: {autoSubmitMoves, confirmSubmitMoves, enableNotifications, theme}} = this.props;
     const {pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
 
     return (
@@ -84,6 +88,14 @@ class SettingsContent extends Component {
                   name={'autoSubmitMoves'}
                   checked={autoSubmitMoves}
                   onChange={this.updateAutoSubmitMove}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Checkbox
+                  label={'Confirm before submitting online moves'}
+                  name={'confirmSubmitMoves'}
+                  checked={confirmSubmitMoves}
+                  onChange={this.updateConfirmSubmitMoves}
                 />
               </Form.Group>
               <Form.Group>

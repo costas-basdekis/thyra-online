@@ -1,7 +1,7 @@
 import _ from "lodash";
 import moment from "moment";
 
-const appVersion = 5
+const appVersion = 6;
 
 class Client {
   static getDefaultSettings() {

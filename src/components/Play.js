@@ -371,6 +371,11 @@ class PlayPlayer extends Component {
     [Game.MOVE_TYPE_BUILD_AROUND_WORKER]: "Build",
   };
 
+  submitAndDisableConfirm = () => {
+    this.props.submit();
+    this.props.client.updateSettings({...this.props.user.settings, confirmSubmitMoves: false});
+  };
+
   render() {
     const {
       game, player, allowControl, names, settings, changeAutoSubmitMoves, playerUser,
@@ -406,35 +411,46 @@ class PlayPlayer extends Component {
                       ? 'Auto-submitting'
                       : (
                         <Fragment>
-                          <Modal
-                            size={'mini'}
-                            trigger={
-                              <Button
-                                positive
-                                className={'attention'}
-                              >
-                                Submit
-                              </Button>
-                            }
-                            header={'Submit move'}
-                            content={
-                              <Modal.Content>
-                                Are you sure you want to submit these moves?
-                                <br />
-                                <Board
-                                  game={game}
-                                  medium
-                                  settings={settings}
-                                  animated
-                                  showArrows
-                                />
-                              </Modal.Content>
-                            }
-                            actions={[
-                              {key: 'cancel', negative: true, content: 'Cancel'},
-                              {key: 'ok', positive: true, content: 'Submit', onClick: submit},
-                            ]}
-                          />
+                          {settings.confirmSubmitMoves ? (
+                            <Modal
+                              size={'mini'}
+                              trigger={
+                                <Button
+                                  positive
+                                  className={'attention'}
+                                >
+                                  Preview
+                                </Button>
+                              }
+                              header={'Submit move'}
+                              content={
+                                <Modal.Content>
+                                  Are you sure you want to submit these moves?
+                                  <br />
+                                  <Board
+                                    game={game}
+                                    medium
+                                    settings={settings}
+                                    animated
+                                    showArrows
+                                  />
+                                </Modal.Content>
+                              }
+                              actions={[
+                                {key: 'never-ask-again', content: 'Never ask again', onClick: this.submitAndDisableConfirm},
+                                {key: 'cancel', negative: true, content: 'Cancel'},
+                                {key: 'ok', positive: true, content: 'Submit', onClick: submit},
+                              ]}
+                            />
+                          ) : (
+                            <Button
+                              positive
+                              className={'attention'}
+                              onClick={submit}
+                            >
+                              Submit
+                            </Button>
+                          )}
                           {isPlayerControlled && canUndo ? (
                             <Fragment>
                               {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />
@@ -497,7 +513,10 @@ PlayPlayer.propTypes = {
   undo: PropTypes.func,
   takeBack: PropTypes.func,
   changeAutoSubmitMoves: PropTypes.func.isRequired,
+  client: PropTypes.object.isRequired,
 };
+
+PlayPlayer = withClient(PlayPlayer);
 
 class PlayHistory extends Component {
   state = {

@@ -225,6 +225,7 @@ class ChosenOnlineGame extends Component {
           terse
           live
           currentGameId={game ? game.id : null}
+          reverse={false}
         />
       </Segment>
     );

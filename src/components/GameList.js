@@ -120,7 +120,7 @@ class GameList extends Component {
   };
 
   render() {
-    const {user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize} = this.props;
+    const {user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize, reverse} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -130,9 +130,11 @@ class GameList extends Component {
     if (activePage > totalPages) {
       activePage = totalPages;
     }
-    const visibleGames = games
-      .slice((totalPages - activePage) * pageSize, (totalPages - activePage) * pageSize + pageSize)
-      .reverse();
+    let visibleGames = games
+      .slice((totalPages - activePage) * pageSize, (totalPages - activePage) * pageSize + pageSize);
+    if (reverse) {
+      visibleGames = visibleGames.reverse();
+    }
 
     return (
       <Fragment>
@@ -179,12 +181,14 @@ GameList.propTypes = {
   live: PropTypes.bool.isRequired,
   currentGameId: PropTypes.string,
   pageSize: PropTypes.number.isRequired,
+  reverse: PropTypes.bool.isRequired,
 };
 
 GameList.defaultProps = {
   terse: false,
   live: false,
   pageSize: 10,
+  reverse: true,
 };
 
 export default GameList;

@@ -234,9 +234,11 @@ class Play extends Component {
         game={displayGame}
         transformation={transformation}
         makeMove={selectedGame ? this.makeMoveToSelected : this.makeMove}
-        minChainCount={this.props.submit ? this.props.game.chainCount : (
-          this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
-        )}
+        minChainCount={displayGame === game ? (
+          this.props.submit ? this.props.game.chainCount : (
+            this.props.game.canUndo ? this.props.game.previous.chainCount : this.props.game.chainCount
+          )
+        ) : 0}
         allowControl={displayGame === game ? allowControl : undefined}
         settings={settings}
         animated={settings.theme.animations}

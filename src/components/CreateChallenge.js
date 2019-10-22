@@ -288,9 +288,8 @@ class CreateChallenge extends Component {
             defaultSettings={client.settings}
             changeSettings={this.changeSettings}
             game={game}
-            matchGame={currentStep.game}
             allowControl={[currentStep.game.nextPlayer]}
-            names={{[challenge.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.initialPlayer]]: 'Challenge'}}
+            names={{[challenge.options.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Challenge'}}
             submit={this.submit}
             onDisplayPositionChange={this.onDisplayPositionChange}
             makeMove={this.makeMove}

@@ -1,15 +1,16 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Game from "../game/game";
-import {Button, Grid, Header, Icon, Label, Message, Modal, Segment, Tab} from "semantic-ui-react";
+import {Button, Grid, Header, Icon, Label, Menu, Message, Modal, Segment, Tab} from "semantic-ui-react";
 import Play from "./Play";
 import {withClient} from "../client/withClient";
 import _ from 'lodash';
 import "../styles/challenges.css";
 import ChallengeList from "./ChallengeList";
-import {Link, Route, Switch, withRouter} from "react-router-dom";
+import {Link, NavLink, Route, Switch, withRouter} from "react-router-dom";
 import CreateChallenge from "./CreateChallenge";
 import EditChallenge from "./EditChallenge";
+import * as utils from "../utils";
 
 class Challenges extends Component {
   render() {
@@ -236,6 +237,29 @@ class ChallengePlayer extends Component {
     this.props.selectLiveChallenge(null);
   };
 
+  close = () => {
+    this.props.selectLiveChallenge(null);
+  };
+
+  shareChallenge = e => {
+    const url = this.props.location.pathname;
+    if (navigator.share) {
+      const challenge = this.challenge;
+      navigator.share({
+        title: `Thyra Online - Solve challenge${challenge.options.type === 'mate' ? `: Find mate in ${challenge.options.typeOptions.mateIn}` : ''}`,
+        text: `Solve Santorini challenge`,
+        url,
+      }).catch(() => {
+        utils.copyToClipboard(url);
+        alert('Link copied to clipboard');
+      });
+    } else {
+      utils.copyToClipboard(url);
+      alert('Link copied to clipboard');
+    }
+    e.preventDefault();
+  };
+
   render() {
     if (!this.props.user) {
       return null;
@@ -262,7 +286,7 @@ class ChallengePlayer extends Component {
       return null;
     }
 
-    const {user, client} = this.props;
+    const {user, client, location} = this.props;
     const challengePrompt = challenge.options.type === 'mate'
       ? `Find mate in ${challenge.options.typeOptions.mateIn}`
       : 'Unknown challenge';
@@ -278,6 +302,17 @@ class ChallengePlayer extends Component {
     return (
       <Fragment>
         <Grid centered>
+          <Grid.Row>
+            <Menu stackable size={'massive'} inverted items={[
+              {key: 'close', content: 'Close', icon: 'x', onClick: this.close, color: 'red', active: true},
+              {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareChallenge, as: NavLink,
+                to: location.pathname, color: 'green', active: true,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to challenge'},
+              process.env.REACT_APP_DEBUG && challenge.userId === user.id ? {key: 'edit', content: 'Edit challenge', icon: 'edit', as: NavLink,
+                to: `/challenge/${challenge.id}/edit`, color: 'green', active: true,
+                title: 'Click to edit the challenge'} : null,
+            ].filter(item => item)} />
+          </Grid.Row>
           <Grid.Row>
             <Segment>
               <Header as={'h1'}>{challengePrompt}</Header>

@@ -59,7 +59,7 @@ class TournamentCard extends Component {
               {" "}
               <Label content={`${tournament.userIds.length} players`} icon={'users'} />
               {" "}
-              <Label content={moment(tournament.endDatetime || tournament.startDatetime || tournament.createdDate).from()} icon={'calendar'} />
+              <Label content={moment(tournament.endDatetime || tournament.startDatetime || tournament.createdDatetime).from()} icon={'calendar'} />
             </Card.Meta>
           ) : null}
         </Card.Content>

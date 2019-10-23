@@ -242,7 +242,7 @@ class ChallengePlayer extends Component {
   };
 
   shareChallenge = e => {
-    const url = this.props.location.pathname;
+    const url = window.location.href;
     if (navigator.share) {
       const challenge = this.challenge;
       navigator.share({

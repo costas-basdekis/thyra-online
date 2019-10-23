@@ -142,7 +142,7 @@ class ChosenOnlineGame extends Component {
   };
 
   shareGame = e => {
-    const url = this.props.location.pathname;
+    const url = window.location.href;
     if (navigator.share) {
       const game = this.game;
       const {playerA, playerB} = this.playersInfo;

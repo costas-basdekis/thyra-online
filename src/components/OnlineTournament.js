@@ -48,7 +48,7 @@ class ChosenOnlineTournament extends Component {
   };
 
   shareTournament = e => {
-    const url = this.props.location.pathname;
+    const url = window.location.href;
     if (navigator.share) {
       const {tournament} = this;
       navigator.share({

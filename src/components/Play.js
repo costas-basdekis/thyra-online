@@ -382,19 +382,21 @@ class PlayPlayer extends Component {
       canSubmit, canAnyPlayerSubmit, canUndo, canTakeBack, submit, undo, takeBack,
     } = this.props;
     const isPlayerControlled = allowControl.includes(player);
-    const isPlayersTurn = (canAnyPlayerSubmit ? game.previous : game).nextPlayer === player;
-    const playerWon = game.winner === player;
+    const previousGame = canAnyPlayerSubmit ? game.previous : game;
+    const isPlayersTurn = previousGame.nextPlayer === player;
+    const playerWon = previousGame.winner === player;
+    const finished = previousGame.finished;
 
     return (
       <Menu
         stackable
-        className={classNames({attention: !game.finished && isPlayerControlled && isPlayersTurn && !canSubmit})}
+        className={classNames({attention: !finished && isPlayerControlled && isPlayersTurn && !canSubmit})}
         size={'massive'}
-        inverted={game.finished || player === Game.PLAYER_B}
-        color={game.finished ? (playerWon ? 'green' : 'red') : undefined}
+        inverted={finished || player === Game.PLAYER_B}
+        color={finished ? (playerWon ? 'green' : 'red') : undefined}
         items={[
           {key: 'icon',
-            icon: game.finished ? (playerWon ? 'trophy' : 'thumbs down') : (isPlayersTurn ? 'play' : 'hourglass'),
+            icon: finished ? (playerWon ? 'trophy' : 'thumbs down') : (isPlayersTurn ? 'play' : 'hourglass'),
             content: (
               <Fragment>
                 <PlayerColourBoard medium settings={settings} player={player} allowControl={allowControl} />
@@ -402,7 +404,7 @@ class PlayPlayer extends Component {
               </Fragment>
             )},
           {key: 'instructions', content: (
-            game.finished
+            finished
               ? (playerWon ? 'Won' : 'Lost')
               : (
                 canSubmit
@@ -464,11 +466,11 @@ class PlayPlayer extends Component {
                         isPlayerControlled && canUndo
                           ? (
                             <Fragment>
-                              {this.constructor.MOVE_TYPE_NAMES[(canAnyPlayerSubmit ? game.previous : game).moveType]}
+                              {this.constructor.MOVE_TYPE_NAMES[previousGame.moveType]}
                               {" or "}<Button negative content={'Undo'} disabled={!canUndo} onClick={undo} />
                             </Fragment>
                           )
-                          : this.constructor.MOVE_TYPE_NAMES[(canAnyPlayerSubmit ? game.previous : game).moveType]
+                          : this.constructor.MOVE_TYPE_NAMES[previousGame.moveType]
                       )
                       : `Waiting for ${names[Game.OTHER_PLAYER[player]]}`
                   )
@@ -477,7 +479,7 @@ class PlayPlayer extends Component {
           !canUndo && canTakeBack && !isPlayersTurn ? (
             <Button negative content={'Take move back'} onClick={takeBack} />
           ) : null,
-          !game.finished && submit && allowControl.includes(player) ? {
+          !finished && submit && allowControl.includes(player) ? {
             key: 'auto-submit', content: (
               <Checkbox
                 label={'Auto submit moves'}
@@ -487,7 +489,7 @@ class PlayPlayer extends Component {
               />
             )
           } : null,
-          game.finished && playerUser && playerUser.online ? {
+          finished && playerUser && playerUser.online ? {
             key: 'challenge', content: (
               <ChallengeUserButton otherUser={playerUser} />
             ),

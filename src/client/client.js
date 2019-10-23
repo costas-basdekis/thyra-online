@@ -7,6 +7,7 @@ class Client {
   static getDefaultSettings() {
     return JSON.parse(JSON.stringify({
       autoSubmitMoves: false,
+      confirmSubmitMoves: true,
       enableNotifications: false,
       theme: {pieces: 'king', scheme: '', rotateOpponent: true, animations: true, arrows: true, numbers: 'obvious'},
     }));

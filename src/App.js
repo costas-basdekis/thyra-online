@@ -246,7 +246,7 @@ class App extends Component {
             liveChallenge.options.type === 'mate'
               ? `Find mate in ${liveChallenge.options.typeOptions.mateIn}`
               : 'Unknown challenge'
-          ) : 'Challenges'}, path: 'challenge', render: () => (
+          ) : 'Challenges'}, path: 'challenge', navigate: liveChallenge ? `challenge/${liveChallenge.id}` : 'challenge', render: () => (
             <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
           )} : null,
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (

@@ -13,6 +13,9 @@ class SettingsContent extends Component {
     {value: 'green', label: 'Green'},
     {value: 'halloween', label: 'Halloween'},
   ];
+  themeCellsOptions = [
+    {value: 'original', label: 'Original'},
+  ];
   themePiecesOptions = [
     {value: 'pawn', label: 'Pawn'},
     {value: 'king', label: 'King'},
@@ -82,9 +85,13 @@ class SettingsContent extends Component {
     this.props.updateSettings({theme: {pieces: value}});
   };
 
+  updateThemeCells = (e, {value}) => {
+    this.props.updateSettings({theme: {cells: value}});
+  };
+
   render() {
     const {settings: {autoSubmitMoves, confirmSubmitMoves, enableNotifications, theme}} = this.props;
-    const {pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
+    const {cells = 'original', pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
 
     return (
       <Tab menu={{pointing: true, attached: false}} panes={[
@@ -198,6 +205,33 @@ class SettingsContent extends Component {
                   {menuItem: 'Board', render: () => (
                     <Tab.Pane>
                       <Grid stackable columns={'equal'} verticalAlign={'middle'}>
+                        <Grid.Row>
+                          <Grid.Column textAlign={'center'}>
+                            <Form.Field><Header as={'h2'}>Cells:</Header></Form.Field>
+                          </Grid.Column>
+                          </Grid.Row>
+                        {this.themeCellsOptions.map(option => (
+                          <Grid.Row key={`theme-cells-${option.value}`}>
+                            <Grid.Column width={4}>
+                              <Checkbox
+                                radio
+                                label={option.label}
+                                name={'theme.cells'}
+                                value={option.value}
+                                checked={cells === option.value}
+                                onChange={this.updateThemeCells}
+                              />
+                            </Grid.Column>
+                            <Grid.Column floated={'right'} textAlign={'right'}>
+                              {this.themeDemoBoard({cells: option.value})}
+                            </Grid.Column>
+                          </Grid.Row>
+                        ))}
+                        <Grid.Row>
+                          <Grid.Column textAlign={'center'}>
+                            <Form.Field><Header as={'h2'}>Colours:</Header></Form.Field>
+                          </Grid.Column>
+                        </Grid.Row>
                         {this.themeSchemeOptions.map(option => (
                           <Grid.Row key={`theme-scheme-${option.value}`}>
                             <Grid.Column width={4}>

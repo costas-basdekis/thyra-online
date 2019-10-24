@@ -9,7 +9,15 @@ class Client {
       autoSubmitMoves: false,
       confirmSubmitMoves: true,
       enableNotifications: false,
-      theme: {pieces: 'king', scheme: '', rotateOpponent: true, animations: true, arrows: true, numbers: 'obvious'},
+      theme: {
+        cells: 'original',
+        pieces: 'king',
+        scheme: '',
+        rotateOpponent: true,
+        animations: true,
+        arrows: true,
+        numbers: 'obvious',
+      },
     }));
   }
 

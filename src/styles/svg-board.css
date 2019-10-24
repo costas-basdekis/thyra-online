@@ -3,22 +3,22 @@
 }
 
 .svg-board use[*|href^="#cell-"][*|href$="-border"] {
-  fill: var(--level-0-border);
+  --level-border: var(--level-0-border);
 }
 
 .svg-board use[*|href^="#cell-"][*|href$="-border"].available {
-  fill: var(--cell-available-border);
+  --level-border: var(--cell-available-border);
 }
 .svg-board:not(.selectable) use[*|href^="#cell-"][*|href$="-border"].available {
   cursor: pointer;
 }
 
 .svg-board use[*|href^="#cell-"][*|href$="-border"].available:hover {
-  fill: var(--cell-available-hovered-border);
+  --level-border: var(--cell-available-hovered-border);
 }
 
 .svg-board use[*|href^="#cell-"][*|href$="-border"].undoable {
-  fill: var(--cell-undoable-border);
+  --level-border: var(--cell-undoable-border);
 }
 
 .svg-board:not(.selectable) use[*|href^="#cell-"][*|href$="-border"].undoable {
@@ -26,7 +26,11 @@
 }
 
 .svg-board use[*|href^="#cell-"][*|href$="-border"].undoable:hover {
-  fill: var(--cell-undoable-hovered-border);
+  --level-border: var(--cell-undoable-hovered-border);
+}
+
+.svg-board .cell-border .border {
+    fill: var(--level-border);
 }
 
 .svg-board .cell-0 {

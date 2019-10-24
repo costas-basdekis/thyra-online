@@ -35,7 +35,9 @@ class Client {
     } catch (e) {
       this.settings = null;
     }
-    if (!this.settings) {
+    if (this.settings) {
+      this.settings = _.merge(this.constructor.getDefaultSettings(), this.settings);
+    } else {
       this.settings = this.constructor.getDefaultSettings();
     }
     if (!window.io) {

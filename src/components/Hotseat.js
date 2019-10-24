@@ -70,7 +70,7 @@ class Hotseat extends Component {
 
   render() {
     const {game, error, selectedGame} = this.state;
-    const {user, client} = this.props;
+    const {user} = this.props;
 
     return (
       <Fragment>
@@ -93,7 +93,6 @@ class Hotseat extends Component {
         </Grid>
         <Play
           user={user}
-          defaultSettings={client.settings}
           game={game}
           makeMove={this.makeMove}
           onSelectedGameChange={this.onSelectedGameChange}

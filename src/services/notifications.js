@@ -1,15 +1,6 @@
 import {client} from "../client/client";
 
 class Notifications {
-  constructor() {
-    this.user = client.user;
-    client.subscribe({onUser: this.onUser});
-  }
-
-  onUser = user => {
-    this.user = user;
-  };
-
   async requestPermission() {
     if (window.Notification && window.Notification.permission !== 'denied') {
       await window.Notification.requestPermission();
@@ -17,7 +8,7 @@ class Notifications {
   }
 
   async notify() {
-    if (!this.user || !this.user.settings.enableNotifications) {
+    if (!client.applicableSettings.enableNotifications) {
       return;
     }
     await this.requestPermission();

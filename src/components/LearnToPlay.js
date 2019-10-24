@@ -4,7 +4,6 @@ import {Button, Grid, Label, Menu, Message} from "semantic-ui-react";
 import BoardBackground from "./Board/BoardBackground";
 import Game from "../game/game";
 import {withClient} from "../client/withClient";
-import Client from "../client/client";
 import {NavLink} from "react-router-dom";
 
 class LearnBoard extends Component {
@@ -208,9 +207,9 @@ class LearnBoard extends Component {
   };
 
   render() {
-    const {user, board, canMove, canBuild, rowsAndColumns: originalRowsAndColumns} = this.props;
+    const {client, board, canMove, canBuild, rowsAndColumns: originalRowsAndColumns} = this.props;
     const {rowsAndColumns, arrows, won, selectedMoveCell, selectedBuildCell} = this.state;
-    const rawSettings = user ? user.settings : Client.getDefaultSettings();
+    const rawSettings = client.applicableSettings;
     const settings = {...rawSettings, theme: {...rawSettings.theme, numbers: 'obvious'}};
 
     return (

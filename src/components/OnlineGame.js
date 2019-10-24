@@ -183,7 +183,7 @@ class ChosenOnlineGame extends Component {
 
   render() {
     const {
-      location, user, client, game, selectLiveGame,
+      location, user, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
       tournamentsInfo: {byId: tournamentsById},
     } = this.props;
@@ -278,7 +278,6 @@ class ChosenOnlineGame extends Component {
         </Responsive>
         <Play
           user={user}
-          defaultSettings={client.settings}
           otherUser={otherUser}
           changeSettings={this.changeSettings}
           game={gameGame}

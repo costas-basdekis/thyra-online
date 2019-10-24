@@ -249,7 +249,7 @@ class CreateChallenge extends Component {
   render() {
     const {user, client} = this.props;
     const {editing, challenge, game, tree, currentStep} = this.state;
-    const settings = user ? user.settings : client.settings;
+    const settings = client.applicableSettings;
 
     if (editing) {
       return (
@@ -307,7 +307,6 @@ class CreateChallenge extends Component {
           <Header as={'h3'}>Current step</Header>
           <Play
             user={user}
-            defaultSettings={client.settings}
             changeSettings={this.changeSettings}
             game={game}
             allowControl={[currentStep.game.nextPlayer]}
@@ -447,9 +446,9 @@ class ChallengeForm extends Component {
   };
 
   render() {
-    const {user, client, initialChallenge} = this.props;
+    const {client, initialChallenge} = this.props;
     const {editingPosition, challenge, error} = this.state;
-    const settings = user ? user.settings : client.settings;
+    const settings = client.applicableSettings;
 
     if (editingPosition) {
       return (

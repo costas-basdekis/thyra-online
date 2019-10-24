@@ -11,7 +11,8 @@ import {
   Label,
   Menu,
   Modal,
-  Pagination, Responsive,
+  Pagination,
+  Responsive,
   Segment,
   Statistic
 } from "semantic-ui-react";
@@ -127,7 +128,7 @@ class Play extends Component {
         this.setState({game: this.props.game, resigning: false});
       }
     }
-    if (this.props.user && this.props.user.settings.autoSubmitMoves) {
+    if (this.props.client.applicableSettings.autoSubmitMoves) {
       if (!this.canSubmit(prevProps, prevState) && this.canSubmit()) {
         this.submit();
       }
@@ -135,7 +136,7 @@ class Play extends Component {
   }
 
   changeAutoSubmitMoves = () => {
-    if (!this.props.user.settings.autoSubmitMoves) {
+    if (!this.props.client.applicableSettings.autoSubmitMoves) {
       this.autoSubmitModal.current.handleOpen();
     } else {
       this.props.changeSettings({...this.props.user.settings, autoSubmitMoves: false});
@@ -170,15 +171,14 @@ class Play extends Component {
 
   render() {
     const {
-      user, defaultSettings, names, allowControl, matchGame, children, usersInfo: {byId: usersById},
+      client, user, names, allowControl, matchGame, children, usersInfo: {byId: usersById},
     } = this.props;
     const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
     const isMyGame = allowControl.length > 0;
     const canSubmit = this.canSubmit();
     const tooShortToResign = matchGame ? matchGame.tooShortToResign : false;
-    const settings = user ? user.settings : defaultSettings;
-  	const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
+    const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
     const canUndo = !selectedGame && (this.props.submit ? game.chainCount > this.props.game.chainCount : game.canUndo);
     const canTakeBack = !!(!this.props.submit && !selectedGame && game.previous);
 
@@ -197,7 +197,7 @@ class Play extends Component {
             takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
             game={game}
-            settings={settings}
+            applicableSettings={client.applicableSettings}
             names={names}
             allowControl={allowControl}
           />
@@ -215,7 +215,7 @@ class Play extends Component {
             takeBack={this.takeMoveBack}
             changeAutoSubmitMoves={this.changeAutoSubmitMoves}
             game={game}
-            settings={settings}
+            applicableSettings={client.applicableSettings}
             names={names}
             allowControl={allowControl}
           />
@@ -240,9 +240,9 @@ class Play extends Component {
           )
         ) : 0}
         allowControl={displayGame === game ? allowControl : undefined}
-        settings={settings}
-        animated={settings.theme.animations}
-        showArrows={settings.theme.arrows}
+        settings={client.applicableSettings}
+        animated={client.applicableSettings.theme.animations}
+        showArrows={client.applicableSettings.theme.arrows}
       />
     );
 
@@ -296,7 +296,7 @@ class Play extends Component {
           selectedGame={selectedGame}
           selectGame={this.selectGame}
           user={user}
-          defaultSettings={defaultSettings}
+          applicableSettings={client.applicableSettings}
         />
         {selectedGame ? (
           <Segment textAlign={"center"}>
@@ -332,7 +332,6 @@ class Play extends Component {
 
 Play.propTypes = {
   user: PropTypes.object,
-  defaultSettings: PropTypes.object.isRequired,
   otherUser: PropTypes.object,
   settings: PropTypes.object,
   changeSettings: PropTypes.func,
@@ -378,7 +377,7 @@ class PlayPlayer extends Component {
 
   render() {
     const {
-      game, player, allowControl, names, settings, changeAutoSubmitMoves, playerUser,
+      game, player, allowControl, names, applicableSettings, changeAutoSubmitMoves, playerUser,
       canSubmit, canAnyPlayerSubmit, canUndo, canTakeBack, submit, undo, takeBack,
     } = this.props;
     const isPlayerControlled = allowControl.includes(player);
@@ -399,7 +398,7 @@ class PlayPlayer extends Component {
             icon: finished ? (playerWon ? 'trophy' : 'thumbs down') : (isPlayersTurn ? 'play' : 'hourglass'),
             content: (
               <Fragment>
-                <PlayerColourBoard medium settings={settings} player={player} allowControl={allowControl} />
+                <PlayerColourBoard medium applicableSettings={applicableSettings} player={player} allowControl={allowControl} />
                 {names[player]}
               </Fragment>
             )},
@@ -409,11 +408,11 @@ class PlayPlayer extends Component {
               : (
                 canSubmit
                   ? (
-                    settings.autoSubmitMoves
+                    applicableSettings.autoSubmitMoves
                       ? 'Auto-submitting'
                       : (
                         <Fragment>
-                          {settings.confirmSubmitMoves ? (
+                          {applicableSettings.confirmSubmitMoves ? (
                             <Modal
                               size={'mini'}
                               trigger={
@@ -432,7 +431,7 @@ class PlayPlayer extends Component {
                                   <Board
                                     game={game}
                                     medium
-                                    settings={settings}
+                                    settings={applicableSettings}
                                     animated
                                     showArrows
                                   />
@@ -486,7 +485,7 @@ class PlayPlayer extends Component {
               <Checkbox
                 label={'Auto submit moves'}
                 toggle
-                checked={settings.autoSubmitMoves}
+                checked={applicableSettings.autoSubmitMoves}
                 onChange={changeAutoSubmitMoves}
               />
             )
@@ -503,7 +502,7 @@ class PlayPlayer extends Component {
 }
 
 PlayPlayer.propTypes = {
-  settings: PropTypes.object,
+  applicableSettings: PropTypes.object,
   game: PropTypes.instanceOf(Game).isRequired,
   names: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
@@ -532,7 +531,7 @@ class PlayHistory extends Component {
   };
 
   render() {
-    const {game, selectedGame, user, defaultSettings, selectGame, pageSize, moveNotation} = this.props;
+    const {game, applicableSettings, selectedGame, selectGame, pageSize, moveNotation} = this.props;
     const {activePage} = this.state;
 
     const totalPages = Math.ceil((game.history.length - 1) / pageSize);
@@ -558,7 +557,7 @@ class PlayHistory extends Component {
                   small
                   onSelect={selectGame}
                   selected={previousGame === selectedGame}
-                  settings={user ? user.settings : defaultSettings}
+                  settings={applicableSettings}
                 />
                 {moveNotation ? (
                   <Label color={'green'}>
@@ -591,7 +590,7 @@ PlayHistory.propTypes = {
   game: PropTypes.instanceOf(Game).isRequired,
   selectedGame: PropTypes.instanceOf(Game),
   user: PropTypes.object,
-  defaultSettings: PropTypes.object.isRequired,
+  applicableSettings: PropTypes.object.isRequired,
   selectGame: PropTypes.func,
   pageSize: PropTypes.number.isRequired,
   moveNotation: PropTypes.bool.isRequired,

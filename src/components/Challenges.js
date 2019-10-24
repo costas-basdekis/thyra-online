@@ -286,7 +286,7 @@ class ChallengePlayer extends Component {
       return null;
     }
 
-    const {user, client, location} = this.props;
+    const {user, location} = this.props;
     const challengePrompt = challenge.options.type === 'mate'
       ? `Find mate in ${challenge.options.typeOptions.mateIn}`
       : 'Unknown challenge';
@@ -326,7 +326,6 @@ class ChallengePlayer extends Component {
         </Grid>
         <Play
           user={user}
-          defaultSettings={client.settings}
           changeSettings={this.changeSettings}
           game={game}
           allowControl={[challenge.options.initialPlayer]}

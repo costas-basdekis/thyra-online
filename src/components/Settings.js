@@ -315,7 +315,7 @@ class Settings extends Component {
     if (props.user && props.user !== state.user) {
       return {
         user: props.user,
-        settings: props.user.settings || Client.getDefaultSettings(),
+        settings: props.client.settings,
       };
     }
 

@@ -113,7 +113,7 @@ class EditPosition extends Component {
   render() {
     const {user, client, keydown, usePosition} = this.props;
     const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game, selectedGame, previousPosition} = this.state;
-    const settings = user ? user.settings : client.settings;
+    const settings = client.applicableSettings;
 
     const positionNotation = Game.getPositionNotation(position);
     return (
@@ -144,7 +144,6 @@ class EditPosition extends Component {
           <Play
             user={user}
             settings={settings}
-            defaultSettings={client.settings}
             game={game}
             makeMove={this.makeMove}
             onSelectedGameChange={this.onSelectedGameChange}
@@ -293,8 +292,8 @@ class EditPositionPalette extends Component {
   };
 
   render() {
-    const {user, client} = this.props;
-    const settings = user ? user.settings : client.settings;
+    const {client} = this.props;
+    const settings = client.applicableSettings;
 
     return (
       <BoardBackground
@@ -378,8 +377,8 @@ class EditPositionBoard extends Component {
 
   render() {
     const {position} = this;
-    const {user, client} = this.props;
-    const settings = user ? user.settings : client.settings;
+    const {client} = this.props;
+    const settings = client.applicableSettings;
 
     return (
       <BoardBackground

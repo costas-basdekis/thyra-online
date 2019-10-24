@@ -5,15 +5,10 @@ import HtmlBoardBackground from "./HtmlBoardBackground";
 import SvgBoardBackground from "./SvgBoardBackground";
 import "../../styles/board.css";
 import "../../styles/board-theme.css";
-import * as utils from "../../utils";
 
 class BoardBackground extends Component {
   render() {
     let {renderer = 'svg', ...props} = this.props;
-
-    if (props.settings) {
-      props.settings = utils.getApplicableSettings(props.settings);
-    }
 
     const renderers = {
       'html': HtmlBoardBackground,

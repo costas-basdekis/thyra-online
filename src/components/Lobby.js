@@ -377,6 +377,7 @@ class Lobby extends Component {
               challenge={otherUnsolved[0]}
               selectChallenge={this.props.selectLiveChallenge}
               currentChallengeId={null}
+              applicableSettings={client.applicableSettings}
             />
           ) : null}
         </Card.Group>

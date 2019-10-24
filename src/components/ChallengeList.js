@@ -24,7 +24,7 @@ export class ChallengeCard extends Component {
   }
 
   render() {
-    const {user, usersById, challenge, currentChallengeId} = this.props;
+    const {user, applicableSettings, usersById, challenge, currentChallengeId} = this.props;
     const userChallenge = this.userChallenge;
 
     const creator = usersById[challenge.userId];
@@ -86,7 +86,7 @@ export class ChallengeCard extends Component {
             <Board
               game={Game.fromCompressedPositionNotation(challenge.startingPosition.position)}
               medium
-              settings={user ? user.settings : undefined}
+              settings={applicableSettings}
             />
           </Card.Meta>
         </Card.Content>
@@ -101,6 +101,7 @@ ChallengeCard.propTypes = {
   challenge: PropTypes.object.isRequired,
   selectChallenge: PropTypes.func.isRequired,
   currentChallengeId: PropTypes.string,
+  applicableSettings: PropTypes.object.isRequired,
 };
 
 class ChallengeList extends Component {
@@ -113,7 +114,7 @@ class ChallengeList extends Component {
   };
 
   render() {
-    const {user, usersInfo: {byId: usersById}, challenges, selectChallenge, currentChallengeId, pageSize} = this.props;
+    const {client, user, usersInfo: {byId: usersById}, challenges, selectChallenge, currentChallengeId, pageSize} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -138,6 +139,7 @@ class ChallengeList extends Component {
               challenge={challenge}
               selectChallenge={selectChallenge}
               currentChallengeId={currentChallengeId}
+              applicableSettings={client.applicableSettings}
             />
           ))}
         </Card.Group>

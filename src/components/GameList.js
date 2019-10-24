@@ -15,7 +15,7 @@ export class GameCard extends Component {
   };
 
   render() {
-    const {user, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
+    const {client, user, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
 
     const tournament = tournamentsById[game.tournamentId];
 
@@ -50,7 +50,7 @@ export class GameCard extends Component {
               className={'ui image floated right mini'}
               game={gameGame}
               small
-              settings={user ? user.settings : undefined}
+              settings={client.applicableSettings}
             />
           ) : null}
           <Card.Header>

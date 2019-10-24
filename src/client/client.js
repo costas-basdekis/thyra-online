@@ -1,5 +1,6 @@
 import _ from "lodash";
 import moment from "moment";
+import * as utils from "../utils";
 
 const appVersion = 6;
 
@@ -41,6 +42,7 @@ class Client {
     } else {
       this.settings = this.constructor.getDefaultSettings();
     }
+    this.applicableSettings = utils.getApplicableSettings(this.settings);
     if (!window.io) {
       window.io = () => ({
         on: () => console.warn("Socket script was missing"),
@@ -166,6 +168,7 @@ class Client {
       this.username = user.name;
       this.token = user.token;
       this.settings = user.settings;
+      this.applicableSettings = utils.getApplicableSettings(this.settings);
       localStorage.setItem('user-id', this.id);
       localStorage.setItem('user-name', this.username);
       localStorage.setItem('user-token', this.token);

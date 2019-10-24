@@ -11,6 +11,7 @@ class SettingsContent extends Component {
     {value: 'subtle', label: 'Subtle'},
     {value: 'pastel', label: 'Pastel'},
     {value: 'green', label: 'Green'},
+    {value: 'halloween', label: 'Halloween'},
   ];
   themePiecesOptions = [
     {value: 'pawn', label: 'Pawn'},

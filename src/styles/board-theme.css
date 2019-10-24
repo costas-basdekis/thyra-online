@@ -73,3 +73,22 @@
     --player-a-fill: #333;
     --player-b-fill: #700;
 }
+
+.board.board-theme-halloween {
+    --cell-available-border: blue;
+    --cell-available-hovered-border: black;
+    --cell-undoable-border: red;
+    --cell-undoable-hovered-border: yellow;
+    --level-0-border: white;
+    --level-0-background: #dddddd;
+    --level-1-border: #eee;
+    --level-1-background: #88a974;
+    --level-2-border: #ddd;
+    --level-2-background: #ffb301;
+    --level-3-border: #ccc;
+    --level-3-background: #e64c3c;
+    --level-4-border: darkblue;
+    --level-4-background: blue;
+    --player-a-fill: #333;
+    --player-b-fill: #700;
+}

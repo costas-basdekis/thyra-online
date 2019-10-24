@@ -15,7 +15,7 @@ export class GameCard extends Component {
   };
 
   render() {
-    const {client, user, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
+    const {user, applicableSettings, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
 
     const tournament = tournamentsById[game.tournamentId];
 
@@ -50,7 +50,7 @@ export class GameCard extends Component {
               className={'ui image floated right mini'}
               game={gameGame}
               small
-              settings={client.applicableSettings}
+              settings={applicableSettings}
             />
           ) : null}
           <Card.Header>
@@ -103,6 +103,7 @@ GameCard.propTypes = {
   terse: PropTypes.bool.isRequired,
   live: PropTypes.bool.isRequired,
   currentGameId: PropTypes.string,
+  applicableSettings: PropTypes.object.isRequired,
 };
 
 GameCard.defaultProps = {
@@ -120,7 +121,7 @@ class GameList extends Component {
   };
 
   render() {
-    const {user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize, reverse} = this.props;
+    const {applicableSettings, user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize, reverse} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -150,6 +151,7 @@ class GameList extends Component {
               terse={terse}
               live={live}
               currentGameId={currentGameId}
+              applicableSettings={applicableSettings}
             />
           ))}
         </Card.Group>
@@ -182,6 +184,7 @@ GameList.propTypes = {
   currentGameId: PropTypes.string,
   pageSize: PropTypes.number.isRequired,
   reverse: PropTypes.bool.isRequired,
+  applicableSettings: PropTypes.object.isRequired,
 };
 
 GameList.defaultProps = {

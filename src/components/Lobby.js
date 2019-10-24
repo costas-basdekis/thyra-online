@@ -389,7 +389,14 @@ class Lobby extends Component {
             {key: 'other-past', label: "Other Past games", items: otherFinished},
           ].filter(({items}) => items.length).map(({key, label, items, color}) => (
             {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
-              <GameList user={user} usersById={usersById} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
+              <GameList
+                user={user}
+                usersById={usersById}
+                tournamentsById={tournamentsById}
+                games={items}
+                selectLiveGame={selectLiveGame}
+                applicableSettings={client.applicableSettings}
+              />
             )}
           ))} />
         </Segment>

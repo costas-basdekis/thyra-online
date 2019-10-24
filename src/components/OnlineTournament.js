@@ -83,7 +83,7 @@ class ChosenOnlineTournament extends Component {
 
   render() {
     const {
-      location, user, selectLiveGame,
+      location, client, user, selectLiveGame,
       usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo,
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
@@ -246,6 +246,7 @@ class ChosenOnlineTournament extends Component {
                                   selectLiveGame={selectLiveGame}
                                   terse
                                   live
+                                  applicableSettings={client.applicableSettings}
                                 />
                               ) : 'Finished'
                             )}</Table.Cell>
@@ -315,6 +316,7 @@ class ChosenOnlineTournament extends Component {
                                       selectLiveGame={selectLiveGame}
                                       terse
                                       live
+                                      applicableSettings={client.applicableSettings}
                                     />
                                   ) : 'Not started yet'
                                 ) : null}

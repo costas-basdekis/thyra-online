@@ -183,7 +183,7 @@ class ChosenOnlineGame extends Component {
 
   render() {
     const {
-      location, user, game, selectLiveGame,
+      location, client, user, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
       tournamentsInfo: {byId: tournamentsById},
     } = this.props;
@@ -226,6 +226,7 @@ class ChosenOnlineGame extends Component {
           live
           currentGameId={game ? game.id : null}
           reverse={false}
+          applicableSettings={client.applicableSettings}
         />
       </Segment>
     );
@@ -324,7 +325,8 @@ class OnlineGame extends Component {
 
   render() {
     const {
-      selectLiveGame, game, user, usersInfo: {byId}, gamesInfo: {games, myLive, otherLive, myFinished, otherFinished},
+      selectLiveGame, game, client, user, usersInfo: {byId},
+      gamesInfo: {games, myLive, otherLive, myFinished, otherFinished},
       tournamentsInfo: {byId: tournamentsById},
     } = this.props;
     if (!Object.values(byId).length) {
@@ -343,7 +345,14 @@ class OnlineGame extends Component {
               {key: 'all', label: "All games", items: games},
             ].filter(({items}) => items.length).map(({key, label, items, color}) => (
               {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
-                <GameList user={user} usersById={byId} tournamentsById={tournamentsById} games={items} selectLiveGame={selectLiveGame} />
+                <GameList
+                  user={user}
+                  usersById={byId}
+                  tournamentsById={tournamentsById}
+                  games={items}
+                  selectLiveGame={selectLiveGame}
+                  applicableSettings={client.applicableSettings}
+                />
               )}
             ))} />
           </Segment>

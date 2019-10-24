@@ -10,6 +10,7 @@ class Client {
       confirmSubmitMoves: true,
       enableNotifications: false,
       theme: {
+        useTopicalTheme: true,
         cells: 'original',
         pieces: 'king',
         scheme: '',

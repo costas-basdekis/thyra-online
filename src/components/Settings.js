@@ -62,6 +62,10 @@ class SettingsContent extends Component {
     this.props.updateSettings({enableNotifications: checked});
   };
 
+  updateThemeUseTopicalTheme = (e, {checked}) => {
+    this.props.updateSettings({theme: {useTopicalTheme: checked}});
+  };
+
   updateThemeRotateOpponent = (e, {checked}) => {
     this.props.updateSettings({theme: {rotateOpponent: checked}});
   };
@@ -92,7 +96,7 @@ class SettingsContent extends Component {
 
   render() {
     const {settings: {autoSubmitMoves, confirmSubmitMoves, enableNotifications, theme}} = this.props;
-    const {cells = 'original', pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
+    const {useTopicalTheme, cells = 'original', pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
 
     return (
       <Tab menu={{pointing: true, attached: false}} panes={[
@@ -132,6 +136,16 @@ class SettingsContent extends Component {
               <Grid.Row>
                 <Grid.Column textAlign={'center'}>
                   {this.themeDemoBoard({animations: theme.animations})}
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={4}>
+                  <Checkbox
+                    label={'Use topical theme when available'}
+                    name={'theme.useTopicalTheme'}
+                    checked={useTopicalTheme}
+                    onChange={this.updateThemeUseTopicalTheme}
+                  />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>

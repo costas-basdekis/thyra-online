@@ -2,62 +2,62 @@
   pointer-events: none;
 }
 
-.svg-board use[*|href="#cell-border"] {
+.svg-board use[*|href^="#cell-"][*|href$="-border"] {
   fill: var(--level-0-border);
 }
 
-.svg-board use[*|href="#cell-border"].available {
+.svg-board use[*|href^="#cell-"][*|href$="-border"].available {
   fill: var(--cell-available-border);
 }
-.svg-board:not(.selectable) use[*|href="#cell-border"].available {
+.svg-board:not(.selectable) use[*|href^="#cell-"][*|href$="-border"].available {
   cursor: pointer;
 }
 
-.svg-board use[*|href="#cell-border"].available:hover {
+.svg-board use[*|href^="#cell-"][*|href$="-border"].available:hover {
   fill: var(--cell-available-hovered-border);
 }
 
-.svg-board use[*|href="#cell-border"].undoable {
+.svg-board use[*|href^="#cell-"][*|href$="-border"].undoable {
   fill: var(--cell-undoable-border);
 }
 
-.svg-board:not(.selectable) use[*|href="#cell-border"].undoable {
+.svg-board:not(.selectable) use[*|href^="#cell-"][*|href$="-border"].undoable {
   cursor: pointer;
 }
 
-.svg-board use[*|href="#cell-border"].undoable:hover {
+.svg-board use[*|href^="#cell-"][*|href$="-border"].undoable:hover {
   fill: var(--cell-undoable-hovered-border);
 }
 
-.svg-board #cell-0 {
+.svg-board .cell-0 {
     fill: var(--level-0-background);
 }
 
-.svg-board #cell-1 > .border {
+.svg-board .cell-1 .border {
     fill: var(--level-1-border);
 }
-.svg-board #cell-1 > .fill {
+.svg-board .cell-1 .fill {
     fill: var(--level-1-background);
 }
 
-.svg-board #cell-2 > .border {
+.svg-board .cell-2 .border {
     fill: var(--level-2-border);
 }
-.svg-board #cell-2 > .fill {
+.svg-board .cell-2 .fill {
     fill: var(--level-2-background);
 }
 
-.svg-board #cell-3 > .border {
+.svg-board .cell-3 .border {
     fill: var(--level-3-border);
 }
-.svg-board #cell-3 > .fill {
+.svg-board .cell-3 .fill {
     fill: var(--level-3-background);
 }
 
-.svg-board #cell-4 > .border {
+.svg-board .cell-4 .border {
     fill: var(--level-4-border);
 }
-.svg-board #cell-4 > .fill {
+.svg-board .cell-4 .fill {
     fill: var(--level-4-background);
 }
 

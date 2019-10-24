@@ -22,6 +22,14 @@ class SettingsContent extends Component {
     {value: 'bug', label: 'Bug'},
     {value: 'eye', label: 'Eye'},
     {value: 'user', label: 'User'},
+    {value: 'halloween-witch-hat', label: 'Halloween: Witch Hat'},
+    {value: 'halloween-cauldron', label: 'Halloween: Cauldron'},
+    {value: 'halloween-bat', label: 'Halloween: Bat'},
+    {value: 'halloween-spider', label: 'Halloween: Spider'},
+    {value: 'halloween-cat', label: 'Halloween: Cat'},
+    {value: 'halloween-tombstone', label: 'Halloween: Tombstone'},
+    {value: 'halloween-pumpkin', label: 'Halloween: Pumpkin'},
+    {value: 'halloween-ghost', label: 'Halloween: Ghost'},
   ];
   themeNumbersOptions = [
     {value: '', label: 'None'},

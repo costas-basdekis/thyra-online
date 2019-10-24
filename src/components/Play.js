@@ -180,7 +180,7 @@ class Play extends Component {
     const settings = user ? user.settings : defaultSettings;
   	const isPlayerBOpponent = allowControl.includes(Game.PLAYER_A);
     const canUndo = !selectedGame && (this.props.submit ? game.chainCount > this.props.game.chainCount : game.canUndo);
-    const canTakeBack = !this.props.submit && !selectedGame && game.previous;
+    const canTakeBack = !!(!this.props.submit && !selectedGame && game.previous);
 
   	const controlsNode = (
   	  <Fragment>
@@ -476,9 +476,11 @@ class PlayPlayer extends Component {
                   )
               )
           )},
-          !canUndo && canTakeBack && !isPlayersTurn ? (
-            <Button negative content={'Take move back'} onClick={takeBack} />
-          ) : null,
+          !canUndo && canTakeBack && !isPlayersTurn ? {
+            key: 'take-move-back', content: (
+              <Button negative content={'Take move back'} onClick={takeBack}/>
+            ),
+          } : null,
           !finished && submit && allowControl.includes(player) ? {
             key: 'auto-submit', content: (
               <Checkbox

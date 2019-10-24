@@ -242,7 +242,7 @@ class App extends Component {
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          process.env.REACT_APP_DEBUG ? {menuItem: {icon: 'shield', content: liveChallenge ? (
+          (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {menuItem: {icon: 'shield', content: liveChallenge ? (
             liveChallenge.options.type === 'mate'
               ? `Find mate in ${liveChallenge.options.typeOptions.mateIn}`
               : 'Unknown challenge'

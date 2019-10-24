@@ -245,10 +245,10 @@ class ChosenOnlineGame extends Component {
               {key: 'play', content: 'Play position', icon: 'retweet', as: NavLink,
                 to: `/hotseat?position=${(selectedGame || gameGame).compressedFullNotation}`, color: 'green', active: true,
                 title: 'Click to open hotseat with this game', target: '_blank'},
-              process.env.REACT_APP_DEBUG ? {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
+              (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {key: 'edit', content: 'Edit position', icon: 'edit', as: NavLink,
                 to: `/challenge/create?position=${(selectedGame || gameGame).positionNotation}`, color: 'green', active: true,
                 title: 'Click to edit the position for this game', target: '_blank'} : null,
-              process.env.REACT_APP_DEBUG ? {key: 'copy-play', icon: 'clipboard', content: 'Copy play position', color: 'green', active: true,
+              (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {key: 'copy-play', icon: 'clipboard', content: 'Copy play position', color: 'green', active: true,
                 title: 'Click to copy play position to position', onClick: this.copyPlayPosition} : null,
             ].filter(item => item)} />
           </Grid.Row>

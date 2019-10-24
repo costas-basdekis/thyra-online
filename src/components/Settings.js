@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, Fragment} from "react";
 import PropTypes from 'prop-types';
 import {Checkbox, Form, Grid, Header, Label, Modal, Segment, Tab} from "semantic-ui-react";
 import Client from "../client/client";
@@ -95,7 +95,7 @@ class SettingsContent extends Component {
   };
 
   render() {
-    const {settings: {autoSubmitMoves, confirmSubmitMoves, enableNotifications, theme}} = this.props;
+    const {settings: {autoSubmitMoves, confirmSubmitMoves, enableNotifications, theme}, applicableSettingsName, applicableSettingsOverride} = this.props;
     const {useTopicalTheme, cells = 'original', pieces = 'king', scheme, rotateOpponent, animations, arrows, numbers} = theme;
 
     return (
@@ -146,6 +146,15 @@ class SettingsContent extends Component {
                     checked={useTopicalTheme}
                     onChange={this.updateThemeUseTopicalTheme}
                   />
+                </Grid.Column>
+                <Grid.Column floated={'right'} textAlign={'right'}>
+                  {applicableSettingsName ? (
+                    <Fragment>
+                      {applicableSettingsName}
+                      <br/>
+                      {this.themeDemoBoard(applicableSettingsOverride.theme)}
+                    </Fragment>
+                  ) : null}
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -303,6 +312,8 @@ class SettingsContent extends Component {
 SettingsContent.propTypes = {
   settings: PropTypes.object.isRequired,
   updateSettings: PropTypes.func.isRequired,
+  applicableThemeName: PropTypes.string,
+  applicableSettingsOverride: PropTypes.object,
 };
 
 class Settings extends Component {
@@ -341,6 +352,7 @@ class Settings extends Component {
 
   render() {
     const {settings} = this.state;
+    const {client} = this.props;
 
     return (
       <Modal
@@ -351,7 +363,14 @@ class Settings extends Component {
           {key: 'cancel', content: 'Cancel'},
           {key: 'save', content: 'Save', positive: true, onClick: this.save},
         ]}
-        content={{scrolling: true, content: <SettingsContent settings={settings} updateSettings={this.updateSettings} />}}
+        content={{scrolling: true, content: (
+          <SettingsContent
+            settings={settings}
+            updateSettings={this.updateSettings}
+            applicableSettingsName={client.applicableSettingsName}
+            applicableSettingsOverride={client.applicableSettingsOverride}
+          />
+        )}}
       />
     );
   }

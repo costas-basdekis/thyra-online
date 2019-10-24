@@ -16,6 +16,7 @@ export const topicalThemes = [
   {
     from: moment("2019-10-25T12:00:00"),
     until: moment("2019-11-01T00:00:00"),
+    name: 'Halloween',
     override: {
       theme: {
         cells: 'halloween',
@@ -31,24 +32,28 @@ const getTopicalThemeOverrideAndNextUpdateDate = (on = moment()) => {
     topicalTheme.from.isSameOrBefore(on) && topicalTheme.until.isSameOrAfter(on)
   ));
   if (matchingTopicalTheme) {
-    return {override: matchingTopicalTheme.override, nextUpdatedDate: matchingTopicalTheme.until};
+    return {
+      override: matchingTopicalTheme.override,
+      nextUpdatedDate: matchingTopicalTheme.until,
+      name: matchingTopicalTheme.name,
+    };
   }
 
   const nextTopicalTheme = topicalThemes.find(topicalTheme => (
     topicalTheme.from.isSameOrAfter(on)
   ));
   if (nextTopicalTheme) {
-    return {override: null, nextUpdatedDate: nextTopicalTheme.from};
+    return {override: null, nextUpdatedDate: nextTopicalTheme.from, name: null};
   }
 
-  return {override: null, nextUpdatedDate: null};
+  return {override: null, nextUpdatedDate: null, name: null};
 };
 
 export const getApplicableSettingsAndNextUpdateDate = (settings, on) => {
-  const {override, nextUpdatedDate} = getTopicalThemeOverrideAndNextUpdateDate(on);
+  const {override, nextUpdatedDate, name} = getTopicalThemeOverrideAndNextUpdateDate(on);
   if (override) {
     settings = _.merge({}, settings, override);
   }
 
-  return {applicableSettings: settings, nextUpdatedDate};
+  return {applicableSettings: settings, nextUpdatedDate, override, name};
 };

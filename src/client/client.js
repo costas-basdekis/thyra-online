@@ -69,8 +69,10 @@ class Client {
     } else {
       this.settings = this.constructor.getDefaultSettings();
     }
-    const {applicableSettings, nextUpdatedDate} = utils.getApplicableSettingsAndNextUpdateDate(this.settings);
+    const {applicableSettings, nextUpdatedDate, override, name} = utils.getApplicableSettingsAndNextUpdateDate(this.settings);
     this.applicableSettings = applicableSettings;
+    this.applicableSettingsName = name;
+    this.applicableSettingsOverride = override;
     if (this.updateApplicableSettingsTimeout) {
       clearTimeout(this.updateApplicableSettingsTimeout);
       this.updateApplicableSettingsTimeout = null;

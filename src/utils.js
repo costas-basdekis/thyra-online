@@ -51,7 +51,7 @@ const getTopicalThemeOverrideAndNextUpdateDate = (on = moment()) => {
 
 export const getApplicableSettingsAndNextUpdateDate = (settings, on) => {
   const {override, nextUpdatedDate, name} = getTopicalThemeOverrideAndNextUpdateDate(on);
-  if (override) {
+  if (settings.theme.useTopicalTheme && override) {
     settings = _.merge({}, settings, override);
   }
 

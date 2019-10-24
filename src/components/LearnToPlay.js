@@ -275,7 +275,7 @@ class LearnToPlay extends Component {
         In this website, you can play <strong>Santorini©</strong> games with people around the world.
       </div>
       <div>
-        The board consists of a <strong>5x5 square grid</strong>, and each player, <strong>black</strong> and
+        The board consists of a <strong>5x5 square grid</strong>, and each player, <strong>black</strong>{" and "}
         <strong>white</strong>, has two <strong>pieces</strong> each:
       </div>
       <LearnBoard

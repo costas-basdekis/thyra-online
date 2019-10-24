@@ -32,17 +32,14 @@ class Client {
     localStorage.removeItem('user-password');
     this.token = localStorage.getItem('user-token') || password;
     const localSettings = localStorage.getItem('user-settings') || 'null';
+    let settings;
     try {
-      this.settings = JSON.parse(localSettings);
+      settings = JSON.parse(localSettings);
     } catch (e) {
-      this.settings = null;
+      settings = null;
     }
-    if (this.settings) {
-      this.settings = _.merge(this.constructor.getDefaultSettings(), this.settings);
-    } else {
-      this.settings = this.constructor.getDefaultSettings();
-    }
-    this.applicableSettings = utils.getApplicableSettings(this.settings);
+    this.updateApplicableSettingsTimeout = null;
+    this.setSettings(settings);
     if (!window.io) {
       window.io = () => ({
         on: () => console.warn("Socket script was missing"),
@@ -64,6 +61,27 @@ class Client {
     this.onChallenges = [];
 
     this.bindSocket();
+  }
+
+  setSettings(settings) {
+    if (settings) {
+      this.settings = _.merge(this.constructor.getDefaultSettings(), settings);
+    } else {
+      this.settings = this.constructor.getDefaultSettings();
+    }
+    const {applicableSettings, nextUpdatedDate} = utils.getApplicableSettingsAndNextUpdateDate(this.settings);
+    this.applicableSettings = applicableSettings;
+    if (this.updateApplicableSettingsTimeout) {
+      clearTimeout(this.updateApplicableSettingsTimeout);
+      this.updateApplicableSettingsTimeout = null;
+    }
+    if (nextUpdatedDate) {
+      const millisecondsUntilUpdate = nextUpdatedDate.diff(moment());
+      this.updateApplicableSettingsTimeout = setTimeout(() => {
+        this.setSettings(this.settings);
+        this.onUser.map(callback => callback(this.user));
+      }, millisecondsUntilUpdate);
+    }
   }
 
   bindSocket() {
@@ -167,8 +185,7 @@ class Client {
       this.id = user.id;
       this.username = user.name;
       this.token = user.token;
-      this.settings = user.settings;
-      this.applicableSettings = utils.getApplicableSettings(this.settings);
+      this.setSettings(user.settings);
       localStorage.setItem('user-id', this.id);
       localStorage.setItem('user-name', this.username);
       localStorage.setItem('user-token', this.token);

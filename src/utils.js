@@ -26,21 +26,29 @@ export const topicalThemes = [
   },
 ];
 
-const getTopicalThemeOverride = (on = moment()) => {
-  for (const topicalTheme of topicalThemes) {
-    if (topicalTheme.from.isSameOrBefore(on) && topicalTheme.until.isSameOrAfter(on)) {
-      return topicalTheme.override;
-    }
+const getTopicalThemeOverrideAndNextUpdateDate = (on = moment()) => {
+  const matchingTopicalTheme = topicalThemes.find(topicalTheme => (
+    topicalTheme.from.isSameOrBefore(on) && topicalTheme.until.isSameOrAfter(on)
+  ));
+  if (matchingTopicalTheme) {
+    return {override: matchingTopicalTheme.override, nextUpdatedDate: matchingTopicalTheme.until};
   }
 
-  return null;
+  const nextTopicalTheme = topicalThemes.find(topicalTheme => (
+    topicalTheme.from.isSameOrAfter(on)
+  ));
+  if (nextTopicalTheme) {
+    return {override: null, nextUpdatedDate: nextTopicalTheme.from};
+  }
+
+  return {override: null, nextUpdatedDate: null};
 };
 
-export const getApplicableSettings = (settings, on) => {
-  const topicalThemeOverride = getTopicalThemeOverride(on);
-  if (topicalThemeOverride) {
-    return _.merge({}, settings, topicalThemeOverride);
+export const getApplicableSettingsAndNextUpdateDate = (settings, on) => {
+  const {override, nextUpdatedDate} = getTopicalThemeOverrideAndNextUpdateDate(on);
+  if (override) {
+    settings = _.merge({}, settings, override);
   }
 
-  return settings;
+  return {applicableSettings: settings, nextUpdatedDate};
 };

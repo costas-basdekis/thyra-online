@@ -5,7 +5,7 @@ const appVersion = 6;
 
 class Client {
   static getDefaultSettings() {
-    return JSON.parse(JSON.stringify({
+    return {
       autoSubmitMoves: false,
       confirmSubmitMoves: true,
       enableNotifications: false,
@@ -18,7 +18,7 @@ class Client {
         arrows: true,
         numbers: 'obvious',
       },
-    }));
+    };
   }
 
   scriptIoReloadInterval = null;

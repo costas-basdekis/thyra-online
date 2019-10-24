@@ -15,6 +15,7 @@ class SettingsContent extends Component {
   ];
   themeCellsOptions = [
     {value: 'original', label: 'Original'},
+    {value: 'halloween', label: 'Halloween'},
   ];
   themePiecesOptions = [
     {value: 'pawn', label: 'Pawn'},

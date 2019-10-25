@@ -328,6 +328,10 @@ class Client {
     this.socket.emit('create-challenge', challenge);
   }
 
+  updateChallenge(challenge) {
+    this.socket.emit('update-challenge', challenge);
+  }
+
   submitChallengeMove(challenge, path) {
     this.socket.emit("submit-challenge-moves", {id: challenge.id, path});
   }

@@ -236,6 +236,25 @@ class CreateChallenge extends Component {
     this.props.client.createChallenge(cleanedChallenge);
   };
 
+  updateChallenge = () => {
+    const cleanedChallenge = JSON.parse(JSON.stringify(this.state.challenge, (key, value) => {
+      if (value instanceof Game) {
+        return undefined;
+      } else {
+        return value;
+      }
+    }));
+    this.props.client.updateChallenge(cleanedChallenge);
+  };
+
+  createOrUpdateChallenge = () => {
+    if (this.state.challenge.id) {
+      this.updateChallenge();
+    } else {
+      this.createChallenge();
+    }
+  };
+
   discardChallenge = () => {
     this.setState({
       editing: true,
@@ -270,7 +289,7 @@ class CreateChallenge extends Component {
           </Grid.Row>
           <Grid.Row>
             <Button secondary onClick={this.editChallenge}>Edit</Button>
-            <Button positive onClick={this.createChallenge}>Create</Button>
+            <Button positive onClick={this.createChallenge}>{challenge.id ? 'Update' : 'Create'}</Button>
             <Button negative onClick={this.discardChallenge}>Discard</Button>
           </Grid.Row>
         </Grid>

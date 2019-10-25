@@ -14,7 +14,7 @@ export const copyToClipboard = text => {
 
 export const topicalThemes = [
   {
-    from: moment("2019-10-25T12:00:00"),
+    from: moment("2019-10-28T12:30:00"),
     until: moment("2019-11-01T00:00:00"),
     name: 'Halloween',
     override: {

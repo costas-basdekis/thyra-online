@@ -308,7 +308,7 @@ class ChallengePlayer extends Component {
               {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareChallenge, as: NavLink,
                 to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to challenge'},
-              (process.env.REACT_APP_DEBUG || (user && user.admin)) && challenge.userId === user.id ? {key: 'edit', content: 'Edit challenge', icon: 'edit', as: NavLink,
+              (process.env.REACT_APP_DEBUG || (user && user.admin)) && challenge.isMyChallenge ? {key: 'edit', content: 'Edit challenge', icon: 'edit', as: NavLink,
                 to: `/challenge/${challenge.id}/edit`, color: 'green', active: true,
                 title: 'Click to edit the challenge'} : null,
             ].filter(item => item)} />

@@ -32,9 +32,13 @@ class CreateChallenge extends Component {
     if (challengeStep.startingPosition) {
       challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition);
     } else if (challengeStep.playerResponses) {
-      challengeStep.playerResponses = challengeStep.playerResponses.map(this.fillGames);
-    } else if (challengeStep.challengeResponse) {
-      challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse);
+      challengeStep.playerResponses = challengeStep.playerResponses.map(nextStep => this.fillGames(nextStep));
+    } else if ('challengeResponse' in challengeStep) {
+      if (challengeStep.challengeResponse) {
+        challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse);
+      }
+    } else {
+      throw new Error('Cannot find type of step');
     }
 
     return challengeStep;
@@ -270,7 +274,11 @@ class CreateChallenge extends Component {
     const {editing, challenge, game, tree, currentStep} = this.state;
     const settings = client.applicableSettings;
 
-    if (editing) {
+    if (!challenge) {
+      return null;
+    }
+
+    if (editing && challenge.isMyChallenge) {
       return (
         <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
       )
@@ -289,7 +297,7 @@ class CreateChallenge extends Component {
           </Grid.Row>
           <Grid.Row>
             <Button secondary onClick={this.editChallenge}>Edit</Button>
-            <Button positive onClick={this.createChallenge}>{challenge.id ? 'Update' : 'Create'}</Button>
+            <Button positive onClick={this.createOrUpdateChallenge}>{challenge.id ? 'Update' : 'Create'}</Button>
             <Button negative onClick={this.discardChallenge}>Discard</Button>
           </Grid.Row>
         </Grid>

@@ -62,7 +62,7 @@ export class ChallengeCard extends Component {
             {userChallenge && userChallenge.meta.mistakes ? (
               <Label icon={{name: 'exclamation', color: 'red'}} content={`${userChallenge.meta.mistakes} mistakes`} />
             ) : null}
-            {user && challenge.userId === user.id ? (
+            {user && challenge.isMyChallenge ? (
               <Label
                 icon={(
                   challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()

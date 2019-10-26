@@ -18,7 +18,7 @@ class EditChallenge extends Component {
 
   render() {
     const challenge = this.challenge;
-    if (!challenge) {
+    if (!challenge || !challenge.isMyChallenge) {
       return (
         <Fragment>
           <Modal

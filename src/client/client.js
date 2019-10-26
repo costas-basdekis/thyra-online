@@ -108,7 +108,7 @@ class Client {
 
     this.challengesInfo = this.prepareChallenges([]);
     this.socket.on("challenges", this.gotChallenges);
-    this.socket.on("private-challenges", this.gotPrivateChallenges);
+    this.socket.on("personal-challenges", this.gotPersonalChallenges);
 
     this.getUser();
   }
@@ -346,8 +346,8 @@ class Client {
     this.onChallenges.map(callback => callback(this.challengesInfo));
   };
 
-  gotPrivateChallenges = privateChallenges => {
-    this.gotChallenges(privateChallenges.concat(this.challengesInfo.public));
+  gotPersonalChallenges = personalChallenges => {
+    this.gotChallenges(personalChallenges.concat(this.challengesInfo.other));
   };
 
   prepareChallenges(challenges) {

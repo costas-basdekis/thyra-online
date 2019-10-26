@@ -108,6 +108,7 @@ class Client {
 
     this.challengesInfo = this.prepareChallenges([]);
     this.socket.on("challenges", this.gotChallenges);
+    this.socket.on("private-challenges", this.gotPrivateChallenges);
 
     this.getUser();
   }
@@ -345,10 +346,16 @@ class Client {
     this.onChallenges.map(callback => callback(this.challengesInfo));
   };
 
+  gotPrivateChallenges = privateChallenges => {
+    this.gotChallenges(privateChallenges.concat(this.challengesInfo.public));
+  };
+
   prepareChallenges(challenges) {
     const otherChallenges = this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges;
     return {
       challenges,
+      public: challenges.filter(challenge => challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()),
+      private: challenges.filter(challenge => !challenge.meta.public || challenge.meta.publishDatetime.isAfter()),
       byId: _.fromPairs(challenges.map(game => [game.id, game])),
       mine: this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [],
       other: otherChallenges,

@@ -2,7 +2,7 @@ import _ from "lodash";
 import moment from "moment";
 import * as utils from "../utils";
 
-const appVersion = 7;
+const appVersion = 8;
 
 class Client {
   static getDefaultSettings() {

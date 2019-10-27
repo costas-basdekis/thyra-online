@@ -113,7 +113,7 @@ class LearnBoard extends Component {
     if (selectedMoveCell) {
       this.setState(({rowsAndColumns}) => ({
         selectedMoveCell: null,
-        rowsAndColumns: Game.updateCells(rowsAndColumns, ...[
+        rowsAndColumns: Game.Classic.updateCells(rowsAndColumns, ...[
           {x: selectedMoveCell.x, y: selectedMoveCell.y, player: null, worker: null},
           {x: cell.x, y: cell.y, player: selectedMoveCell.player, worker: selectedMoveCell.worker},
         ]),
@@ -131,7 +131,7 @@ class LearnBoard extends Component {
     this.setState(({rowsAndColumns}) => ({
       selectedMoveCell: movedFromCell,
       selectedBuildCell: null,
-      rowsAndColumns: Game.updateCells(rowsAndColumns, ...[
+      rowsAndColumns: Game.Classic.updateCells(rowsAndColumns, ...[
         {x: selectedBuildCell.x, y: selectedBuildCell.y, player: null, worker: null},
         {x: movedFromCell.x, y: movedFromCell.y, player: movedFromCell.player, worker: movedFromCell.worker},
       ]),
@@ -144,7 +144,7 @@ class LearnBoard extends Component {
     if (selectedBuildCell) {
       this.setState(({rowsAndColumns}) => ({
         selectedBuildCell: null,
-        rowsAndColumns: Game.updateCells(rowsAndColumns, {
+        rowsAndColumns: Game.Classic.updateCells(rowsAndColumns, {
           x: cell.x, y: cell.y, level: rowsAndColumns[cell.y].cells[cell.x].level + 1,
         }),
         arrows: [
@@ -230,6 +230,7 @@ class LearnBoard extends Component {
           </Fragment>
         ) : null}
         <BoardBackground
+          gameType={Game.Classic}
           medium
           allowControl={[]}
           clickable={canMove || canBuild}

@@ -13,7 +13,7 @@ class SvgBoardBackground extends PureComponent {
   render() {
     let {
       className, clickable, undoable, isCellAvailable, isCellUndoable, small, medium, makeMove, onSelect, selected,
-      allowControl, settings, rowsAndColumns, transformation, animated, showArrows, game, arrows,
+      allowControl, settings, rowsAndColumns, transformation, animated, showArrows, game, arrows, gameType,
     } = this.props;
     const {theme} = settings;
 
@@ -41,6 +41,7 @@ class SvgBoardBackground extends PureComponent {
               {row.cells.map(cell => (
                 <SvgBoardCell
                   key={`${cell.x}-${cell.y}`}
+                  gameType={gameType}
                   cell={cell}
                   clickable={clickable || (undoable && isCellUndoable(cell))}
                   available={isCellAvailable(cell)}
@@ -57,7 +58,7 @@ class SvgBoardBackground extends PureComponent {
           ))}
         </g>
         {animated ? (
-          <SvgBoardPieces rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
+          <SvgBoardPieces gameType={gameType} rowsAndColumns={rowsAndColumns} theme={theme} allowControl={allowControl} />
         ) : null}
         {showArrows ? (
           arrows ? (
@@ -77,6 +78,7 @@ class SvgBoardBackground extends PureComponent {
 }
 
 SvgBoardBackground.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   rowsAndColumns: PropTypes.array.isRequired,
   transformation: PropTypes.func,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,
@@ -241,15 +243,16 @@ SvgBoardAvailableMovesArrows.propTypes = {
 
 class SvgBoardPieces extends PureComponent {
   render() {
-    const {rowsAndColumns, theme, allowControl} = this.props;
+    const {gameType, rowsAndColumns, theme, allowControl} = this.props;
 
-    const pieces = _.sortBy(Game.findCells(rowsAndColumns, cell => cell.player), ['player', 'worker']);
+    const pieces = _.sortBy(gameType.findCells(rowsAndColumns, cell => cell.player), ['player', 'worker']);
 
     return (
       <g data-key={'pieces'} style={{pointerEvents: 'none'}}>
         {pieces.map(cell => (
           <SvgBoardPiece
             key={`${cell.player}-${cell.worker}`}
+            gameType={gameType}
             cell={cell}
             theme={theme}
             allowControl={allowControl}
@@ -261,6 +264,7 @@ class SvgBoardPieces extends PureComponent {
 }
 
 SvgBoardPieces.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   rowsAndColumns: PropTypes.array.isRequired,
   theme: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
@@ -293,12 +297,14 @@ class SvgBoardPiece extends PureComponent {
   }
 
   render() {
-    const {cell, theme, allowControl} = this.props;
+    const {gameType, cell, theme, allowControl} = this.props;
     const {previousPosition, position} = this.state;
   	const isPlayerAOpponent = !allowControl.includes(Game.PLAYER_A) && allowControl.includes(Game.PLAYER_B);
   	const isPlayerBOpponent = !isPlayerAOpponent;
+    const translateTo = constants.translate(gameType, position);
+    const translateFrom = constants.translate(gameType, previousPosition);
     return (
-      <g transform={`translate(${position.x * 100},${position.y * 100})`}>
+      <g transform={`translate(${translateTo.x},${translateTo.y})`}>
         <Piece
           style={theme.pieces || 'king'}
           colour={cell.player === Game.PLAYER_A ? 'white' : 'black'}
@@ -309,8 +315,8 @@ class SvgBoardPiece extends PureComponent {
           attributeName={'transform'}
           attributeType={'XML'}
           type={'translate'}
-          from={`${previousPosition.x * 100} ${previousPosition.y * 100}`}
-          to={`${position.x * 100} ${position.y * 100}`}
+          from={`${translateFrom.x} ${translateFrom.y}`}
+          to={`${translateTo.x} ${translateTo.y}`}
           dur={'0.1s'}
           repeatCount={1}
           fill={'freeze'}
@@ -321,6 +327,7 @@ class SvgBoardPiece extends PureComponent {
 }
 
 SvgBoardPiece.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   cell: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   allowControl: PropTypes.array.isRequired,
@@ -336,9 +343,12 @@ class SvgBoardCell extends PureComponent {
   };
 
   render() {
-    let {cell, clickable, available, undoable, settings: {theme}, makeMove, undo, animated, allowControl} = this.props;
+    let {
+      gameType, cell, clickable, available, undoable, settings: {theme}, makeMove, undo, animated, allowControl,
+    } = this.props;
     return (
       <Cell
+        gameType={gameType}
         x={cell.x}
         y={cell.y}
         available={available}
@@ -355,6 +365,7 @@ class SvgBoardCell extends PureComponent {
 }
 
 SvgBoardCell.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   cell: PropTypes.object.isRequired,
   clickable: PropTypes.bool.isRequired,
   available: PropTypes.bool.isRequired,

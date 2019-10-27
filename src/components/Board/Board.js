@@ -75,6 +75,7 @@ class Board extends PureComponent {
         rowsAndColumns={rowsAndColumns}
         transformation={transformation}
         game={game}
+        gameType={game.constructor}
         animated={animated}
       />
     );

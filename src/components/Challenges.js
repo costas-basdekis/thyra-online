@@ -146,7 +146,7 @@ class ChallengePlayer extends Component {
     if (!userChallenge) {
       return null;
     }
-    let resultingGame = Game.fromCompressedPositionNotation(userChallenge.startingPosition.position);
+    let resultingGame = Game.Classic.fromCompressedPositionNotation(userChallenge.startingPosition.position);
     let userChallengeStep = userChallenge.startingPosition;
     while (userChallengeStep) {
       const lastPlayerResponse = userChallengeStep.playerResponses[userChallengeStep.playerResponses.length - 1];

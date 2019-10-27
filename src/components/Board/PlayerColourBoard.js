@@ -32,7 +32,7 @@ class PlayerColourBoard extends Component {
   };
 
   render() {
-    const {small, medium, player, applicableSettings, allowControl} = this.props;
+    const {gameType, small, medium, player, applicableSettings, allowControl} = this.props;
 
     return (
       <BoardBackground
@@ -44,12 +44,14 @@ class PlayerColourBoard extends Component {
         isCellUndoable={this.isCellUndoable}
         settings={applicableSettings}
         allowControl={allowControl}
+        gameType={gameType}
       />
     );
   }
 }
 
 PlayerColourBoard.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   applicableSettings: PropTypes.object.isRequired,
   player: PropTypes.oneOf(Game.PLAYERS).isRequired,
   allowControl: PropTypes.array.isRequired,

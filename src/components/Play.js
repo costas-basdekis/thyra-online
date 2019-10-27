@@ -61,7 +61,7 @@ class Play extends Component {
   };
 
   newGame = () => {
-    this.makeMove(Game.create());
+    this.makeMove(this.state.game.constructor.create());
   };
 
   selectGame = game => {
@@ -120,6 +120,7 @@ class Play extends Component {
       const gameChanged = (
         !this.props.game
         || !prevProps.game
+        || this.props.game.constructor !== prevProps.game.constructor
         || this.props.game.compressedFullNotation !== prevProps.game.compressedFullNotation
         || this.props.game.positionNotation !== prevProps.game.positionNotation
       );
@@ -398,7 +399,13 @@ class PlayPlayer extends Component {
             icon: finished ? (playerWon ? 'trophy' : 'thumbs down') : (isPlayersTurn ? 'play' : 'hourglass'),
             content: (
               <Fragment>
-                <PlayerColourBoard medium applicableSettings={applicableSettings} player={player} allowControl={allowControl} />
+                <PlayerColourBoard
+                  gameType={game.constructor}
+                  medium
+                  applicableSettings={applicableSettings}
+                  player={player}
+                  allowControl={allowControl}
+                />
                 {names[player]}
               </Fragment>
             )},

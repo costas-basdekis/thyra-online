@@ -2,7 +2,7 @@ import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import Play from "./Play";
 import Game from "../game/game";
-import {Grid, Modal, Menu} from "semantic-ui-react";
+import {Grid, Modal, Menu, Button} from "semantic-ui-react";
 import * as utils from "../utils";
 import {withClient} from "../client/withClient";
 
@@ -19,7 +19,7 @@ class Hotseat extends Component {
     if (position) {
       let game, error;
       try {
-        game = Game.fromCompressedMoveNotation(position);
+        game = Game.Classic.fromCompressedMoveNotation(position);
         if (!game) {
           error = 'The position was not valid';
         } else {
@@ -30,11 +30,11 @@ class Hotseat extends Component {
         error = 'The series of moves where not valid';
       }
       if (!game) {
-        return {game: Game.create(), error};
+        return {game: Game.Classic.create(), error};
       }
       return {game, error: false};
     } else {
-      return {game: Game.create(), error: false};
+      return {game: Game.Classic.create(), error: false};
     }
   }
 
@@ -68,6 +68,22 @@ class Hotseat extends Component {
     this.setState({selectedGame});
   };
 
+  switchToClassic = () => {
+    this.switchTo(Game.Classic);
+  };
+
+  switchToHex = () => {
+    this.switchTo(Game.Hex);
+  };
+
+  switchTo = gameType => {
+    this.setState({
+      selectedGame: null,
+      game: gameType.create(),
+      error: false,
+    });
+  };
+
   render() {
     const {game, error, selectedGame} = this.state;
     const {user} = this.props;
@@ -96,7 +112,10 @@ class Hotseat extends Component {
           game={game}
           makeMove={this.makeMove}
           onSelectedGameChange={this.onSelectedGameChange}
-        />
+        >
+          <Button onClick={this.switchToClassic} content={'Switch to Classic'} disabled={game.constructor === Game.Classic}/>
+          <Button onClick={this.switchToHex} content={'Switch to Hex'} disabled={game.constructor === Game.Hex}/>
+        </Play>
       </Fragment>
     );
   }

@@ -84,7 +84,7 @@ export class ChallengeCard extends Component {
               />
             )}
             <Board
-              game={Game.fromCompressedPositionNotation(challenge.startingPosition.position)}
+              game={Game.Classic.fromCompressedPositionNotation(challenge.startingPosition.position)}
               medium
               settings={applicableSettings}
             />

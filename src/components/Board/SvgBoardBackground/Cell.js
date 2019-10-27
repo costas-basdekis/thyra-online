@@ -17,6 +17,30 @@ class BaseCellDefinitions extends PureComponent {
       <path className={"border"} d={`M0,0h${constants.cellSize}v${constants.cellSize}h-${constants.cellSize}z M${constants.borderWidth},${constants.borderWidth}v${constants.cellSize - constants.borderWidth * 2}h${constants.cellSize - constants.borderWidth * 2}v-${constants.cellSize - constants.borderWidth * 2}z`} />
     </g>
   );
+  static defaultBorderHex = (
+    <g>
+      <rect
+        fill={"transparent"}
+        width={constants.cellSize}
+        height={constants.cellSize}
+      />
+      <path className={"border"} d={`
+        M ${(() => {
+          const center = {x: 0, y: 0};
+          return [0, 1, 2, 3, 4, 5]
+            .map(index => index / 6 * Math.PI * 2)
+            .map(angle => {
+              const radius = constants.cellSize * 1.5 / 2;
+              const x = center.x + Math.cos(angle) * radius;
+              const y = center.y + Math.sin(angle) * radius;
+              return `${x},${y}`;
+            })
+            .join('L');
+        })()} z 
+        M ${[0, 1, 2, 3, 4, 5].reverse().map(index => index / 6 * Math.PI * 2).map(angle => `${Math.cos(angle) * (constants.cellSize - constants.borderWidth * 2) * 1.5 / 2},${Math.sin(angle) * (constants.cellSize - constants.borderWidth * 2) * 1.5 / 2}`).concat('L')} z 
+      `} />
+    </g>
+  );
 
 	render() {
 	  const {name, paths} = this.props;
@@ -216,14 +240,15 @@ class Cell extends PureComponent {
 
 	render() {
   	const {
-  	  x, y, available, undoable, level, player, onClick, animated, allowControl,
+  	  x, y, available, undoable, level, player, onClick, animated, allowControl, gameType,
       theme: {cells = 'original', pieces = 'king', rotateOpponent = true, numbers},
     } = this.props;
   	const {previousLevel, currentLevel} = this.state;
   	const isPlayerAOpponent = !allowControl.includes(Game.PLAYER_A) && allowControl.includes(Game.PLAYER_B);
   	const isPlayerBOpponent = !isPlayerAOpponent;
-  	return (
-    	<g transform={`translate(${x * 100},${y * 100})`}>
+    const translate = constants.translate(gameType, {x, y});
+    return (
+    	<g transform={`translate(${translate.x},${translate.y})`}>
         <g className={'cell-contents'}>
           {animated ? ([0, 1, 2, 3, 4].map(i => (
             <use key={i} xlinkHref={`#cell-${cells}-${i}`} opacity={i <= level ? 1 : 0}>
@@ -259,6 +284,7 @@ class Cell extends PureComponent {
 }
 
 Cell.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   x: PropTypes.number.isRequired,
   y: PropTypes.number.isRequired,
   available: PropTypes.bool.isRequired,

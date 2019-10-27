@@ -19,7 +19,7 @@ export class GameCard extends Component {
 
     const tournament = tournamentsById[game.tournamentId];
 
-    const gameGame = Game.deserialize(game.game);
+    const gameGame = Game.Classic.deserialize(game.game);
     const playerA = usersById[game.userIds[0]];
     const playerB = usersById[game.userIds[1]];
     const nextPlayerUser = gameGame.nextPlayer === Game.PLAYER_A ? playerA : playerB;

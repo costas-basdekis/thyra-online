@@ -20,6 +20,7 @@ class BoardBackground extends Component {
 }
 
 BoardBackground.propTypes = {
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
   rowsAndColumns: PropTypes.array.isRequired,
   transformation: PropTypes.func,
   className: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]).isRequired,

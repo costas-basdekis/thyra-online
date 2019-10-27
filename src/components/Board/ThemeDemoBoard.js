@@ -86,6 +86,7 @@ class ThemeDemoBoard extends Component {
 
     return (
       <BoardBackground
+        gameType={Game.Classic}
         small={small}
         medium={medium}
         allowControl={[Game.PLAYER_A, Game.PLAYER_B]}

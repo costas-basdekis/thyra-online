@@ -9,12 +9,12 @@ import Play from "./Play";
 import * as utils from "../utils";
 
 class EditPosition extends Component {
-  static initialPositionNotation = Game.getPositionNotation(Game.getInitialRowsAndColumns());
+  static initialPositionNotation = Game.Classic.getPositionNotation(Game.Classic.getInitialRowsAndColumns());
 
   state = {
     paletteSelectedItem: {x: 0, y: 1},
     paletteUpdate: {player: Game.PLAYER_A, worker: Game.WORKER_FIRST},
-    position: Game.getInitialRowsAndColumns(),
+    position: Game.Classic.getInitialRowsAndColumns(),
     positionError: null,
     urlError: false,
     ...this.getGameAndErrorFromUrlPosition(),
@@ -28,7 +28,7 @@ class EditPosition extends Component {
     if (position) {
       let game, urlError;
       try {
-        game = Game.fromCompressedPositionNotation(position);
+        game = Game.Classic.fromCompressedPositionNotation(position);
         if (!game) {
           urlError = 'The position was not valid';
         }
@@ -37,11 +37,11 @@ class EditPosition extends Component {
         urlError = `The board position was not valid: ${e.message}`;
       }
       if (!game) {
-        return {game: Game.create(), urlError, position: Game.getInitialRowsAndColumns()};
+        return {game: Game.Classic.create(), urlError, position: Game.Classic.getInitialRowsAndColumns()};
       }
       return {game, urlError: false, position: game.rowsAndColumns};
     } else {
-      return {game: Game.create(), urlError: false, position: Game.getInitialRowsAndColumns()};
+      return {game: Game.Classic.create(), urlError: false, position: Game.Classic.getInitialRowsAndColumns()};
     }
   }
 
@@ -56,10 +56,10 @@ class EditPosition extends Component {
   onPositionChange = position => {
     let game, positionError;
     try {
-      game = Game.fromPosition(position);
+      game = Game.Classic.fromPosition(position);
       positionError = null;
     } catch (e) {
-      game = Game.create();
+      game = Game.Classic.create();
       positionError = e.message;
     }
     this.setState(state => ({
@@ -85,7 +85,7 @@ class EditPosition extends Component {
   };
 
   resetBoard = () => {
-    this.onPositionChange(Game.getInitialRowsAndColumns());
+    this.onPositionChange(Game.Classic.getInitialRowsAndColumns());
   };
 
   undo = () => {
@@ -97,7 +97,7 @@ class EditPosition extends Component {
   };
 
   copyPosition = () => {
-    utils.copyToClipboard(Game.getPositionNotation(this.state.position));
+    utils.copyToClipboard(Game.Classic.getPositionNotation(this.state.position));
     alert('Position copied to clipboard');
   };
 
@@ -107,7 +107,7 @@ class EditPosition extends Component {
   };
 
   usePosition = () => {
-    this.props.usePosition(Game.fromPosition(this.state.position).positionNotation);
+    this.props.usePosition(Game.Classic.fromPosition(this.state.position).positionNotation);
   };
 
   render() {
@@ -115,7 +115,7 @@ class EditPosition extends Component {
     const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game, selectedGame, previousPosition} = this.state;
     const settings = client.applicableSettings;
 
-    const positionNotation = Game.getPositionNotation(position);
+    const positionNotation = Game.Classic.getPositionNotation(position);
     return (
       <Fragment>
         <Modal
@@ -297,6 +297,7 @@ class EditPositionPalette extends Component {
 
     return (
       <BoardBackground
+        gameType={Game.Classic}
         medium
         allowControl={[Game.PLAYER_A, Game.PLAYER_B]}
         rowsAndColumns={this.constructor.rowsAndColumns}
@@ -324,7 +325,7 @@ EditPositionPalette = withClient(EditPositionPalette);
 
 class EditPositionBoard extends Component {
   state = {
-    position: Game.getInitialRowsAndColumns(),
+    position: Game.Classic.getInitialRowsAndColumns(),
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -365,7 +366,7 @@ class EditPositionBoard extends Component {
   };
 
   updatePosition = newCell => {
-    const newPosition = Game.updateCells(this.position, newCell);
+    const newPosition = Game.Classic.updateCells(this.position, newCell);
 
     if (this.props.position === undefined) {
       this.setState({position: newPosition});
@@ -382,6 +383,7 @@ class EditPositionBoard extends Component {
 
     return (
       <BoardBackground
+        gameType={Game.Classic}
         medium
         allowControl={[Game.PLAYER_A, Game.PLAYER_B]}
         rowsAndColumns={position}

@@ -105,7 +105,7 @@ class ChosenOnlineGame extends Component {
 
   gameGameSelector = createSelector([
     () => this.game,
-  ], game => game ? Game.deserialize(game.game) : null);
+  ], game => game ? Game.Classic.deserialize(game.game) : null);
 
   get gameGame() {
     return this.gameGameSelector(this.props);
@@ -317,7 +317,7 @@ ChosenOnlineGame = withRouter(withClient(ChosenOnlineGame));
 class OnlineGame extends Component {
   gameGameSelector = createSelector([
     props => props.game,
-  ], game => game ? Game.deserialize(game.game) : null);
+  ], game => game ? Game.Classic.deserialize(game.game) : null);
 
   get gameGame() {
     return this.gameGameSelector(this.props);

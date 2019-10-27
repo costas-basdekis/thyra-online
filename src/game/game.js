@@ -458,6 +458,10 @@ class Game {
     return this.constructor.findCells(this.rowsAndColumns, condition);
   }
 
+  static areCellsNeighbours(lhs, rhs) {
+    throw new Error('Not implemented `areCellsNeighbours`');
+  }
+
   static canPlayerWin(rowsAndColumns, player) {
     const playerCells = this.findCells(rowsAndColumns, cell => cell.player === player && cell.level === 2);
     if (!playerCells.length) {
@@ -465,10 +469,7 @@ class Game {
     }
     const playerWinningMoves = this.findCells(rowsAndColumns, cell => (
       cell.level === 3
-      && playerCells.find(playerCell => (
-        Math.abs(cell.x - playerCell.x) <= 1
-        && Math.abs(cell.y - playerCell.y) <= 1
-      ))
+      && playerCells.find(playerCell => this.areCellsNeighbours(cell, playerCell))
     ));
 
     return playerWinningMoves.length > 0;
@@ -517,8 +518,7 @@ class Game {
     const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
     const maximumLevel = fromCell.level + 1;
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
-      Math.abs(cell.x - coordinates.x) <= 1
-      && Math.abs(cell.y - coordinates.y) <= 1
+      this.areCellsNeighbours(cell, coordinates)
       && !cell.player
       && cell.level <= 3
       && cell.level <= maximumLevel
@@ -532,8 +532,7 @@ class Game {
   static getBuildableAvailableMovesMatrix(rowsAndColumns, coordinates) {
     const fromCell = rowsAndColumns[coordinates.y].cells[coordinates.x];
     return this.getAvailableMovesMatrix(rowsAndColumns, cell => (
-      Math.abs(cell.x - coordinates.x) <= 1
-      && Math.abs(cell.y - coordinates.y) <= 1
+      this.areCellsNeighbours(cell, coordinates)
       && !cell.player
       && cell.level < 4
       && (!this.canPlayerWin(this.updateCells(rowsAndColumns, ...[
@@ -729,6 +728,38 @@ class Game {
     }, {x, y});
   }
 }
+
+class GameClassic extends Game {
+  static areCellsNeighbours(lhs, rhs) {
+    return (
+      Math.abs(lhs.x - rhs.x) <= 1
+      && Math.abs(lhs.y - rhs.y) <= 1
+    );
+  }
+}
+Game.Classic = GameClassic;
+
+class GameHex extends Game {
+  static areCellsNeighbours(lhs, rhs) {
+    if (!(
+      Math.abs(lhs.x - rhs.x) <= 1
+      && Math.abs(lhs.y - rhs.y) <= 1
+    )) {
+      return false;
+    }
+
+    if (lhs.x === rhs.x) {
+      return true;
+    } else if (lhs.x % 2 === 0) {
+      return rhs.y >= lhs.y;
+    } else {
+      return rhs.y <= lhs.y;
+    }
+  }
+}
+Game.Hex = GameHex;
+
+Game.GAME_TYPES = [Game.Classic, Game.Hex];
 
 export {
   InvalidMoveError,

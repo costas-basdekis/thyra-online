@@ -27,7 +27,7 @@ class CreateChallenge extends Component {
   fillGames(challengeStep) {
     challengeStep = {...challengeStep};
     if (!challengeStep.game && challengeStep.position) {
-      challengeStep.game = Game.fromCompressedPositionNotation(challengeStep.position);
+      challengeStep.game = Game.Classic.fromCompressedPositionNotation(challengeStep.position);
     }
     if (challengeStep.startingPosition) {
       challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition);
@@ -380,8 +380,8 @@ class ChallengeForm extends Component {
         publishDatetime: null,
       },
       startingPosition: {
-        position: Game.create().positionNotation,
-        game: Game.create(),
+        position: Game.Classic.create().positionNotation,
+        game: Game.Classic.create(),
         playerResponses: [],
       },
     },
@@ -430,8 +430,8 @@ class ChallengeForm extends Component {
       this.setState(state => {
         const position = state.challenge.startingPosition.position;
         const isPositionValid = position
-          ? Game.isValidCompressedPositionNotation(position) : false;
-        const game = isPositionValid ? Game.fromCompressedPositionNotation(position) : null;
+          ? Game.Classic.isValidCompressedPositionNotation(position) : false;
+        const game = isPositionValid ? Game.Classic.fromCompressedPositionNotation(position) : null;
         return {
           error: {
             ...state.error,

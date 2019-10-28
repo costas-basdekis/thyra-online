@@ -275,14 +275,14 @@ class CreateChallenge extends Component {
     const {editing, challenge, game, tree, currentStep} = this.state;
     const settings = client.applicableSettings;
 
-    if (!challenge) {
-      return null;
-    }
-
-    if (editing && challenge.isMyChallenge) {
+    if (editing && (!challenge || challenge.isMyChallenge)) {
       return (
         <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
       )
+    }
+
+    if (!challenge) {
+      return null;
     }
 
     return (
@@ -365,8 +365,9 @@ class ChallengeForm extends Component {
 
   state = {
     challenge: this.props.initialChallenge || {
+      isMyChallenge: true,
       options: {
-        initialPlayer: null,
+        initialPlayer: Game.PLAYER_A,
         type: 'mate',
         typeOptions: {
           mateIn: 1,

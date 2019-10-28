@@ -102,6 +102,7 @@ class Client {
 
     this.gamesInfo = this.prepareGames([]);
     this.socket.on("games", this.gotGames);
+    this.socket.on("game", this.gotGame);
 
     this.tournamentsInfo = this.prepareTournaments([]);
     this.socket.on("tournaments", this.gotTournaments);
@@ -256,6 +257,11 @@ class Client {
     games = _.sortBy(games, ['startDatetime', 'id'], ['desc', 'desc']);
     this.gamesInfo = this.prepareGames(games);
     this.onGames.map(callback => callback(this.gamesInfo));
+  };
+
+  gotGame = game => {
+    const games = this.gamesInfo.games.filter(oldGame => oldGame.id !== game.id).concat([game]);
+    client.gotGames(games);
   };
 
   prepareGames(games) {

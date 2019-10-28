@@ -427,7 +427,7 @@ class PlayPlayer extends Component {
                                   positive
                                   className={'attention'}
                                 >
-                                  Preview
+                                  Submit...
                                 </Button>
                               }
                               header={'Submit move'}

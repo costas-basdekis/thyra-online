@@ -17,6 +17,7 @@ import OnlineTournament from "./components/OnlineTournament";
 import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
 import Challenges from "./components/Challenges";
+import * as utils from "./utils";
 
 class App extends Component {
   state = {
@@ -242,13 +243,14 @@ class App extends Component {
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {menuItem: {icon: 'shield', content: liveChallenge ? (
-            liveChallenge.options.type === 'mate'
-              ? `Find mate in ${liveChallenge.options.typeOptions.mateIn}`
-              : 'Unknown challenge'
-          ) : 'Challenges'}, path: 'challenge', navigate: liveChallenge ? `challenge/${liveChallenge.id}` : 'challenge', render: () => (
-            <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
-          )} : null,
+          (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {
+            menuItem: {icon: 'shield', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Challenges'},
+            path: 'challenge',
+            navigate: liveChallenge ? `challenge/${liveChallenge.id}` : 'challenge',
+            render: () => (
+              <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
+            ),
+          } : null,
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>
           )},

@@ -246,7 +246,7 @@ class ChallengePlayer extends Component {
     if (navigator.share) {
       const challenge = this.challenge;
       navigator.share({
-        title: `Thyra Online - Solve challenge${challenge.options.type === 'mate' ? `: Find mate in ${challenge.options.typeOptions.mateIn}` : ''}`,
+        title: `Thyra Online - Solve challenge${utils.getChallengeTitle(challenge)}`,
         text: `Solve Santorini challenge`,
         url,
       }).catch(() => {
@@ -287,16 +287,13 @@ class ChallengePlayer extends Component {
     }
 
     const {user, location} = this.props;
-    const challengePrompt = challenge.options.type === 'mate'
-      ? `Find mate in ${challenge.options.typeOptions.mateIn}`
-      : 'Unknown challenge';
     const message = (
       wrongMove ? (
         <Message error icon={'warning'} content={"That's not the right answer"} />
       ) : won ? (
         <Message success icon={'check'} content={"Correct! You solved it!"} />
       ) : (
-        <Message content={challengePrompt} />
+        <Message content={utils.getChallengeTitle(challenge)} />
       )
     );
     return (
@@ -315,7 +312,7 @@ class ChallengePlayer extends Component {
           </Grid.Row>
           <Grid.Row>
             <Segment>
-              <Header as={'h1'}>{challengePrompt}</Header>
+              <Header as={'h1'}>{utils.getChallengeTitle(challenge)}</Header>
               <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
               <Header as={'h4'}>{challenge.meta.source}</Header>
             </Segment>

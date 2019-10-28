@@ -57,3 +57,12 @@ export const getApplicableSettingsAndNextUpdateDate = (settings, on) => {
 
   return {applicableSettings: settings, nextUpdatedDate, override, name};
 };
+
+export const getChallengeTitle = challenge => {
+  switch (challenge.options.type) {
+    case 'mate':
+      return `Find mate in ${challenge.options.typeOptions.mateIn}`;
+    default:
+      return 'Unknown challenge';
+  }
+};

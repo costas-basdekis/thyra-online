@@ -8,6 +8,7 @@ import {withClient} from "../client/withClient";
 import Play from "./Play";
 import EditPosition from "./EditPosition";
 import moment from "moment";
+import * as utils from "../utils";
 
 class CreateChallenge extends Component {
   state = {
@@ -283,14 +284,13 @@ class CreateChallenge extends Component {
         <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
       )
     }
-    const challengePrompt = challenge.options.type === 'mate' ? `Find mate in ${challenge.options.typeOptions.mateIn}` : 'Unknown challenge';
 
     return (
       <Fragment>
         <Grid centered>
           <Grid.Row>
             <Segment>
-              <Header as={'h1'}>{challengePrompt}</Header>
+              <Header as={'h1'}>{utils.getChallengeTitle(challenge)}</Header>
               <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
               <Header as={'h4'}>{challenge.meta.source}</Header>
             </Segment>

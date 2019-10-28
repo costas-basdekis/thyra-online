@@ -6,6 +6,7 @@ import Game from "../game/game";
 import Board from "./Board";
 import {NavLink} from "react-router-dom";
 import {withClient} from "../client/withClient";
+import * as utils from "../utils";
 
 export class ChallengeCard extends Component {
   selectChallenge = () => {
@@ -39,9 +40,7 @@ export class ChallengeCard extends Component {
       >
         <Card.Content>
           <Card.Header>
-            {challenge.options.type === 'mate'
-              ? `Find mate in ${challenge.options.typeOptions.mateIn}`
-              : 'Unknown challenge'}
+            {utils.getChallengeTitle(challenge)}
           </Card.Header>
           <Card.Meta>
             <Label

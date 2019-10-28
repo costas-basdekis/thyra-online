@@ -62,6 +62,8 @@ export const getChallengeTitle = challenge => {
   switch (challenge.options.type) {
     case 'mate':
       return `Find mate in ${challenge.options.typeOptions.mateIn}`;
+    case 'avoidMate':
+      return `Avoid mate in ${challenge.options.typeOptions.mateIn}`;
     default:
       return 'Unknown challenge';
   }

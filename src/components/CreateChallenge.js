@@ -450,6 +450,33 @@ class ChallengeForm extends Component {
           },
         };
       });
+    } else if (name === 'options.type') {
+      this.setState(state => {
+        switch (state.challenge.options.type) {
+          case 'mate':
+            return _.merge({}, {challenge: state.challenge}, {
+              challenge: {
+                options: {
+                  typeOptions: {
+                    mateIn: 1,
+                  },
+                },
+              },
+            });
+          case 'avoidMate':
+            return _.merge({}, {challenge: state.challenge}, {
+              challenge: {
+                options: {
+                  typeOptions: {
+                    mateIn: 1,
+                  },
+                },
+              },
+            });
+          default:
+            return null;
+        }
+      });
     }
   };
 
@@ -537,6 +564,7 @@ class ChallengeForm extends Component {
             <Form.Select
               options={[
                 {key: 'mate', value: 'mate', text: 'Mate'},
+                {key: 'avoidMate', value: 'avoidMate', text: 'Avoid Mate'},
               ]}
               name={'options.type'}
               label={'Type'}
@@ -544,19 +572,35 @@ class ChallengeForm extends Component {
               required
               value={challenge.options.type}
             />
-            <Form.Group>
-              <Form.Field
-                control={Input}
-                type={'range'}
-                label={`Mate In: ${challenge.options.typeOptions.mateIn}`}
-                min={1}
-                max={10}
-                name={'options.typeOptions.mateIn'}
-                onChange={this.setValue}
-                required
-                value={challenge.options.typeOptions.mateIn}
-              />
-            </Form.Group>
+            {challenge.options.type === 'mate' ? (
+              <Form.Group>
+                <Form.Field
+                  control={Input}
+                  type={'range'}
+                  label={`Mate In: ${challenge.options.typeOptions.mateIn}`}
+                  min={1}
+                  max={10}
+                  name={'options.typeOptions.mateIn'}
+                  onChange={this.setValue}
+                  required
+                  value={challenge.options.typeOptions.mateIn}
+                />
+              </Form.Group>
+            ) : challenge.options.type === 'avoidMate' ? (
+              <Form.Group>
+                <Form.Field
+                  control={Input}
+                  type={'range'}
+                  label={`Avoid Mate In: ${challenge.options.typeOptions.mateIn}`}
+                  min={1}
+                  max={10}
+                  name={'options.typeOptions.mateIn'}
+                  onChange={this.setValue}
+                  required
+                  value={challenge.options.typeOptions.mateIn}
+                />
+              </Form.Group>
+            ) : "Unknown challenge type"}
             <Form.Group>
               <Form.Field
                 control={Input}

@@ -20,9 +20,11 @@ class Challenges extends Component {
       <Switch>
         <Route exact path={this.props.match.path}>
           <Fragment>
-            <Segment>
-              <Link to={`${this.props.match.path}/create`}><Button content={'Create Puzzle'} /></Link>
-            </Segment>
+            {(user && user.admin) ? (
+              <Segment>
+                <Link to={`${this.props.match.path}/create`}><Button content={'Create Puzzle'} /></Link>
+              </Segment>
+            ) : null}
             <Tab menu={{pointing: true}} panes={[
               {key: 'other-started', label: "Started Puzzles", items: otherStarted, color: 'green'},
               {key: 'other-not-started', label: "New Puzzles", items: otherNotStarted},
@@ -35,12 +37,12 @@ class Challenges extends Component {
             ))} />
           </Fragment>
         </Route>
-        {(process.env.REACT_APP_DEBUG || (user && user.admin)) ? (
+        {(user && user.admin) ? (
           <Route exact path={`${this.props.match.path}/create`}>
             <CreateChallenge />
           </Route>
         ) : null}
-        {(process.env.REACT_APP_DEBUG || (user && user.admin)) ? (
+        {(user && user.admin) ? (
           <Route exact path={`${this.props.match.path}/:id/edit`}>
             <EditChallenge />
           </Route>
@@ -305,9 +307,9 @@ class ChallengePlayer extends Component {
               {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareChallenge, as: NavLink,
                 to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to challenge'},
-              (process.env.REACT_APP_DEBUG || (user && user.admin)) && challenge.isMyChallenge ? {key: 'edit', content: 'Edit puzzle', icon: 'edit', as: NavLink,
+              (challenge.isMyChallenge ? {key: 'edit', content: 'Edit puzzle', icon: 'edit', as: NavLink,
                 to: `/puzzle/${challenge.id}/edit`, color: 'green', active: true,
-                title: 'Click to edit the puzzle'} : null,
+                title: 'Click to edit the puzzle'} : null),
             ].filter(item => item)} />
           </Grid.Row>
           <Grid.Row>

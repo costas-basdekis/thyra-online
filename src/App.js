@@ -243,14 +243,12 @@ class App extends Component {
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {
-            menuItem: {icon: 'puzzle', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Puzzles'},
-            path: 'puzzle',
-            navigate: liveChallenge ? `puzzle/${liveChallenge.id}` : 'puzzle',
-            render: () => (
-              <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
-            ),
-          } : null,
+          {menuItem: {icon: 'puzzle', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Puzzles'},
+          path: 'puzzle',
+          navigate: liveChallenge ? `puzzle/${liveChallenge.id}` : 'puzzle',
+          render: () => (
+            <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
+          )},
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>
           )},

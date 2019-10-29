@@ -198,6 +198,7 @@ class Client {
     this.user = user;
     this.onUser.map(callback => callback(user));
     this.gotUsers(this.usersInfo.users);
+    this.gotChallenges(this.challengesInfo.challenges);
   };
 
   changeUsername(name) {

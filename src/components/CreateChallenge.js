@@ -337,7 +337,7 @@ class CreateChallenge extends Component {
             changeSettings={this.changeSettings}
             game={game}
             allowControl={[currentStep.game.nextPlayer]}
-            names={{[challenge.options.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Challenge'}}
+            names={{[challenge.options.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Puzzle'}}
             submit={this.submit}
             onDisplayPositionChange={this.onDisplayPositionChange}
             makeMove={this.makeMove}

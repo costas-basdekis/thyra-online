@@ -32,7 +32,7 @@ export class ChallengeCard extends Component {
     return (
       <Card
         as={NavLink}
-        to={`/challenge/${challenge.id}`}
+        to={`/puzzle/${challenge.id}`}
         onClick={this.selectChallenge}
         style={{
           ...(challenge.id === currentChallengeId ? {backgroundColor: 'lightgreen'} : {}),

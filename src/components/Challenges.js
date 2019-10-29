@@ -21,13 +21,13 @@ class Challenges extends Component {
         <Route exact path={this.props.match.path}>
           <Fragment>
             <Segment>
-              <Link to={`${this.props.match.path}/create`}><Button content={'Create Challenge'} /></Link>
+              <Link to={`${this.props.match.path}/create`}><Button content={'Create Puzzle'} /></Link>
             </Segment>
             <Tab menu={{pointing: true}} panes={[
-              {key: 'other-started', label: "Started Challenges", items: otherStarted, color: 'green'},
-              {key: 'other-not-started', label: "New Challenges", items: otherNotStarted},
-              {key: 'other-solved', label: "Solved Challenges", items: otherSolved},
-              {key: 'mine', label: "My Challenges", items: mine},
+              {key: 'other-started', label: "Started Puzzles", items: otherStarted, color: 'green'},
+              {key: 'other-not-started', label: "New Puzzles", items: otherNotStarted},
+              {key: 'other-solved', label: "Solved Puzzles", items: otherSolved},
+              {key: 'mine', label: "My Puzzles", items: mine},
             ].filter(({items}) => items.length).map(({key, label, items, color}) => (
               {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
                 <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={items} />
@@ -246,8 +246,8 @@ class ChallengePlayer extends Component {
     if (navigator.share) {
       const challenge = this.challenge;
       navigator.share({
-        title: `Thyra Online - Solve challenge${utils.getChallengeTitle(challenge)}`,
-        text: `Solve Santorini challenge`,
+        title: `Thyra Online - Solve puzzle ${utils.getChallengeTitle(challenge)}`,
+        text: `Solve Santorini puzzle`,
         url,
       }).catch(() => {
         utils.copyToClipboard(url);
@@ -305,9 +305,9 @@ class ChallengePlayer extends Component {
               {key: 'share', content: 'Share Game', icon: 'share', onClick: this.shareChallenge, as: NavLink,
                 to: location.pathname, color: 'green', active: true,
                 title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to challenge'},
-              (process.env.REACT_APP_DEBUG || (user && user.admin)) && challenge.isMyChallenge ? {key: 'edit', content: 'Edit challenge', icon: 'edit', as: NavLink,
-                to: `/challenge/${challenge.id}/edit`, color: 'green', active: true,
-                title: 'Click to edit the challenge'} : null,
+              (process.env.REACT_APP_DEBUG || (user && user.admin)) && challenge.isMyChallenge ? {key: 'edit', content: 'Edit puzzle', icon: 'edit', as: NavLink,
+                to: `/puzzle/${challenge.id}/edit`, color: 'green', active: true,
+                title: 'Click to edit the puzzle'} : null,
             ].filter(item => item)} />
           </Grid.Row>
           <Grid.Row>
@@ -326,7 +326,7 @@ class ChallengePlayer extends Component {
           changeSettings={this.changeSettings}
           game={game}
           allowControl={[challenge.options.initialPlayer]}
-          names={{[challenge.options.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Challenge'}}
+          names={{[challenge.options.initialPlayer]: 'You', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Puzzle'}}
           submit={this.submit}
           onDisplayPositionChange={this.onDisplayPositionChange}
         >

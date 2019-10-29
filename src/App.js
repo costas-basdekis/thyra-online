@@ -61,7 +61,7 @@ class App extends Component {
   selectLiveChallenge = liveChallenge => {
     let challengeUrl;
     if (liveChallenge) {
-      challengeUrl = `/challenge/${liveChallenge.id}`;
+      challengeUrl = `/puzzle/${liveChallenge.id}`;
     } else {
       challengeUrl = `/lobby`;
     }
@@ -244,9 +244,9 @@ class App extends Component {
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
           (process.env.REACT_APP_DEBUG || (user && user.admin)) ? {
-            menuItem: {icon: 'shield', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Challenges'},
-            path: 'challenge',
-            navigate: liveChallenge ? `challenge/${liveChallenge.id}` : 'challenge',
+            menuItem: {icon: 'puzzle', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Puzzles'},
+            path: 'puzzle',
+            navigate: liveChallenge ? `puzzle/${liveChallenge.id}` : 'puzzle',
             render: () => (
               <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
             ),

@@ -13,7 +13,7 @@ class EditChallenge extends Component {
   }
 
   dismissUrlChallengeError = () => {
-    this.props.history.push('/challenge');
+    this.props.history.push('/puzzle');
   };
 
   render() {

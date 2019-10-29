@@ -403,13 +403,13 @@ class Lobby extends Component {
         {challenges ? (<Segment>
           <Tab menu={{pointing: true}} panes={(() => {
             let challengesList = [
-              {key: 'other-started', label: "Started Challenges", items: otherStarted, color: 'green'},
-              {key: 'other-not-started', label: "New Challenges", items: otherNotStarted},
-              {key: 'other-solved', label: "Solved Challenges", items: otherSolved},
+              {key: 'other-started', label: "Started Puzzles", items: otherStarted, color: 'green'},
+              {key: 'other-not-started', label: "New Puzzles", items: otherNotStarted},
+              {key: 'other-solved', label: "Solved Puzzles", items: otherSolved},
             ].filter(({items}) => items.length);
             if (!challengesList.length) {
               challengesList = [
-                {key: 'challenges', label: "Challenges", items: challenges},
+                {key: 'puzzles', label: "Puzzles", items: challenges},
               ];
             }
             return challengesList;

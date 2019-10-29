@@ -176,6 +176,13 @@ class UserCard extends Component {
                 title={`Won ${otherUser.tournamentWinCount}/${otherUser.tournamentCount} tournaments entered`}
               />
               ) : null}
+            {Object.values(otherUser.challenges || {}).length ? (
+              <Label
+                icon={'puzzle'}
+                content={`${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won && !userChallenge.meta.mistakes).length}/${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won).length}/${Object.values(otherUser.challenges).length}`}
+                title={`${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won && !userChallenge.meta.mistakes).length} perfect puzzles, out of ${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won).length} solved, out of ${Object.values(otherUser.challenges).length} attempted`}
+              />
+            ) : null}
           </Card.Meta>
         </Card.Content>
         {client && user && otherUser.online ? <Card.Content extra>

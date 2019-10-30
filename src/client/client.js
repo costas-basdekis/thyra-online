@@ -109,7 +109,7 @@ class Client {
     this.socket.on("tournaments", this.gotTournaments);
 
     this.challengesInfo = this.prepareChallenges([]);
-    this.socket.on("challenges", this.gotChallenges);
+    this.socket.on("challenges", this.gotNonPersonalChallenges);
     this.socket.on("personal-challenges", this.gotPersonalChallenges);
 
     this.getUser();
@@ -357,6 +357,10 @@ class Client {
     challenges = _.sortBy(challenges, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
     this.challengesInfo = this.prepareChallenges(challenges);
     this.onChallenges.map(callback => callback(this.challengesInfo));
+  };
+
+  gotNonPersonalChallenges = personalChallenges => {
+    this.gotChallenges(personalChallenges.concat(this.challengesInfo.mine));
   };
 
   gotPersonalChallenges = personalChallenges => {

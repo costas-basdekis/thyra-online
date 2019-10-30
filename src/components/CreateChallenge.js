@@ -398,7 +398,6 @@ class ChallengeForm extends Component {
       const position = params.get('position');
       if (position) {
         this.setValue(null, {name: 'startingPosition.position', value: position});
-        this.setState({editingPosition: true});
       }
     }
   }

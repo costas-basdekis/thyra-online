@@ -176,11 +176,11 @@ class UserCard extends Component {
                 title={`Won ${otherUser.tournamentWinCount}/${otherUser.tournamentCount} tournaments entered`}
               />
               ) : null}
-            {Object.values(otherUser.challenges || {}).length ? (
+            {otherUser.challengesStats && otherUser.challengesStats.attempted ? (
               <Label
                 icon={'puzzle'}
-                content={`${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won && !userChallenge.meta.mistakes).length}/${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won).length}/${Object.values(otherUser.challenges).length}`}
-                title={`${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won && !userChallenge.meta.mistakes).length} perfect puzzles, out of ${Object.values(otherUser.challenges).filter(userChallenge => userChallenge.meta.won).length} solved, out of ${Object.values(otherUser.challenges).length} attempted`}
+                content={`${otherUser.challengesStats.perfectStars}⭐ (${otherUser.challengesStats.perfect}/${otherUser.challengesStats.imperfect}/${otherUser.challengesStats.attempted})`}
+                title={`${otherUser.challengesStats.perfectStars} total perfect stars (${otherUser.challengesStats.perfect} perfect puzzles, out of ${otherUser.challengesStats.imperfect} solved, out of ${otherUser.challengesStats.attempted} attempted)`}
               />
             ) : null}
           </Card.Meta>

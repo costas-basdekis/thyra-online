@@ -82,6 +82,13 @@ export class ChallengeCard extends Component {
                 content={challenge.meta.publishDatetime.fromNow()}
               />
             )}
+            {challenge.usersStats && challenge.usersStats.attempted ? (
+              <Label
+                icon={'user'}
+                content={`${challenge.usersStats.averagePerfectScore !== null ? challenge.usersStats.averagePerfectScore : 'No perfect solve'} (${challenge.usersStats.perfect}/${challenge.usersStats.imperfect}/${challenge.usersStats.attempted})`}
+                title={`${challenge.usersStats.averagePerfectScore !== null ? `${challenge.usersStats.averagePerfectScore} average user score` : 'No perfect solve'} (${challenge.usersStats.perfect} perfect solves, out of ${challenge.usersStats.imperfect} solves, out of ${challenge.usersStats.attempted} attempts)`}
+              />
+            ) : null}
             <Board
               game={Game.Classic.fromCompressedPositionNotation(challenge.startingPosition.position)}
               medium

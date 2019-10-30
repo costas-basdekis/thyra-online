@@ -247,7 +247,13 @@ class App extends Component {
           path: 'puzzle',
           navigate: liveChallenge ? `puzzle/${liveChallenge.id}` : 'puzzle',
           render: () => (
-            <Tab.Pane><Challenges challenge={liveChallenge} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
+            <Tab.Pane>
+              <Challenges
+                challenge={liveChallenge}
+                selectLiveGame={this.selectLiveGame}
+                selectLiveChallenge={this.selectLiveChallenge}
+              />
+            </Tab.Pane>
           )},
           {menuItem: {icon: 'book', content: 'Learn To Play'}, path: 'learn-to-play', render: () => (
             <Tab.Pane><LearnToPlay /></Tab.Pane>

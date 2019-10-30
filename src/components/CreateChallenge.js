@@ -271,13 +271,13 @@ class CreateChallenge extends Component {
   };
 
   render() {
-    const {user, client} = this.props;
+    const {user, client, gamesInfo: {byId: gamesById}} = this.props;
     const {editing, challenge, game, tree, currentStep} = this.state;
     const settings = client.applicableSettings;
 
     if (editing && (!challenge || challenge.isMyChallenge)) {
       return (
-        <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} />
+        <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} gamesById={gamesById} />
       )
     }
 
@@ -354,6 +354,7 @@ class CreateChallenge extends Component {
 
 CreateChallenge.propTypes = {
   initialChallenge: PropTypes.object,
+  gamesInfo: PropTypes.object.isRequired,
 };
 
 class ChallengeForm extends Component {
@@ -375,6 +376,8 @@ class ChallengeForm extends Component {
       },
       meta: {
         source: '',
+        gameId: null,
+        game: null,
         difficulty: 1,
         maxDifficulty: 3,
         public: true,
@@ -388,17 +391,28 @@ class ChallengeForm extends Component {
     },
     error: {
       position: null,
+      gameId: null,
     },
     editingPosition: false,
   };
 
   componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
     if (!this.props.initialChallenge) {
-      const params = new URLSearchParams(window.location.search);
       const position = params.get('position');
       if (position) {
         this.setValue(null, {name: 'startingPosition.position', value: position});
       }
+    }
+    const gameId = params.get('gameId');
+    if (gameId) {
+      this.setValue(null, {name: 'meta.gameId', value: gameId});
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.gamesById !== this.props.gamesById) {
+      this.onValueSet('meta.gameId');
     }
   }
 
@@ -476,6 +490,20 @@ class ChallengeForm extends Component {
           default:
             return null;
         }
+      });
+    } else if (name === 'meta.gameId') {
+      this.setState(state => {
+        const game = this.props.gamesById[state.challenge.meta.gameId];
+        return _.merge({}, {challenge: state.challenge}, {
+          error: {
+            gameId: !game && state.challenge.meta.gameId ? 'There is no game with such an ID' : null,
+          },
+          challenge: {
+            meta: {
+              game: game ? Game.Classic.deserialize(game.game) : null,
+            },
+          },
+        });
       });
     }
   };
@@ -623,6 +651,24 @@ class ChallengeForm extends Component {
             </Form.Group>
             <Form.Group>
               <Form.Field
+                name={'meta.gameId'}
+                control={Input}
+                label={'From game'}
+                placeholder={'Game ID'}
+                onChange={this.setValue}
+                value={challenge.meta.gameId || ''}
+                error={error.gameId}
+              />
+            </Form.Group>
+            {challenge.meta.game ? (
+              <Board
+                medium
+                settings={settings}
+                game={challenge.meta.game}
+              />
+            ) : null}
+            <Form.Group>
+              <Form.Field
                 control={Checkbox}
                 label={'Public'}
                 name={'meta.public'}
@@ -651,6 +697,7 @@ ChallengeForm.propTypes = {
   onCreateChallenge: PropTypes.func.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
+  gamesById: PropTypes.object.isRequired,
 };
 
 ChallengeForm = withClient(ChallengeForm);

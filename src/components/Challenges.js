@@ -11,6 +11,7 @@ import {Link, NavLink, Route, Switch, withRouter} from "react-router-dom";
 import CreateChallenge from "./CreateChallenge";
 import EditChallenge from "./EditChallenge";
 import * as utils from "../utils";
+import {GameCard} from "./GameList";
 
 class Challenges extends Component {
   render() {
@@ -48,7 +49,10 @@ class Challenges extends Component {
           </Route>
         ) : null}
         <Route exact path={`${this.props.match.path}/:id`}>
-          <ChallengePlayer selectLiveChallenge={this.props.selectLiveChallenge} />
+          <ChallengePlayer
+            selectLiveGame={this.props.selectLiveGame}
+            selectLiveChallenge={this.props.selectLiveChallenge}
+          />
         </Route>
       </Switch>
     );
@@ -59,6 +63,7 @@ Challenges.propTypes = {
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
   liveChallenge: PropTypes.object,
+  selectLiveGame: PropTypes.func.isRequired,
   selectLiveChallenge: PropTypes.func.isRequired,
 };
 
@@ -288,7 +293,11 @@ class ChallengePlayer extends Component {
       return null;
     }
 
-    const {user, location} = this.props;
+    const {
+      client, user,
+      usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo: {byId: tournamentsById},
+      location, selectLiveGame,
+    } = this.props;
     const message = (
       wrongMove ? (
         <Message error icon={'warning'} content={"That's not the right answer"} />
@@ -316,7 +325,22 @@ class ChallengePlayer extends Component {
             <Segment>
               <Header as={'h1'}>{utils.getChallengeTitle(challenge)}</Header>
               <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
-              <Header as={'h4'}>{challenge.meta.source}</Header>
+              {challenge.meta.source ? <Header as={'h4'}>{challenge.meta.source}</Header> : null}
+              {challenge.meta.gameId ? (
+                <Header as={'h4'}>
+                  From
+                  <GameCard
+                    user={null}
+                    usersById={usersById}
+                    tournamentsById={tournamentsById}
+                    game={gamesById[challenge.meta.gameId]}
+                    selectLiveGame={selectLiveGame}
+                    terse
+                    live
+                    applicableSettings={client.applicableSettings}
+                  />
+                </Header>
+              ) : null}
             </Segment>
           </Grid.Row>
           <Grid.Row>
@@ -342,7 +366,11 @@ class ChallengePlayer extends Component {
 ChallengePlayer.propTypes = {
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
-  selectLiveChallenge: PropTypes.func.isRequired
+  usersInfo: PropTypes.object.isRequired,
+  gamesInfo: PropTypes.object.isRequired,
+  tournamentsInfo: PropTypes.object.isRequired,
+  selectLiveGame: PropTypes.func.isRequired,
+  selectLiveChallenge: PropTypes.func.isRequired,
 };
 
 ChallengePlayer = withRouter(withClient(ChallengePlayer));

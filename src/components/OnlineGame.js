@@ -246,7 +246,7 @@ class ChosenOnlineGame extends Component {
                 to: `/hotseat?position=${(selectedGame || gameGame).compressedFullNotation}`, color: 'green', active: true,
                 title: 'Click to open hotseat with this game', target: '_blank'},
               (user && user.admin) ? {key: 'edit', content: 'Create Puzzle', icon: 'edit', as: NavLink,
-                to: `/puzzle/create?position=${(selectedGame || gameGame).positionNotation}`, color: 'green', active: true,
+                to: `/puzzle/create?position=${(selectedGame || gameGame).positionNotation}&gameId=${game.id}`, color: 'green', active: true,
                 title: 'Click to create a puzzle from this position', target: '_blank'} : null,
               (user && user.admin) ? {key: 'copy-play', icon: 'clipboard', content: 'Copy play position', color: 'green', active: true,
                 title: 'Click to copy play position to position', onClick: this.copyPlayPosition} : null,

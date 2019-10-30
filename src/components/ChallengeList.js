@@ -25,10 +25,13 @@ export class ChallengeCard extends Component {
   }
 
   render() {
-    const {user, applicableSettings, usersById, challenge, currentChallengeId} = this.props;
+    const {user, applicableSettings, usersById, gamesById, challenge, currentChallengeId} = this.props;
     const userChallenge = this.userChallenge;
 
     const creator = usersById[challenge.userId];
+    const game = gamesById[challenge.meta.gameId];
+    const playerA = game ? usersById[game.userIds[0]] : null;
+    const playerB = game ? usersById[game.userIds[1]] : null;
     return (
       <Card
         as={NavLink}
@@ -89,6 +92,13 @@ export class ChallengeCard extends Component {
                 title={`${challenge.usersStats.averagePerfectScore !== null ? `${challenge.usersStats.averagePerfectScore} average user score` : 'No perfect solve'} (${challenge.usersStats.perfect} perfect solves, out of ${challenge.usersStats.imperfect} solves, out of ${challenge.usersStats.attempted} attempts)`}
               />
             ) : null}
+            {game ? (
+              <Label
+                icon={'play'}
+                content={`${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
+                title={`From game between ${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
+              />
+            ) : null}
             <Board
               game={Game.Classic.fromCompressedPositionNotation(challenge.startingPosition.position)}
               medium
@@ -104,6 +114,7 @@ export class ChallengeCard extends Component {
 ChallengeCard.propTypes = {
   user: PropTypes.object,
   usersById: PropTypes.object.isRequired,
+  gamesById: PropTypes.object.isRequired,
   challenge: PropTypes.object.isRequired,
   selectChallenge: PropTypes.func.isRequired,
   currentChallengeId: PropTypes.string,
@@ -120,7 +131,10 @@ class ChallengeList extends Component {
   };
 
   render() {
-    const {client, user, usersInfo: {byId: usersById}, challenges, selectChallenge, currentChallengeId, pageSize} = this.props;
+    const {
+      client, user, usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById},
+      challenges, selectChallenge, currentChallengeId, pageSize,
+    } = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -142,6 +156,7 @@ class ChallengeList extends Component {
               key={challenge.id}
               user={user}
               usersById={usersById}
+              gamesById={gamesById}
               challenge={challenge}
               selectChallenge={selectChallenge}
               currentChallengeId={currentChallengeId}

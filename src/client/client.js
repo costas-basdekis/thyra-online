@@ -354,7 +354,7 @@ class Client {
     for (const challenge of challenges) {
       challenge.meta.publishDatetime = moment(challenge.meta.publishDatetime);
     }
-    challenges = _.sortBy(challenges, ['startDatetime', 'endDatetime', 'createdDatetime', 'id'], ['desc', 'desc', 'desc', 'desc']);
+    challenges = _.sortBy(challenges, ['publishDatetime', 'createdDatetime', 'id'], ['desc', 'desc']);
     this.challengesInfo = this.prepareChallenges(challenges);
     this.onChallenges.map(callback => callback(this.challengesInfo));
   };

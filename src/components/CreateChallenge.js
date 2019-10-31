@@ -9,6 +9,7 @@ import Play from "./Play";
 import EditPosition from "./EditPosition";
 import moment from "moment";
 import * as utils from "../utils";
+import {withRouter} from "react-router-dom";
 
 class CreateChallenge extends Component {
   state = {
@@ -261,13 +262,17 @@ class CreateChallenge extends Component {
   };
 
   discardChallenge = () => {
-    this.setState({
-      editing: true,
-      challenge: null,
-      currentStep: null,
-      tree: null,
-      game: null,
-    });
+    if (this.state.challenge.id) {
+      this.props.history.push(`/puzzle/${this.state.challenge.id}`);
+    } else {
+      this.setState({
+        editing: true,
+        challenge: null,
+        currentStep: null,
+        tree: null,
+        game: null,
+      });
+    }
   };
 
   render() {
@@ -355,6 +360,7 @@ class CreateChallenge extends Component {
 CreateChallenge.propTypes = {
   initialChallenge: PropTypes.object,
   gamesInfo: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
 };
 
 class ChallengeForm extends Component {
@@ -702,4 +708,4 @@ ChallengeForm.propTypes = {
 
 ChallengeForm = withClient(ChallengeForm);
 
-export default withClient(CreateChallenge);
+export default withRouter(withClient(CreateChallenge));

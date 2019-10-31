@@ -299,6 +299,7 @@ class ChallengePlayer extends Component {
       usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo: {byId: tournamentsById},
       location, selectLiveGame,
     } = this.props;
+    const userIsCreator = !challenge.id || (!!user && challenge.userId === user.id);
     const message = (
       wrongMove ? (
         <Message error icon={'warning'} content={"That's not the right answer"} />
@@ -329,17 +330,21 @@ class ChallengePlayer extends Component {
               {challenge.meta.source ? <Header as={'h4'}>{challenge.meta.source}</Header> : null}
               {challenge.meta.gameId ? (
                 <Header as={'h4'}>
-                  From
-                  <GameCard
-                    user={null}
-                    usersById={usersById}
-                    tournamentsById={tournamentsById}
-                    game={gamesById[challenge.meta.gameId]}
-                    selectLiveGame={selectLiveGame}
-                    terse
-                    live
-                    applicableSettings={client.applicableSettings}
-                  />
+                  {won || userIsCreator ? (
+                    <Fragment>
+                      From{" "}
+                      <GameCard
+                        user={null}
+                        usersById={usersById}
+                        tournamentsById={tournamentsById}
+                        game={gamesById[challenge.meta.gameId]}
+                        selectLiveGame={selectLiveGame}
+                        terse
+                        live
+                        applicableSettings={client.applicableSettings}
+                      />
+                    </Fragment>
+                  ) : "Solve puzzle to see source game"}
                 </Header>
               ) : null}
             </Segment>

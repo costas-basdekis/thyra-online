@@ -29,6 +29,7 @@ export class ChallengeCard extends Component {
     const userChallenge = this.userChallenge;
 
     const creator = usersById[challenge.userId];
+    const userIsCreator = !!user && challenge.userId === user.id;
     const game = gamesById[challenge.meta.gameId];
     const playerA = game ? usersById[game.userIds[0]] : null;
     const playerB = game ? usersById[game.userIds[1]] : null;
@@ -103,11 +104,15 @@ export class ChallengeCard extends Component {
               />
             ) : null}
             {game ? (
-              <Label
-                icon={'play'}
-                content={`${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
-                title={`From game between ${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
-              />
+              userSolvedChallenge || userIsCreator ? (
+                <Label
+                  icon={'play'}
+                  content={`${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
+                  title={`From game between ${playerA ? playerA.name : 'Unknown'} vs ${playerB ? playerB.name : 'Unknown'}`}
+                />
+              ) : (
+                <Label icon={'play'} content={'Solve to see game'} />
+              )
             ) : null}
             <Board
               game={Game.Classic.fromCompressedPositionNotation(challenge.startingPosition.position)}

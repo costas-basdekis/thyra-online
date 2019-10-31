@@ -26,6 +26,31 @@ class CreateChallenge extends Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.challengesInfo.mine !== this.props.challengesInfo.mine) {
+      if (this.state.challenge && !this.state.challenge.id) {
+        const prevChallenges = this.getMatchingChallenges(prevProps.challengesInfo.mine);
+        const challenges = this.getMatchingChallenges(this.props.challengesInfo.mine);
+        if (prevChallenges.length === 0 && challenges.length === 1) {
+          const [challenge] = challenges;
+          this.props.history.push(`/puzzle/${challenge.id}/edit`);
+        }
+      }
+    }
+  }
+
+  getMatchingChallenges(challenges) {
+    const {challenge: newChallenge} = this.state;
+    return challenges.filter(challenge => (
+      challenge.isMyChallenge
+      && challenge.startingPosition.position === newChallenge.startingPosition.position
+      && challenge.options.type === newChallenge.options.type
+      && challenge.meta.source === newChallenge.meta.source
+      && challenge.meta.gameId === newChallenge.meta.gameId
+      && challenge.meta.public === newChallenge.meta.public
+    ));
+  }
+
   fillGames(challengeStep) {
     challengeStep = {...challengeStep};
     if (!challengeStep.game && challengeStep.position) {
@@ -360,6 +385,7 @@ class CreateChallenge extends Component {
 CreateChallenge.propTypes = {
   initialChallenge: PropTypes.object,
   gamesInfo: PropTypes.object.isRequired,
+  challengesInfo: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
 };
 

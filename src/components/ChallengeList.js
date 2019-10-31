@@ -32,6 +32,9 @@ export class ChallengeCard extends Component {
     const game = gamesById[challenge.meta.gameId];
     const playerA = game ? usersById[game.userIds[0]] : null;
     const playerB = game ? usersById[game.userIds[1]] : null;
+    const userInProgress = !!userChallenge && userChallenge.meta.started && !userChallenge.meta.won;
+    const userSolvedChallenge = !!userChallenge && userChallenge.meta.won;
+    const userMadeMistakes = !!userChallenge && !!userChallenge.meta.mistakes;
     return (
       <Card
         as={NavLink}
@@ -55,14 +58,21 @@ export class ChallengeCard extends Component {
               title={{1: 'Easy', 2: 'Medium', 3: 'Hard'}[challenge.meta.difficulty]}
             />
             <Label icon={'user'} content={`By ${creator.name}`} />
-            {userChallenge && userChallenge.meta.started && !userChallenge.meta.won ? (
-              <Label icon={{name: 'play', color: 'green'}} content={'Started'} />
-            ) : null}
-            {userChallenge && userChallenge.meta.won ? (
-              <Label icon={{name: 'trophy', color: 'green'}} content={'Solved'} />
-            ) : null}
-            {userChallenge && userChallenge.meta.mistakes ? (
-              <Label icon={{name: 'exclamation', color: 'red'}} content={`${userChallenge.meta.mistakes} mistakes`} />
+            {userInProgress ? (
+              <Label
+                  icon={{name: 'play', color: userMadeMistakes ? 'orange' : 'green'}}
+                  content={userMadeMistakes ? `Started (${userChallenge.meta.mistakes} mistakes)` : 'Started'}
+              />
+            ) : userSolvedChallenge ? (
+              <Label
+                  icon={{name: 'trophy', color: userMadeMistakes ? 'orange' : 'green'}}
+                  content={userMadeMistakes ?`Solved with ${userChallenge.meta.mistakes} mistakes` : 'Perfect'}
+              />
+            ) : userMadeMistakes ? (
+              <Label
+                  icon={{name: 'exclamation', color: 'orange'}}
+                  content={`${userChallenge.meta.mistakes} mistakes`}
+              />
             ) : null}
             {user && challenge.isMyChallenge ? (
               <Label

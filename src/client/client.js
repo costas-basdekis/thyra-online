@@ -369,12 +369,15 @@ class Client {
 
   prepareChallenges(challenges) {
     const otherChallenges = this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges;
+    const myChallenges = this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [];
     return {
       challenges,
       public: challenges.filter(challenge => challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()),
       private: challenges.filter(challenge => !challenge.meta.public || challenge.meta.publishDatetime.isAfter()),
       byId: _.fromPairs(challenges.map(game => [game.id, game])),
-      mine: this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [],
+      mine: myChallenges,
+      myPublic: myChallenges.filter(challenge => challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()),
+      myPrivate: myChallenges.filter(challenge => !challenge.meta.public || challenge.meta.publishDatetime.isAfter()),
       other: otherChallenges,
       otherSolved: this.user ? otherChallenges.filter(challenge => this.user.challenges[challenge.id] && this.user.challenges[challenge.id].meta.won) : [],
       otherUnsolved: this.user ? otherChallenges.filter(challenge => !this.user.challenges[challenge.id] || !this.user.challenges[challenge.id].meta.won) : otherChallenges,

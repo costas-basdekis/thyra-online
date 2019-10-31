@@ -31,7 +31,7 @@ class App extends Component {
     if (liveGame) {
       gameUrl = `/game/${liveGame.id}`;
     } else {
-      gameUrl = '/lobby';
+      gameUrl = '/game';
     }
     if (gameUrl !== this.props.location.pathname) {
       this.props.history.push(gameUrl);
@@ -47,7 +47,7 @@ class App extends Component {
     if (liveTournament) {
       tournamentUrl = `/tournament/${liveTournament.id}`;
     } else {
-      tournamentUrl = `/lobby`;
+      tournamentUrl = `/tournament`;
     }
     if (tournamentUrl !== this.props.location.pathname) {
       this.props.history.push(tournamentUrl);
@@ -63,7 +63,7 @@ class App extends Component {
     if (liveChallenge) {
       challengeUrl = `/puzzle/${liveChallenge.id}`;
     } else {
-      challengeUrl = `/lobby`;
+      challengeUrl = `/puzzle`;
     }
     if (challengeUrl !== this.props.location.pathname) {
       this.props.history.push(challengeUrl);

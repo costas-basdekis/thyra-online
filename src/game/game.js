@@ -300,22 +300,6 @@ class Game {
       throw new Error("You need to pass rowsAndColumns, status, and previous game");
     }
     this.previous = previous;
-    this.history = (this.previous ? this.previous.history : [])
-      .filter(game => !game.canUndo)
-      .concat([this]);
-    this.previousInHistory = this.history[this.history.length - 2];
-    this.fullHistory = (this.previous ? this.previous.fullHistory : []).concat(this);
-    this.isNextMove = isNextMove;
-    this.moveCount = this.previous ? (isNextMove ? this.previous.moveCount + 1 : this.previous.moveCount) : 1;
-    this.chainCount = this.previous ? this.previous.chainCount + 1 : 0;
-    this.lastMove = lastMove ? lastMove : (status.resignedPlayer ? {resign: status.resignedPlayer} : lastMove);
-    this.moves = this.previous ? this.previous.moves.concat([this.lastMove]) : [];
-    this.lastMovesInHistory = this.fullHistory
-      .slice(this.fullHistory.indexOf(this.previousInHistory) + 1)
-      .map(game => game.lastMove);
-    this.path = this.previousInHistory
-      ? this.previousInHistory.path.concat([this.lastMovesInHistory])
-      : [];
 
     this.rowsAndColumns = rowsAndColumns;
 
@@ -325,27 +309,14 @@ class Game {
     if (missingStatusKeys.length) {
       throw new Error(`Some status keys were missing: ${missingStatusKeys.join(', ')}`);
     }
-    const {nextPlayer, moveType, availableMovesMatrix, canUndo, resignedPlayer} = status;
-    this.thisPlayer = previous ? previous.nextPlayer : Game.PLAYER_A;
-    this.nextPlayer = nextPlayer;
-    this.thisMoveType = previous ? previous.moveType : null;
-    this.moveType = moveType;
-    this.availableMovesMatrix = availableMovesMatrix;
-    this.canUndo = canUndo;
-    this.canTakeMoveBack = !!this.previous;
-    this.resignedPlayer = resignedPlayer;
-    this.moveNotation = resignedPlayer
-      ? this.constructor.MOVE_RESIGNED_NOTATION[resignedPlayer]
-      : (lastMove
-        ? this.constructor.MOVE_NOTATION[lastMove.y][lastMove.x]
-        : '');
-    this.fullNotation = `${this.previous ? this.previous.fullNotation : ''}${this.moveNotation}`;
-    this.compressedFullNotation = this.fullNotation
-      .split(/(..)/)
-      .filter(part => part)
-      .map(part => this.constructor.MOVE_NOTATION_COMPRESSION[part])
-      .join('');
-    this.positionNotation = this.constructor.getPositionNotation(this.rowsAndColumns);
+    this.status = status;
+    this.moveType = this.status.moveType;
+    this.availableMovesMatrix = this.status.availableMovesMatrix;
+    this.resignedPlayer = this.status.resignedPlayer;
+    this.nextPlayer = this.status.nextPlayer;
+    this.canUndo = this.status.canUndo;
+    this.lastMove = lastMove ? lastMove : (this.resignedPlayer ? {resign: this.resignedPlayer} : lastMove);
+    this.isNextMove = isNextMove;
 
     this.winner = this.getWinner();
     if (this.winner) {
@@ -360,6 +331,86 @@ class Game {
     if (this.finished) {
       this.availableMovesMatrix = this.constructor.noMovesAreAvailable();
     }
+  }
+
+  _getProperty(name, func) {
+    if (!this.hasOwnProperty(name)) {
+      // if (this._getPropertyDependencyCycle.includes(name)) {
+      //   throw new Error(`Dependency cycle detected for properties: ${this._getPropertyDependencyCycle.concat([name]).join(', ')}`);
+      // }
+      // this._getPropertyDependencyCycle.push(name);
+      this[name] = func();
+      // if (this._getPropertyDependencyCycle[this._getPropertyDependencyCycle.length - 1] !== name) {
+      //   throw new Error(`Expected the last property set being '${name}', but it was ${this._getPropertyDependencyCycle.join(', ')}`);
+      // }
+      // this._getPropertyDependencyCycle.pop();
+    }
+
+    return this[name];
+
+  }
+  // _getPropertyDependencyCycle = [];
+
+  get history() {
+    return this._getProperty('_history', () => (this.previous ? this.previous.history : [])
+      .filter(game => !game.canUndo)
+      .concat([this]));
+  }
+
+  get previousInHistory() {
+    return this._getProperty('_previousInHistory', () => this.history[this.history.length - 2]);
+  }
+
+  get fullHistory() {
+    return this._getProperty('_fullHistory', ()=> (this.previous ? this.previous.fullHistory : []).concat(this))
+  };
+  get moveCount() {
+    return this._getProperty('_moveCount', ()=> this.previous ? (this.isNextMove ? this.previous.moveCount + 1 : this.previous.moveCount) : 1)
+  };
+  get chainCount() {
+    return this._getProperty('_chainCount', ()=> this.previous ? this.previous.chainCount + 1 : 0)
+  };
+  get moves() {
+    return this._getProperty('_moves', ()=> this.previous ? this.previous.moves.concat([this.lastMove]) : [])
+  };
+  get lastMovesInHistory() {
+    return this._getProperty('_lastMovesInHistory', ()=> this.fullHistory
+      .slice(this.fullHistory.indexOf(this.previousInHistory) + 1)
+      .map(game => game.lastMove))
+  };
+  get path() {
+    return this._getProperty('_path', ()=> this.previousInHistory
+      ? this.previousInHistory.path.concat([this.lastMovesInHistory])
+      : [])
+  };
+
+  get thisPlayer() {
+    return this._getProperty('_thisPlayer', () => this.previous ? this.previous.nextPlayer : Game.PLAYER_A);
+  }
+  get thisMoveType() {
+    return this._getProperty('_thisMoveType', () => this.previous ? this.previous.moveType : null);
+  }
+  get canTakeMoveBack() {
+    return this._getProperty('_canTakeMoveBack', () => !!this.previous);
+  }
+  get moveNotation() {return this._getProperty('_moveNotation', () => this.resignedPlayer
+    ? this.constructor.MOVE_RESIGNED_NOTATION[this.resignedPlayer]
+    : (this.lastMove
+      ? this.constructor.MOVE_NOTATION[this.lastMove.y][this.lastMove.x]
+      : ''));
+  }
+  get fullNotation() {
+    return this._getProperty('_fullNotation', () => `${this.previous ? this.previous.fullNotation : ''}${this.moveNotation}`);
+  }
+  get compressedFullNotation() {
+    return this._getProperty('_compressedFullNotation', () => this.fullNotation
+      .split(/(..)/)
+      .filter(part => part)
+      .map(part => this.constructor.MOVE_NOTATION_COMPRESSION[part])
+      .join(''));
+  }
+  get positionNotation() {
+    return this._getProperty('_positionNotation', () => this.constructor.getPositionNotation(this.rowsAndColumns));
   }
 
   static getAvailableMoves(availableMovesMatrix) {

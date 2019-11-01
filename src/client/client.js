@@ -359,12 +359,14 @@ class Client {
     this.onChallenges.map(callback => callback(this.challengesInfo));
   };
 
-  gotNonPersonalChallenges = personalChallenges => {
-    this.gotChallenges(personalChallenges.concat(this.challengesInfo.mine));
+  gotNonPersonalChallenges = nonPersonalChallenges => {
+    const nonPersonalChallengesIds = nonPersonalChallenges.map(challenge => challenge.id);
+    this.gotChallenges(nonPersonalChallenges.concat(this.challengesInfo.mine.filter(challenge => !nonPersonalChallengesIds.includes(challenge.id))));
   };
 
   gotPersonalChallenges = personalChallenges => {
-    this.gotChallenges(personalChallenges.concat(this.challengesInfo.other));
+    const personalChallengesIds = personalChallenges.map(challenge => challenge.id);
+    this.gotChallenges(personalChallenges.concat(this.challengesInfo.other.filter(challenge => !personalChallengesIds.includes(challenge.id))));
   };
 
   prepareChallenges(challenges) {

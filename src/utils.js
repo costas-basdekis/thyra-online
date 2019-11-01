@@ -58,13 +58,13 @@ export const getApplicableSettingsAndNextUpdateDate = (settings, on) => {
   return {applicableSettings: settings, nextUpdatedDate, override, name};
 };
 
-export const getChallengeTitle = challenge => {
-  switch (challenge.options.type) {
+export const getPuzzleTitle = puzzle => {
+  switch (puzzle.options.type) {
     case 'mate':
-      return `Find mate in ${challenge.options.typeOptions.mateIn}`;
+      return `Find mate in ${puzzle.options.typeOptions.mateIn}`;
     case 'avoidMate':
-      return `Avoid mate in ${challenge.options.typeOptions.mateIn}`;
+      return `Avoid mate in ${puzzle.options.typeOptions.mateIn}`;
     default:
-      return 'Unknown challenge';
+      return 'Unknown puzzle';
   }
 };

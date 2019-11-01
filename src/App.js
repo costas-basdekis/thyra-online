@@ -16,14 +16,14 @@ import SvgBoardBackground from "./components/Board/SvgBoardBackground";
 import OnlineTournament from "./components/OnlineTournament";
 import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
-import Challenges from "./components/Challenges";
+import Puzzles from "./components/Puzzles";
 import * as utils from "./utils";
 
 class App extends Component {
   state = {
     liveGame: null,
     liveTournament: null,
-    liveChallenge: null,
+    livePuzzle: null,
   };
 
   selectLiveGame = liveGame => {
@@ -58,20 +58,20 @@ class App extends Component {
     this.setState({liveTournament});
   };
 
-  selectLiveChallenge = liveChallenge => {
-    let challengeUrl;
-    if (liveChallenge) {
-      challengeUrl = `/puzzle/${liveChallenge.id}`;
+  selectLivePuzzle = livePuzzle => {
+    let puzzleUrl;
+    if (livePuzzle) {
+      puzzleUrl = `/puzzle/${livePuzzle.id}`;
     } else {
-      challengeUrl = `/puzzle`;
+      puzzleUrl = `/puzzle`;
     }
-    if (challengeUrl !== this.props.location.pathname) {
-      this.props.history.push(challengeUrl);
+    if (puzzleUrl !== this.props.location.pathname) {
+      this.props.history.push(puzzleUrl);
     }
-    if (this.state.liveChallenge === liveChallenge) {
+    if (this.state.livePuzzle === livePuzzle) {
       return;
     }
-    this.setState({liveChallenge});
+    this.setState({livePuzzle});
   };
 
   toggleParticipation = tournament => {
@@ -175,7 +175,7 @@ class App extends Component {
   }
 
   render() {
-    const {liveGame, liveTournament, liveChallenge} = this.state;
+    const {liveGame, liveTournament, livePuzzle} = this.state;
     const {connected, disconnected, available, user, usersInfo: {byId: usersById}} = this.props;
     const playerA = liveGame ? usersById[liveGame.userIds[0]] : null;
     const playerB = liveGame ? usersById[liveGame.userIds[1]] : null;
@@ -223,7 +223,7 @@ class App extends Component {
         ) : null}
         <NavigationalTab menu={{pointing: true, attached: false, stackable: true}} panes={[
           client.available ? {menuItem: {icon: 'users', content: 'Lobby'}, path: 'lobby', render: () => (
-            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} selectLiveChallenge={this.selectLiveChallenge} /></Tab.Pane>
+            <Tab.Pane><Lobby selectLiveGame={this.selectLiveGame} selectLiveTournament={this.selectLiveTournament} selectLivePuzzle={this.selectLivePuzzle} /></Tab.Pane>
           )} : null,
           client.available ? {menuItem: {icon: 'play', content: onlineGameLabel}, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
             <Tab.Pane><OnlineGame game={liveGame} selectLiveGame={this.selectLiveGame} /></Tab.Pane>
@@ -243,15 +243,15 @@ class App extends Component {
           {menuItem: {icon: 'retweet', content: 'Hotseat'}, path: 'hotseat', render: () => (
             <Tab.Pane><Hotseat /></Tab.Pane>
           )},
-          {menuItem: {icon: 'puzzle', content: liveChallenge ? utils.getChallengeTitle(liveChallenge) : 'Puzzles'},
+          {menuItem: {icon: 'puzzle', content: livePuzzle ? utils.getPuzzleTitle(livePuzzle) : 'Puzzles'},
           path: 'puzzle',
-          navigate: liveChallenge ? `puzzle/${liveChallenge.id}` : 'puzzle',
+          navigate: livePuzzle ? `puzzle/${livePuzzle.id}` : 'puzzle',
           render: () => (
             <Tab.Pane>
-              <Challenges
-                challenge={liveChallenge}
+              <Puzzles
+                puzzle={livePuzzle}
                 selectLiveGame={this.selectLiveGame}
-                selectLiveChallenge={this.selectLiveChallenge}
+                selectLivePuzzle={this.selectLivePuzzle}
               />
             </Tab.Pane>
           )},

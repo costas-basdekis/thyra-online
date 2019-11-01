@@ -8,7 +8,7 @@ import HashedIcon from "./HashedIcon";
 import GameList from "./GameList";
 import CreateTournament from "./CreateTournament";
 import TournamentList from "./TournamentList";
-import ChallengeList, {ChallengeCard} from "./ChallengeList";
+import PuzzleList, {PuzzleCard} from "./PuzzleList";
 
 class UserList extends Component {
   render() {
@@ -176,11 +176,11 @@ class UserCard extends Component {
                 title={`Won ${otherUser.tournamentWinCount}/${otherUser.tournamentCount} tournaments entered`}
               />
               ) : null}
-            {otherUser.challengesStats && otherUser.challengesStats.attempted ? (
+            {otherUser.puzzlesStats && otherUser.puzzlesStats.attempted ? (
               <Label
                 icon={'puzzle'}
-                content={`${otherUser.challengesStats.perfectStars}⭐ (${otherUser.challengesStats.perfect}/${otherUser.challengesStats.imperfect}/${otherUser.challengesStats.attempted})`}
-                title={`${otherUser.challengesStats.perfectStars} total perfect stars (${otherUser.challengesStats.perfect} perfect puzzles, out of ${otherUser.challengesStats.imperfect} solved, out of ${otherUser.challengesStats.attempted} attempted)`}
+                content={`${otherUser.puzzlesStats.perfectStars}⭐ (${otherUser.puzzlesStats.perfect}/${otherUser.puzzlesStats.imperfect}/${otherUser.puzzlesStats.attempted})`}
+                title={`${otherUser.puzzlesStats.perfectStars} total perfect stars (${otherUser.puzzlesStats.perfect} perfect puzzles, out of ${otherUser.puzzlesStats.imperfect} solved, out of ${otherUser.puzzlesStats.attempted} attempted)`}
               />
             ) : null}
           </Card.Meta>
@@ -355,7 +355,7 @@ class Lobby extends Component {
       client, user,
       usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe},
       gamesInfo: {byId: gamesById, myLive, otherLive, myFinished, otherFinished}, selectLiveGame, selectLiveTournament,
-      challengesInfo: {otherUnsolved, challenges, otherStarted, otherNotStarted, otherSolved},
+      puzzlesInfo: {otherUnsolved, puzzles, otherStarted, otherNotStarted, otherSolved},
       tournamentsInfo,
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
@@ -378,13 +378,13 @@ class Lobby extends Component {
             />
           ) : null}
           {otherUnsolved.length ? (
-            <ChallengeCard
+            <PuzzleCard
               user={user}
               usersById={usersById}
               gamesById={gamesById}
-              challenge={otherUnsolved[0]}
-              selectChallenge={this.props.selectLiveChallenge}
-              currentChallengeId={null}
+              puzzle={otherUnsolved[0]}
+              selectPuzzle={this.props.selectLivePuzzle}
+              currentPuzzleId={null}
               applicableSettings={client.applicableSettings}
             />
           ) : null}
@@ -408,22 +408,22 @@ class Lobby extends Component {
             )}
           ))} />
         </Segment>
-        {challenges ? (<Segment>
+        {puzzles ? (<Segment>
           <Tab menu={{pointing: true}} panes={(() => {
-            let challengesList = [
+            let puzzlesList = [
               {key: 'other-started', label: "Started Puzzles", items: otherStarted, color: 'green'},
               {key: 'other-not-started', label: "New Puzzles", items: otherNotStarted},
               {key: 'other-solved', label: "Solved Puzzles", items: otherSolved},
             ].filter(({items}) => items.length);
-            if (!challengesList.length) {
-              challengesList = [
-                {key: 'puzzles', label: "Puzzles", items: challenges},
+            if (!puzzlesList.length) {
+              puzzlesList = [
+                {key: 'puzzles', label: "Puzzles", items: puzzles},
               ];
             }
-            return challengesList;
+            return puzzlesList;
           })().map(({key, label, items, color}) => (
               {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (
-                  <ChallengeList selectChallenge={this.props.selectLiveChallenge} challenges={items} />
+                  <PuzzleList selectPuzzle={this.props.selectLivePuzzle} puzzles={items} />
                 )}
             ))
           } />
@@ -476,10 +476,10 @@ Lobby.propTypes = {
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
   tournamentsInfo: PropTypes.object.isRequired,
-  challengesInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   selectLiveTournament: PropTypes.func.isRequired,
-  selectLiveChallenge: PropTypes.func.isRequired,
+  selectLivePuzzle: PropTypes.func.isRequired,
 };
 
 export default withClient(Lobby);

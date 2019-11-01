@@ -58,7 +58,7 @@ class Client {
     this.onUsers = [];
     this.onGames = [];
     this.onTournaments = [];
-    this.onChallenges = [];
+    this.onPuzzles = [];
 
     this.bindSocket();
   }
@@ -108,9 +108,9 @@ class Client {
     this.tournamentsInfo = this.prepareTournaments([]);
     this.socket.on("tournaments", this.gotTournaments);
 
-    this.challengesInfo = this.prepareChallenges([]);
-    this.socket.on("challenges", this.gotNonPersonalChallenges);
-    this.socket.on("personal-challenges", this.gotPersonalChallenges);
+    this.puzzlesInfo = this.preparePuzzles([]);
+    this.socket.on("puzzles", this.gotNonPersonalPuzzles);
+    this.socket.on("personal-puzzles", this.gotPersonalPuzzles);
 
     this.getUser();
   }
@@ -134,7 +134,7 @@ class Client {
   };
 
   subscribe(callbacks) {
-    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onTournaments', 'onChallenges']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onTournaments', 'onPuzzles']) {
       const callback = callbacks[name];
       if (callback) {
         this[name].push(callback);
@@ -143,7 +143,7 @@ class Client {
   }
 
   unsubscribe(callbacks) {
-    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onChallenges']) {
+    for (const name of ['onConnect', 'onDisconnect', 'onUser', 'onUsers', 'onGames', 'onPuzzles']) {
       const callback = callbacks[name];
       if (callback) {
         _.pull(this[name], callback);
@@ -199,7 +199,7 @@ class Client {
     this.user = user;
     this.onUser.map(callback => callback(user));
     this.gotUsers(this.usersInfo.users);
-    this.gotChallenges(this.challengesInfo.challenges);
+    this.gotPuzzles(this.puzzlesInfo.puzzles);
   };
 
   changeUsername(name) {
@@ -338,53 +338,53 @@ class Client {
     };
   }
 
-  createChallenge(challenge) {
-    this.socket.emit('create-challenge', challenge);
+  createPuzzle(puzzle) {
+    this.socket.emit('create-puzzle', puzzle);
   }
 
-  updateChallenge(challenge) {
-    this.socket.emit('update-challenge', challenge);
+  updatePuzzle(puzzle) {
+    this.socket.emit('update-puzzle', puzzle);
   }
 
-  submitChallengeMove(challenge, path) {
-    this.socket.emit("submit-challenge-moves", {id: challenge.id, path});
+  submitPuzzleMove(puzzle, path) {
+    this.socket.emit("submit-puzzle-moves", {id: puzzle.id, path});
   }
 
-  gotChallenges = challenges => {
-    for (const challenge of challenges) {
-      challenge.meta.publishDatetime = moment(challenge.meta.publishDatetime);
+  gotPuzzles = puzzles => {
+    for (const puzzle of puzzles) {
+      puzzle.meta.publishDatetime = moment(puzzle.meta.publishDatetime);
     }
-    challenges = _.sortBy(challenges, ['publishDatetime', 'createdDatetime', 'id'], ['desc', 'desc']);
-    this.challengesInfo = this.prepareChallenges(challenges);
-    this.onChallenges.map(callback => callback(this.challengesInfo));
+    puzzles = _.sortBy(puzzles, ['publishDatetime', 'createdDatetime', 'id'], ['desc', 'desc']);
+    this.puzzlesInfo = this.preparePuzzles(puzzles);
+    this.onPuzzles.map(callback => callback(this.puzzlesInfo));
   };
 
-  gotNonPersonalChallenges = nonPersonalChallenges => {
-    const nonPersonalChallengesIds = nonPersonalChallenges.map(challenge => challenge.id);
-    this.gotChallenges(nonPersonalChallenges.concat(this.challengesInfo.mine.filter(challenge => !nonPersonalChallengesIds.includes(challenge.id))));
+  gotNonPersonalPuzzles = nonPersonalPuzzles => {
+    const nonPersonalPuzzlesIds = nonPersonalPuzzles.map(puzzle => puzzle.id);
+    this.gotPuzzles(nonPersonalPuzzles.concat(this.puzzlesInfo.mine.filter(puzzle => !nonPersonalPuzzlesIds.includes(puzzle.id))));
   };
 
-  gotPersonalChallenges = personalChallenges => {
-    const personalChallengesIds = personalChallenges.map(challenge => challenge.id);
-    this.gotChallenges(personalChallenges.concat(this.challengesInfo.other.filter(challenge => !personalChallengesIds.includes(challenge.id))));
+  gotPersonalPuzzles = personalPuzzles => {
+    const personalPuzzlesIds = personalPuzzles.map(puzzle => puzzle.id);
+    this.gotPuzzles(personalPuzzles.concat(this.puzzlesInfo.other.filter(puzzle => !personalPuzzlesIds.includes(puzzle.id))));
   };
 
-  prepareChallenges(challenges) {
-    const otherChallenges = this.user ? challenges.filter(challenge => challenge.userId !== this.user.id) : challenges;
-    const myChallenges = this.user ? challenges.filter(challenge => challenge.userId === this.user.id) : [];
+  preparePuzzles(puzzles) {
+    const otherPuzzles = this.user ? puzzles.filter(puzzle => puzzle.userId !== this.user.id) : puzzles;
+    const myPuzzles = this.user ? puzzles.filter(puzzle => puzzle.userId === this.user.id) : [];
     return {
-      challenges,
-      public: challenges.filter(challenge => challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()),
-      private: challenges.filter(challenge => !challenge.meta.public || challenge.meta.publishDatetime.isAfter()),
-      byId: _.fromPairs(challenges.map(game => [game.id, game])),
-      mine: myChallenges,
-      myPublic: myChallenges.filter(challenge => challenge.meta.public && challenge.meta.publishDatetime.isSameOrBefore()),
-      myPrivate: myChallenges.filter(challenge => !challenge.meta.public || challenge.meta.publishDatetime.isAfter()),
-      other: otherChallenges,
-      otherSolved: this.user ? otherChallenges.filter(challenge => this.user.challenges[challenge.id] && this.user.challenges[challenge.id].meta.won) : [],
-      otherUnsolved: this.user ? otherChallenges.filter(challenge => !this.user.challenges[challenge.id] || !this.user.challenges[challenge.id].meta.won) : otherChallenges,
-      otherStarted: this.user ? otherChallenges.filter(challenge => this.user.challenges[challenge.id] && this.user.challenges[challenge.id].meta.started && !this.user.challenges[challenge.id].meta.won) : [],
-      otherNotStarted: this.user ? otherChallenges.filter(challenge => !this.user.challenges[challenge.id] || !this.user.challenges[challenge.id].meta.started) : otherChallenges,
+      puzzles,
+      public: puzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore()),
+      private: puzzles.filter(puzzle => !puzzle.meta.public || puzzle.meta.publishDatetime.isAfter()),
+      byId: _.fromPairs(puzzles.map(game => [game.id, game])),
+      mine: myPuzzles,
+      myPublic: myPuzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore()),
+      myPrivate: myPuzzles.filter(puzzle => !puzzle.meta.public || puzzle.meta.publishDatetime.isAfter()),
+      other: otherPuzzles,
+      otherSolved: this.user ? otherPuzzles.filter(puzzle => this.user.puzzles[puzzle.id] && this.user.puzzles[puzzle.id].meta.won) : [],
+      otherUnsolved: this.user ? otherPuzzles.filter(puzzle => !this.user.puzzles[puzzle.id] || !this.user.puzzles[puzzle.id].meta.won) : otherPuzzles,
+      otherStarted: this.user ? otherPuzzles.filter(puzzle => this.user.puzzles[puzzle.id] && this.user.puzzles[puzzle.id].meta.started && !this.user.puzzles[puzzle.id].meta.won) : [],
+      otherNotStarted: this.user ? otherPuzzles.filter(puzzle => !this.user.puzzles[puzzle.id] || !this.user.puzzles[puzzle.id].meta.started) : otherPuzzles,
     };
   }
 }

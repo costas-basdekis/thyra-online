@@ -11,77 +11,77 @@ import moment from "moment";
 import * as utils from "../utils";
 import {withRouter} from "react-router-dom";
 
-class CreateChallenge extends Component {
+class CreatePuzzle extends Component {
   state = {
     editing: true,
-    challenge: null,
+    puzzle: null,
     currentStep: null,
     tree: null,
     game: null,
   };
 
   componentDidMount() {
-    if (this.props.initialChallenge) {
-      this.onCreateChallenge(this.fillGames(this.props.initialChallenge));
+    if (this.props.initialPuzzle) {
+      this.onCreatePuzzle(this.fillGames(this.props.initialPuzzle));
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.challengesInfo.mine !== this.props.challengesInfo.mine) {
-      if (this.state.challenge && !this.state.challenge.id) {
-        const prevChallenges = this.getMatchingChallenges(prevProps.challengesInfo.mine);
-        const challenges = this.getMatchingChallenges(this.props.challengesInfo.mine);
-        if (prevChallenges.length === 0 && challenges.length === 1) {
-          const [challenge] = challenges;
-          this.props.history.push(`/puzzle/${challenge.id}/edit`);
+    if (prevProps.puzzlesInfo.mine !== this.props.puzzlesInfo.mine) {
+      if (this.state.puzzle && !this.state.puzzle.id) {
+        const prevPuzzles = this.getMatchingPuzzles(prevProps.puzzlesInfo.mine);
+        const puzzles = this.getMatchingPuzzles(this.props.puzzlesInfo.mine);
+        if (prevPuzzles.length === 0 && puzzles.length === 1) {
+          const [puzzle] = puzzles;
+          this.props.history.push(`/puzzle/${puzzle.id}/edit`);
         }
       }
     }
   }
 
-  getMatchingChallenges(challenges) {
-    const {challenge: newChallenge} = this.state;
-    return challenges.filter(challenge => (
-      challenge.isMyChallenge
-      && challenge.startingPosition.position === newChallenge.startingPosition.position
-      && challenge.options.type === newChallenge.options.type
-      && challenge.meta.source === newChallenge.meta.source
-      && challenge.meta.gameId === newChallenge.meta.gameId
-      && challenge.meta.public === newChallenge.meta.public
+  getMatchingPuzzles(puzzles) {
+    const {puzzle: newPuzzle} = this.state;
+    return puzzles.filter(puzzle => (
+      puzzle.isMyPuzzle
+      && puzzle.startingPosition.position === newPuzzle.startingPosition.position
+      && puzzle.options.type === newPuzzle.options.type
+      && puzzle.meta.source === newPuzzle.meta.source
+      && puzzle.meta.gameId === newPuzzle.meta.gameId
+      && puzzle.meta.public === newPuzzle.meta.public
     ));
   }
 
-  fillGames(challengeStep, previousGame = null) {
-    challengeStep = {...challengeStep};
-    if (!challengeStep.game && challengeStep.position) {
-      if (previousGame && challengeStep.moves) {
-        challengeStep.game = previousGame.makeMoves(challengeStep.moves);
+  fillGames(puzzleStep, previousGame = null) {
+    puzzleStep = {...puzzleStep};
+    if (!puzzleStep.game && puzzleStep.position) {
+      if (previousGame && puzzleStep.moves) {
+        puzzleStep.game = previousGame.makeMoves(puzzleStep.moves);
       } else {
-        challengeStep.game = Game.Classic.fromCompressedPositionNotation(challengeStep.position);
+        puzzleStep.game = Game.Classic.fromCompressedPositionNotation(puzzleStep.position);
       }
     }
-    if (challengeStep.startingPosition) {
-      challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition, challengeStep.game);
-    } else if (challengeStep.playerResponses) {
-      challengeStep.playerResponses = challengeStep.playerResponses.map(nextStep => this.fillGames(nextStep, challengeStep.game));
-    } else if ('challengeResponse' in challengeStep) {
-      if (challengeStep.challengeResponse) {
-        challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse, challengeStep.game);
+    if (puzzleStep.startingPosition) {
+      puzzleStep.startingPosition = this.fillGames(puzzleStep.startingPosition, puzzleStep.game);
+    } else if (puzzleStep.playerResponses) {
+      puzzleStep.playerResponses = puzzleStep.playerResponses.map(nextStep => this.fillGames(nextStep, puzzleStep.game));
+    } else if ('puzzleResponse' in puzzleStep) {
+      if (puzzleStep.puzzleResponse) {
+        puzzleStep.puzzleResponse = this.fillGames(puzzleStep.puzzleResponse, puzzleStep.game);
       }
     } else {
       throw new Error('Cannot find type of step');
     }
 
-    return challengeStep;
+    return puzzleStep;
   }
 
-  onCreateChallenge = challenge => {
+  onCreatePuzzle = puzzle => {
     this.setState({
       editing: false,
-      challenge,
-      currentStep: challenge.startingPosition,
-      tree: this.getTree(challenge.startingPosition),
-      game: challenge.startingPosition.game,
+      puzzle,
+      currentStep: puzzle.startingPosition,
+      tree: this.getTree(puzzle.startingPosition),
+      game: puzzle.startingPosition.game,
     });
   };
 
@@ -105,8 +105,8 @@ class CreateChallenge extends Component {
       return currentStep.playerResponses
         .find(response => response.position === newGame.positionNotation);
     } else {
-      if (currentStep.challengeResponse && currentStep.challengeResponse.position === newGame.positionNotation) {
-        return currentStep.challengeResponse;
+      if (currentStep.puzzleResponse && currentStep.puzzleResponse.position === newGame.positionNotation) {
+        return currentStep.puzzleResponse;
       }
     }
 
@@ -119,25 +119,25 @@ class CreateChallenge extends Component {
     treePath = treePath.slice(0, treePath.findIndex(treePathStep => treePathStep === currentStep) + 1);
     const pathIndexes = treePath.map((treePathStep, index) =>
       index === 0
-        ? ['challenge', 'startingPosition']
+        ? ['puzzle', 'startingPosition']
         : (
           treePath[index - 1].playerResponses
             ? ['playerResponses', treePath[index - 1].playerResponses.indexOf(treePathStep)]
-            : ['challengeResponse']
+            : ['puzzleResponse']
         )
     );
 
     return pathIndexes;
   }
 
-  duplicateChallenge(pathIndexes) {
-    const {challenge} = this.state;
+  duplicatePuzzle(pathIndexes) {
+    const {puzzle} = this.state;
 
-    const newChallenge = {
-      ...challenge,
-      startingPosition: {...challenge.startingPosition},
+    const newPuzzle = {
+      ...puzzle,
+      startingPosition: {...puzzle.startingPosition},
     };
-    let newModifyingStep = newChallenge.startingPosition;
+    let newModifyingStep = newPuzzle.startingPosition;
     for (const index of _.flatten(pathIndexes.slice(1))) {
       const oldStep = newModifyingStep[index];
       const newStep = Array.isArray(oldStep) ? oldStep.slice() : {...oldStep};
@@ -145,7 +145,7 @@ class CreateChallenge extends Component {
       newModifyingStep = newStep;
     }
 
-    return {newChallenge, newModifyingStep};
+    return {newPuzzle, newModifyingStep};
   }
 
   addGameToStep(newModifyingStep, newGame) {
@@ -157,7 +157,7 @@ class CreateChallenge extends Component {
         position: newGame.positionNotation,
         moves: newGame.lastMovesInHistory,
         game: newGame,
-        challengeResponse: null,
+        puzzleResponse: null,
       };
       newModifyingStep.push(newStep);
     } else {
@@ -167,7 +167,7 @@ class CreateChallenge extends Component {
         game: newGame,
         playerResponses: [],
       };
-      newModifyingStep.challengeResponse = newStep;
+      newModifyingStep.puzzleResponse = newStep;
     }
 
     return newStep;
@@ -177,7 +177,7 @@ class CreateChallenge extends Component {
     if (newModifyingStep.playerResponses) {
       newModifyingStep.playerResponses = newModifyingStep.playerResponses.filter(response => response !== step);
     } else {
-      newModifyingStep.challengeResponse = null;
+      newModifyingStep.puzzleResponse = null;
     }
 
     return newModifyingStep;
@@ -197,17 +197,17 @@ class CreateChallenge extends Component {
     }
 
     const pathIndexes = this.getPathIndexes();
-    let {newChallenge, newModifyingStep} = this.duplicateChallenge(pathIndexes);
+    let {newPuzzle, newModifyingStep} = this.duplicatePuzzle(pathIndexes);
     let newStep = this.addGameToStep(newModifyingStep, newGame);
     this.setState({
-      challenge: newChallenge,
+      puzzle: newPuzzle,
       currentStep: newStep,
-      tree: this.getTree(newChallenge.startingPosition),
+      tree: this.getTree(newPuzzle.startingPosition),
       game: newStep.game,
     });
   };
 
-  getTree(startingPosition = this.state.challenge.startingPosition) {
+  getTree(startingPosition = this.state.puzzle.startingPosition) {
     let tree = [[startingPosition]];
     while (tree !== (tree = this.getNextTree(tree))) {}
 
@@ -235,8 +235,8 @@ class CreateChallenge extends Component {
         return [treePath];
       }
     } else {
-      if (lastTreeStep.challengeResponse) {
-        return [treePath.concat(lastTreeStep.challengeResponse)];
+      if (lastTreeStep.puzzleResponse) {
+        return [treePath.concat(lastTreeStep.puzzleResponse)];
       } else {
         return [treePath];
       }
@@ -246,57 +246,57 @@ class CreateChallenge extends Component {
   deleteCurrentStep = () => {
     const {currentStep} = this.state;
     const pathIndexes = this.getPathIndexes().slice(0, -1);
-    let {newChallenge, newModifyingStep} = this.duplicateChallenge(pathIndexes);
+    let {newPuzzle, newModifyingStep} = this.duplicatePuzzle(pathIndexes);
     let newStep = this.removeStep(newModifyingStep, currentStep);
     this.setState({
-      challenge: newChallenge,
+      puzzle: newPuzzle,
       currentStep: newStep,
-      tree: this.getTree(newChallenge.startingPosition),
+      tree: this.getTree(newPuzzle.startingPosition),
       game: newStep.game,
     });
   };
 
-  editChallenge = () => {
+  editPuzzle = () => {
     this.setState({editing: true});
   };
 
-  createChallenge = () => {
-    const cleanedChallenge = JSON.parse(JSON.stringify(this.state.challenge, (key, value) => {
+  createPuzzle = () => {
+    const cleanedPuzzle = JSON.parse(JSON.stringify(this.state.puzzle, (key, value) => {
       if (value instanceof Game) {
         return undefined;
       } else {
         return value;
       }
     }));
-    this.props.client.createChallenge(cleanedChallenge);
+    this.props.client.createPuzzle(cleanedPuzzle);
   };
 
-  updateChallenge = () => {
-    const cleanedChallenge = JSON.parse(JSON.stringify(this.state.challenge, (key, value) => {
+  updatePuzzle = () => {
+    const cleanedPuzzle = JSON.parse(JSON.stringify(this.state.puzzle, (key, value) => {
       if (value instanceof Game) {
         return undefined;
       } else {
         return value;
       }
     }));
-    this.props.client.updateChallenge(cleanedChallenge);
+    this.props.client.updatePuzzle(cleanedPuzzle);
   };
 
-  createOrUpdateChallenge = () => {
-    if (this.state.challenge.id) {
-      this.updateChallenge();
+  createOrUpdatePuzzle = () => {
+    if (this.state.puzzle.id) {
+      this.updatePuzzle();
     } else {
-      this.createChallenge();
+      this.createPuzzle();
     }
   };
 
-  discardChallenge = () => {
-    if (this.state.challenge.id) {
-      this.props.history.push(`/puzzle/${this.state.challenge.id}`);
+  discardPuzzle = () => {
+    if (this.state.puzzle.id) {
+      this.props.history.push(`/puzzle/${this.state.puzzle.id}`);
     } else {
       this.setState({
         editing: true,
-        challenge: null,
+        puzzle: null,
         currentStep: null,
         tree: null,
         game: null,
@@ -306,16 +306,16 @@ class CreateChallenge extends Component {
 
   render() {
     const {user, client, gamesInfo: {byId: gamesById}} = this.props;
-    const {editing, challenge, game, tree, currentStep} = this.state;
+    const {editing, puzzle, game, tree, currentStep} = this.state;
     const settings = client.applicableSettings;
 
-    if (editing && (!challenge || challenge.isMyChallenge)) {
+    if (editing && (!puzzle || puzzle.isMyPuzzle)) {
       return (
-        <ChallengeForm initialChallenge={challenge} onCreateChallenge={this.onCreateChallenge} gamesById={gamesById} />
+        <PuzzleForm initialPuzzle={puzzle} onCreatePuzzle={this.onCreatePuzzle} gamesById={gamesById} />
       )
     }
 
-    if (!challenge) {
+    if (!puzzle) {
       return null;
     }
 
@@ -324,15 +324,15 @@ class CreateChallenge extends Component {
         <Grid centered>
           <Grid.Row>
             <Segment>
-              <Header as={'h1'}>{utils.getChallengeTitle(challenge)}</Header>
-              <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(challenge.meta.difficulty, challenge.meta.maxDifficulty)}</Header>
-              <Header as={'h4'}>{challenge.meta.source}</Header>
+              <Header as={'h1'}>{utils.getPuzzleTitle(puzzle)}</Header>
+              <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(puzzle.meta.difficulty, puzzle.meta.maxDifficulty)}</Header>
+              <Header as={'h4'}>{puzzle.meta.source}</Header>
             </Segment>
           </Grid.Row>
           <Grid.Row>
-            <Button secondary onClick={this.editChallenge}>Edit</Button>
-            <Button positive onClick={this.createOrUpdateChallenge}>{challenge.id ? 'Update' : 'Create'}</Button>
-            <Button negative onClick={this.discardChallenge}>Discard</Button>
+            <Button secondary onClick={this.editPuzzle}>Edit</Button>
+            <Button positive onClick={this.createOrUpdatePuzzle}>{puzzle.id ? 'Update' : 'Create'}</Button>
+            <Button negative onClick={this.discardPuzzle}>Discard</Button>
           </Grid.Row>
         </Grid>
         <Segment>
@@ -371,12 +371,12 @@ class CreateChallenge extends Component {
             changeSettings={this.changeSettings}
             game={game}
             allowControl={[currentStep.game.nextPlayer]}
-            names={{[challenge.options.initialPlayer]: 'Player', [Game.OTHER_PLAYER[challenge.options.initialPlayer]]: 'Puzzle'}}
+            names={{[puzzle.options.initialPlayer]: 'Player', [Game.OTHER_PLAYER[puzzle.options.initialPlayer]]: 'Puzzle'}}
             submit={this.submit}
             onDisplayPositionChange={this.onDisplayPositionChange}
             makeMove={this.makeMove}
           >
-            <Button negative disabled={currentStep === challenge} onClick={this.deleteCurrentStep}>
+            <Button negative disabled={currentStep === puzzle} onClick={this.deleteCurrentStep}>
               <Icon name={'delete'}/>Delete response
             </Button>
           </Play>
@@ -386,14 +386,14 @@ class CreateChallenge extends Component {
   }
 }
 
-CreateChallenge.propTypes = {
-  initialChallenge: PropTypes.object,
+CreatePuzzle.propTypes = {
+  initialPuzzle: PropTypes.object,
   gamesInfo: PropTypes.object.isRequired,
-  challengesInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
 };
 
-class ChallengeForm extends Component {
+class PuzzleForm extends Component {
   static valueConversion = {
     'options.typeOptions.mateIn': parseInt,
     'meta.difficulty': parseInt,
@@ -401,8 +401,8 @@ class ChallengeForm extends Component {
   };
 
   state = {
-    challenge: this.props.initialChallenge || {
-      isMyChallenge: true,
+    puzzle: this.props.initialPuzzle || {
+      isMyPuzzle: true,
       options: {
         initialPlayer: Game.PLAYER_A,
         type: 'mate',
@@ -434,7 +434,7 @@ class ChallengeForm extends Component {
 
   componentDidMount() {
     const params = new URLSearchParams(window.location.search);
-    if (!this.props.initialChallenge) {
+    if (!this.props.initialPuzzle) {
       const position = params.get('position');
       if (position) {
         this.setValue(null, {name: 'startingPosition.position', value: position});
@@ -461,16 +461,16 @@ class ChallengeForm extends Component {
       convertedValue = this.constructor.valueConversion[name](convertedValue);
     }
     this.setState(state => {
-      const challenge = {
-        ...state.challenge,
+      const puzzle = {
+        ...state.puzzle,
       };
-      let newChallengeToChange = challenge;
+      let newPuzzleToChange = puzzle;
       const parts = name.split('.');
       for (const part of parts.slice(0, parts.length - 1)) {
-        newChallengeToChange = newChallengeToChange[part] || {};
+        newPuzzleToChange = newPuzzleToChange[part] || {};
       }
-      newChallengeToChange[parts[parts.length - 1]] = convertedValue;
-      return {challenge};
+      newPuzzleToChange[parts[parts.length - 1]] = convertedValue;
+      return {puzzle};
     });
     this.onValueSet(name, convertedValue);
   };
@@ -478,7 +478,7 @@ class ChallengeForm extends Component {
   onValueSet = name => {
     if (name === 'startingPosition.position') {
       this.setState(state => {
-        const position = state.challenge.startingPosition.position;
+        const position = state.puzzle.startingPosition.position;
         const isPositionValid = position
           ? Game.Classic.isValidCompressedPositionNotation(position) : false;
         const game = isPositionValid ? Game.Classic.fromCompressedPositionNotation(position) : null;
@@ -487,14 +487,14 @@ class ChallengeForm extends Component {
             ...state.error,
             position: !position || isPositionValid ? null : 'This is not a valid position',
           },
-          challenge: {
-            ...state.challenge,
+          puzzle: {
+            ...state.puzzle,
             options: {
-              ...state.challenge.options,
+              ...state.puzzle.options,
               initialPlayer: game ? game.nextPlayer : null,
             },
             startingPosition: {
-              ...state.challenge.startingPosition,
+              ...state.puzzle.startingPosition,
               game,
             }
           },
@@ -502,10 +502,10 @@ class ChallengeForm extends Component {
       });
     } else if (name === 'options.type') {
       this.setState(state => {
-        switch (state.challenge.options.type) {
+        switch (state.puzzle.options.type) {
           case 'mate':
-            return _.merge({}, {challenge: state.challenge}, {
-              challenge: {
+            return _.merge({}, {puzzle: state.puzzle}, {
+              puzzle: {
                 options: {
                   typeOptions: {
                     mateIn: 1,
@@ -514,8 +514,8 @@ class ChallengeForm extends Component {
               },
             });
           case 'avoidMate':
-            return _.merge({}, {challenge: state.challenge}, {
-              challenge: {
+            return _.merge({}, {puzzle: state.puzzle}, {
+              puzzle: {
                 options: {
                   typeOptions: {
                     mateIn: 1,
@@ -529,12 +529,12 @@ class ChallengeForm extends Component {
       });
     } else if (name === 'meta.gameId') {
       this.setState(state => {
-        const game = this.props.gamesById[state.challenge.meta.gameId];
-        return _.merge({}, {challenge: state.challenge}, {
+        const game = this.props.gamesById[state.puzzle.meta.gameId];
+        return _.merge({}, {puzzle: state.puzzle}, {
           error: {
-            gameId: !game && state.challenge.meta.gameId ? 'There is no game with such an ID' : null,
+            gameId: !game && state.puzzle.meta.gameId ? 'There is no game with such an ID' : null,
           },
-          challenge: {
+          puzzle: {
             meta: {
               game: game ? Game.Classic.deserialize(game.game) : null,
             },
@@ -544,12 +544,12 @@ class ChallengeForm extends Component {
     }
   };
 
-  createChallenge = () => {
-    const {challenge, error} = this.state;
+  createPuzzle = () => {
+    const {puzzle, error} = this.state;
     if (error.position) {
       return;
     }
-    this.props.onCreateChallenge(challenge);
+    this.props.onCreatePuzzle(puzzle);
   };
 
   usePosition = positionNotation => {
@@ -564,24 +564,24 @@ class ChallengeForm extends Component {
   };
 
   render() {
-    const {client, initialChallenge} = this.props;
-    const {editingPosition, challenge, error} = this.state;
+    const {client, initialPuzzle} = this.props;
+    const {editingPosition, puzzle, error} = this.state;
     const settings = client.applicableSettings;
 
     if (editingPosition) {
       return (
         <EditPosition
           usePosition={this.usePosition}
-          initialPositionNotation={challenge.startingPosition.position}
+          initialPositionNotation={puzzle.startingPosition.position}
         />
       );
     }
 
     return (
       <Fragment>
-        <Header>Create a challenge</Header>
+        <Header>Create a puzzle</Header>
         <Segment>
-          <Form onSubmit={this.createChallenge}>
+          <Form onSubmit={this.createPuzzle}>
             <Form.Group>
               <Form.Field
                 name={'startingPosition.position'}
@@ -589,7 +589,7 @@ class ChallengeForm extends Component {
                 label={'Initial position'}
                 placeholder={'Game position'}
                 onChange={this.setValue}
-                value={challenge.startingPosition.position}
+                value={puzzle.startingPosition.position}
                 required
                 error={error.position}
               />
@@ -606,23 +606,23 @@ class ChallengeForm extends Component {
                 label={'Player A'}
                 onChange={this.setValue}
                 value={Game.PLAYER_A}
-                checked={challenge.options.initialPlayer === Game.PLAYER_A}
-                disabled={challenge.options.initialPlayer !== Game.PLAYER_A}
+                checked={puzzle.options.initialPlayer === Game.PLAYER_A}
+                disabled={puzzle.options.initialPlayer !== Game.PLAYER_A}
               />
               <Form.Radio
                 name={'options.initialPlayer'}
                 label={'Player B'}
                 onChange={this.setValue}
                 value={Game.PLAYER_B}
-                checked={challenge.options.initialPlayer === Game.PLAYER_B}
-                disabled={challenge.options.initialPlayer !== Game.PLAYER_B}
+                checked={puzzle.options.initialPlayer === Game.PLAYER_B}
+                disabled={puzzle.options.initialPlayer !== Game.PLAYER_B}
               />
             </Form.Group>
-            {challenge.startingPosition.game ? (
+            {puzzle.startingPosition.game ? (
               <Board
                 medium
                 settings={settings}
-                game={challenge.startingPosition.game}
+                game={puzzle.startingPosition.game}
               />
             ) : null}
             <Form.Select
@@ -634,55 +634,55 @@ class ChallengeForm extends Component {
               label={'Type'}
               onChange={this.setValue}
               required
-              value={challenge.options.type}
+              value={puzzle.options.type}
             />
-            {challenge.options.type === 'mate' ? (
+            {puzzle.options.type === 'mate' ? (
               <Form.Group>
                 <Form.Field
                   control={Input}
                   type={'range'}
-                  label={`Mate In: ${challenge.options.typeOptions.mateIn}`}
+                  label={`Mate In: ${puzzle.options.typeOptions.mateIn}`}
                   min={1}
                   max={10}
                   name={'options.typeOptions.mateIn'}
                   onChange={this.setValue}
                   required
-                  value={challenge.options.typeOptions.mateIn}
+                  value={puzzle.options.typeOptions.mateIn}
                 />
               </Form.Group>
-            ) : challenge.options.type === 'avoidMate' ? (
+            ) : puzzle.options.type === 'avoidMate' ? (
               <Form.Group>
                 <Form.Field
                   control={Input}
                   type={'range'}
-                  label={`Avoid Mate In: ${challenge.options.typeOptions.mateIn}`}
+                  label={`Avoid Mate In: ${puzzle.options.typeOptions.mateIn}`}
                   min={1}
                   max={10}
                   name={'options.typeOptions.mateIn'}
                   onChange={this.setValue}
                   required
-                  value={challenge.options.typeOptions.mateIn}
+                  value={puzzle.options.typeOptions.mateIn}
                 />
               </Form.Group>
-            ) : "Unknown challenge type"}
+            ) : "Unknown puzzle type"}
             <Form.Group>
               <Form.Field
                 control={Input}
                 label={'Source'}
                 name={'meta.source'}
                 onChange={this.setValue}
-                value={challenge.meta.source}
+                value={puzzle.meta.source}
               />
               <Form.Field
                 control={Input}
                 type={'range'}
-                label={`Difficulty: ${challenge.meta.difficulty}/${challenge.meta.maxDifficulty}`}
+                label={`Difficulty: ${puzzle.meta.difficulty}/${puzzle.meta.maxDifficulty}`}
                 min={1}
-                max={challenge.meta.maxDifficulty}
+                max={puzzle.meta.maxDifficulty}
                 name={'meta.difficulty'}
                 onChange={this.setValue}
                 required
-                value={challenge.meta.difficulty}
+                value={puzzle.meta.difficulty}
               />
             </Form.Group>
             <Form.Group>
@@ -692,15 +692,15 @@ class ChallengeForm extends Component {
                 label={'From game'}
                 placeholder={'Game ID'}
                 onChange={this.setValue}
-                value={challenge.meta.gameId || ''}
+                value={puzzle.meta.gameId || ''}
                 error={error.gameId}
               />
             </Form.Group>
-            {challenge.meta.game ? (
+            {puzzle.meta.game ? (
               <Board
                 medium
                 settings={settings}
-                game={challenge.meta.game}
+                game={puzzle.meta.game}
               />
             ) : null}
             <Form.Group>
@@ -709,7 +709,7 @@ class ChallengeForm extends Component {
                 label={'Public'}
                 name={'meta.public'}
                 onChange={this.setValue}
-                checked={challenge.meta.public}
+                checked={puzzle.meta.public}
               />
               <Form.Field
                 control={Input}
@@ -717,10 +717,10 @@ class ChallengeForm extends Component {
                 label={'Publish On'}
                 name={'meta.publishDatetime'}
                 onChange={this.setValue}
-                value={challenge.meta.publishDatetime ? challenge.meta.publishDatetime.format("YYYY-MM-DDTHH:mm") : ''}
+                value={puzzle.meta.publishDatetime ? puzzle.meta.publishDatetime.format("YYYY-MM-DDTHH:mm") : ''}
               />
             </Form.Group>
-            <Form.Button primary content={initialChallenge ? 'Update' : 'Create'} />
+            <Form.Button primary content={initialPuzzle ? 'Update' : 'Create'} />
           </Form>
         </Segment>
       </Fragment>
@@ -728,14 +728,14 @@ class ChallengeForm extends Component {
   }
 }
 
-ChallengeForm.propTypes = {
-  initialChallenge: PropTypes.object,
-  onCreateChallenge: PropTypes.func.isRequired,
+PuzzleForm.propTypes = {
+  initialPuzzle: PropTypes.object,
+  onCreatePuzzle: PropTypes.func.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
   gamesById: PropTypes.object.isRequired,
 };
 
-ChallengeForm = withClient(ChallengeForm);
+PuzzleForm = withClient(PuzzleForm);
 
-export default withRouter(withClient(CreateChallenge));
+export default withRouter(withClient(CreatePuzzle));

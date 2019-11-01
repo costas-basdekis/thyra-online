@@ -778,6 +778,124 @@ class Game {
       resignedPlayer: null,
     }, {x, y});
   }
+
+  getAvailableMoves() {
+    if (this.finished) {
+      return [];
+    }
+
+    return _.flatten(this.availableMovesMatrix
+      .map((xs, y) => xs
+        .map((available, x) => [x, y, available])
+        .filter(([, , available]) => available)
+        .map(([x,y])=>({x,y}))));
+  }
+
+  getNextGames() {
+    return this.getAvailableMoves().map(move => this.makeMove(move));
+  }
+
+  getNextFullMoveGames(nextPlayer = this.nextPlayer) {
+    if (this.nextPlayer !== nextPlayer) {
+      return [this];
+    }
+
+    return _.flatten(this.getNextGames().map(game => game.getNextFullMoveGames(nextPlayer)));
+  }
+
+  getSearchState(maxDepth, previous = null) {
+    const result = this.finished ? (this.winner === this.nextPlayer ? 'won' : 'lost') : null;
+    return {
+      game: this,
+      result: result,
+      nextGamesLeft: this.getNextFullMoveGames(),
+      results: {
+        won: result === 'won',
+        lost: result === 'lost',
+        undetermined: false,
+      },
+      ...(!previous || previous.loseLeaves ? {
+        winLeaves: result ==='won' ? [this] : [],
+      } : {
+        loseLeaves: result === 'lost' ? [this] : [],
+      }),
+      previous,
+      moves: null,
+      maxDepth,
+    };
+  }
+
+  static advanceSearchState(state) {
+    if (state.result !== null) {
+      console.log('got result', state.result, 'with', state.maxDepth, 'depth');
+      if (state.previous) {
+        if (state.result === 'won') {
+          state.previous.results.lost = true;
+          if (state.winLeaves) {
+            state.previous.loseLeaves.push(...state.winLeaves);
+          }
+        } else if (state.result === 'lost') {
+          state.previous.results.won = true;
+          // state.previous.result = 'won';
+          if (state.loseLeaves) {
+            state.previous.winLeaves.push(...state.loseLeaves);
+          }
+        } else {
+          throw new Error(`Unknown result '${state.result}'`);
+        }
+        return state.previous;
+      } else {
+        return state;
+      }
+    }
+    if (state.maxDepth <= 0) {
+      // console.log('undetermined');
+      state.results.undetermined = true;
+      if (state.previous) {
+        state.previous.results.undetermined = true;
+        return state.previous;
+      } else {
+        console.log('finished');
+        return state;
+      }
+    }
+    if (!state.nextGamesLeft.length) {
+      if (state.results.won) {
+        state.result = 'won';
+        return state;
+      } else if (state.results.undetermined) {
+        if (state.previous) {
+          state.previous.results.undetermined = true;
+          return state.previous;
+        } else {
+          console.log('finished');
+          return state;
+        }
+      } else if (state.results.lost) {
+        state.result = 'lost';
+        return state;
+      }
+      console.log(state);
+      throw new Error('Result is null, there are no next games, and there are no results');
+    }
+    const nextGame = state.nextGamesLeft.shift();
+    return nextGame.getSearchState(state.maxDepth - 1, state);
+  }
+
+  static advanceSearchStateSteps(state, steps = 20) {
+    let rootState = state;
+    while (rootState.previous) {
+      rootState = rootState.previous;
+    }
+    for (let i = 0 ; i < steps ; i++) {
+      if (rootState.result !== null ) {
+        break;
+      }
+      state = this.advanceSearchState(state);
+    }
+
+    return state;
+  }
 }
 
 class GameClassic extends Game {

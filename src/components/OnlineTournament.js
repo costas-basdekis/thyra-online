@@ -84,7 +84,7 @@ class ChosenOnlineTournament extends Component {
   render() {
     const {
       location, client, user, selectLiveGame,
-      usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo,
+      usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo, puzzlesInfo: {puzzles: allPuzzles},
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
     const {tournament} = this;
@@ -242,6 +242,7 @@ class ChosenOnlineTournament extends Component {
                                   user={null}
                                   usersById={usersById}
                                   tournamentsById={tournamentsById}
+                                  allPuzzles={allPuzzles}
                                   game={gamesById[stats.currentGameId]}
                                   selectLiveGame={selectLiveGame}
                                   terse
@@ -312,6 +313,7 @@ class ChosenOnlineTournament extends Component {
                                       user={null}
                                       usersById={usersById}
                                       tournamentsById={tournamentsById}
+                                      allPuzzles={allPuzzles}
                                       game={game}
                                       selectLiveGame={selectLiveGame}
                                       terse
@@ -394,6 +396,7 @@ ChosenOnlineTournament.propTypes = {
   user: PropTypes.object,
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   selectLiveTournament: PropTypes.func.isRequired,
   tournament: PropTypes.object,

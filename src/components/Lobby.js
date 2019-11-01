@@ -401,6 +401,7 @@ class Lobby extends Component {
                 user={user}
                 usersById={usersById}
                 tournamentsById={tournamentsById}
+                allPuzzles={puzzles}
                 games={items}
                 selectLiveGame={selectLiveGame}
                 applicableSettings={client.applicableSettings}

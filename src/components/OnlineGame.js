@@ -185,7 +185,7 @@ class ChosenOnlineGame extends Component {
     const {
       location, client, user, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
-      tournamentsInfo: {byId: tournamentsById},
+      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {puzzles: allPuzzles},
     } = this.props;
     const {selectedGame} = this.state;
     const {gameGame} = this;
@@ -222,6 +222,7 @@ class ChosenOnlineGame extends Component {
           games={myLiveGames.concat(otherLiveGames)}
           usersById={usersById}
           tournamentsById={tournamentsById}
+          allPuzzles={allPuzzles}
           terse
           live
           currentGameId={game ? game.id : null}
@@ -231,6 +232,10 @@ class ChosenOnlineGame extends Component {
       </Segment>
     );
     const tournament = game ? tournamentsById[game.tournamentId] : null;
+    const puzzles = user ? allPuzzles.filter(puzzle => (
+      puzzle.meta.gameId === game.id
+      && (puzzle.userId === user.id || (user.puzzlesStats[puzzle.id] && user.puzzlesStats[puzzle.id].meta.won))
+    )) : [];
 
     return (
       <Fragment>
@@ -273,6 +278,22 @@ class ChosenOnlineGame extends Component {
               ), as: 'span'} : null,
             ].filter(item => item)}/>
           </Grid.Row>
+          {puzzles.length ? (
+            <Grid.Row>
+              <Menu stackable size={'massive'} items={puzzles.map(puzzle => ({
+                key: puzzle.id, content: (
+                  <NavLink to={`/puzzle/${puzzle.id}`}>
+                    <Icon
+                      name={{1: 'smile outline', 2: 'meh outline', 3: 'frown outline'}[puzzle.meta.difficulty]}
+                      color={{1: 'green', 2: 'orange', 3: 'red'}[puzzle.meta.difficulty]}
+                    />
+                    {" "}
+                    {utils.getPuzzleTitle(puzzle)}
+                  </NavLink>
+                )
+              }))} />
+            </Grid.Row>
+          ) : null}
         </Grid>
         <Responsive as={Fragment} maxWidth={800}>
           {gamesNode}
@@ -308,6 +329,7 @@ ChosenOnlineGame.propTypes = {
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
   tournamentsInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   game: PropTypes.object,
 };
@@ -327,7 +349,7 @@ class OnlineGame extends Component {
     const {
       selectLiveGame, game, client, user, usersInfo: {byId},
       gamesInfo: {games, myLive, otherLive, myFinished, otherFinished},
-      tournamentsInfo: {byId: tournamentsById},
+      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {puzzles: allPuzzles},
     } = this.props;
     if (!Object.values(byId).length) {
       return null;
@@ -349,6 +371,7 @@ class OnlineGame extends Component {
                   user={user}
                   usersById={byId}
                   tournamentsById={tournamentsById}
+                  allPuzzles={allPuzzles}
                   games={items}
                   selectLiveGame={selectLiveGame}
                   applicableSettings={client.applicableSettings}
@@ -373,6 +396,7 @@ OnlineGame.propTypes = {
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
   tournamentsInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
 };
 

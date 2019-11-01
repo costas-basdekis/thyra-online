@@ -15,7 +15,7 @@ export class GameCard extends Component {
   };
 
   render() {
-    const {user, applicableSettings, usersById, tournamentsById, game, terse, live, currentGameId} = this.props;
+    const {user, applicableSettings, usersById, tournamentsById, allPuzzles, game, terse, live, currentGameId} = this.props;
 
     const tournament = tournamentsById[game.tournamentId];
 
@@ -32,6 +32,10 @@ export class GameCard extends Component {
     const isMyTurn = (isUserPlayerA && playerAToPlay) || (isUserPlayerB && playerBToPlay);
     const showPlayerA = !terse || !isMyGame || isUserPlayerB;
     const showPlayerB = !terse || !isMyGame || isUserPlayerA;
+    const puzzles = !terse && user ? allPuzzles.filter(puzzle => (
+      puzzle.meta.gameId === game.id
+      && (puzzle.userId === user.id || (user.puzzlesStats[puzzle.id] && user.puzzlesStats[puzzle.id].meta.won))
+    )) : null;
 
     return (
       <Card
@@ -84,6 +88,8 @@ export class GameCard extends Component {
               <Label content={moment(game.endDatetime || game.startDatetime).from()} icon={'calendar'} />
               {" "}
               {tournament ? <Label content={tournament.name} icon={'sitemap'} /> : null}
+              {" "}
+              {puzzles.length ? <Label content={`${puzzles.length} puzzles`} icon={'puzzle'} />  : null}
             </Card.Meta>
           ) : (
             tournament ? <Label icon={'sitemap'} /> : null
@@ -98,6 +104,7 @@ GameCard.propTypes = {
   user: PropTypes.object,
   usersById: PropTypes.object.isRequired,
   tournamentsById: PropTypes.object.isRequired,
+  allPuzzles: PropTypes.array.isRequired,
   game: PropTypes.object.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,
@@ -121,7 +128,7 @@ class GameList extends Component {
   };
 
   render() {
-    const {applicableSettings, user, usersById, tournamentsById, games, terse, live, selectLiveGame, currentGameId, pageSize, reverse} = this.props;
+    const {applicableSettings, user, usersById, tournamentsById, allPuzzles, games, terse, live, selectLiveGame, currentGameId, pageSize, reverse} = this.props;
     if (!Object.values(usersById).length) {
       return null;
     }
@@ -146,6 +153,7 @@ class GameList extends Component {
               user={user}
               usersById={usersById}
               tournamentsById={tournamentsById}
+              allPuzzles={allPuzzles}
               game={game}
               selectLiveGame={selectLiveGame}
               terse={terse}
@@ -177,6 +185,7 @@ GameList.propTypes = {
   user: PropTypes.object,
   usersById: PropTypes.object.isRequired,
   tournamentsById: PropTypes.object.isRequired,
+  allPuzzles: PropTypes.array.isRequired,
   games: PropTypes.array.isRequired,
   selectLiveGame: PropTypes.func.isRequired,
   terse: PropTypes.bool.isRequired,

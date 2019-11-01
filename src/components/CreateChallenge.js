@@ -51,18 +51,22 @@ class CreateChallenge extends Component {
     ));
   }
 
-  fillGames(challengeStep) {
+  fillGames(challengeStep, previousGame = null) {
     challengeStep = {...challengeStep};
     if (!challengeStep.game && challengeStep.position) {
-      challengeStep.game = Game.Classic.fromCompressedPositionNotation(challengeStep.position);
+      if (previousGame && challengeStep.moves) {
+        challengeStep.game = previousGame.makeMoves(challengeStep.moves);
+      } else {
+        challengeStep.game = Game.Classic.fromCompressedPositionNotation(challengeStep.position);
+      }
     }
     if (challengeStep.startingPosition) {
-      challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition);
+      challengeStep.startingPosition = this.fillGames(challengeStep.startingPosition, challengeStep.game);
     } else if (challengeStep.playerResponses) {
-      challengeStep.playerResponses = challengeStep.playerResponses.map(nextStep => this.fillGames(nextStep));
+      challengeStep.playerResponses = challengeStep.playerResponses.map(nextStep => this.fillGames(nextStep, challengeStep.game));
     } else if ('challengeResponse' in challengeStep) {
       if (challengeStep.challengeResponse) {
-        challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse);
+        challengeStep.challengeResponse = this.fillGames(challengeStep.challengeResponse, challengeStep.game);
       }
     } else {
       throw new Error('Cannot find type of step');

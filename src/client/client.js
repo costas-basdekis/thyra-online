@@ -352,9 +352,14 @@ class Client {
 
   gotPuzzles = puzzles => {
     for (const puzzle of puzzles) {
-      puzzle.meta.publishDatetime = moment(puzzle.meta.publishDatetime);
+      puzzle.meta.publishDatetime = puzzle.meta.publishDatetime ? moment(puzzle.meta.publishDatetime) : null;
+      puzzle.meta.createdDatetime = puzzle.meta.createdDatetime ? moment(puzzle.meta.createdDatetime) : null;
     }
-    puzzles = _.sortBy(puzzles, ['publishDatetime', 'createdDatetime', 'id'], ['desc', 'desc']);
+    puzzles = _.sortBy(puzzles, [
+      puzzle => puzzle.meta.publishDatetime ? puzzle.meta.publishDatetime.toISOString() : null,
+      puzzle => puzzle.meta.createdDatetime ? puzzle.meta.createdDatetime.toISOString() : null,
+      'id',
+    ], ['desc', 'desc', 'desc']);
     this.puzzlesInfo = this.preparePuzzles(puzzles);
     this.onPuzzles.map(callback => callback(this.puzzlesInfo));
   };

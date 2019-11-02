@@ -1021,6 +1021,8 @@ Game.Hex = GameHex;
 
 Game.GAME_TYPES = [Game.Classic, Game.Hex];
 
+window.Game = Game;
+
 export {
   InvalidMoveError,
 };

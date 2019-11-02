@@ -1,6 +1,5 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
-import _  from 'lodash';
 import Game from "../../game/game";
 import BoardBackground from "./BoardBackground";
 import {Menu} from "semantic-ui-react";
@@ -112,100 +111,11 @@ class BoardTransformation extends PureComponent {
     flippedHorizontally: false,
   };
 
-  // noinspection JSSuspiciousNameCombination
-  static transformationMap = {
-    '0,false': null,
-    // makeTransformRowsAndColumns({transpose:  false, flipX: false, flipY: false}),
-    '1,false': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: true}),
-    '2,false': this.makeTransformRowsAndColumns({transpose: false, flipX: true, flipY: true}),
-    '3,false': this.makeTransformRowsAndColumns({transpose: true, flipX: true, flipY: false}),
-    '0,true': this.makeTransformRowsAndColumns({transpose: false, flipX: true, flipY: false}),
-    '1,true': this.makeTransformRowsAndColumns({transpose: true, flipX: true, flipY: true}),
-    '2,true': this.makeTransformRowsAndColumns({transpose: false, flipX: false, flipY: true}),
-    '3,true': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: false}),
-  };
-
-  static makeTransformRowsAndColumns(config) {
-    const transformRowsAndColumns = rowsAndColumns => {
-      return this.transformRowsAndColumns(rowsAndColumns, config);
-    };
-    transformRowsAndColumns.coordinates = (rowsAndColumns, coordinates) => {
-      return this.reverseTransformCoordinates(rowsAndColumns, coordinates, config);
-    };
-    // We can tell if the board is flipped (horizontally or vertically)
-    const flipped = config.transpose ^ config.flipX ^ config.flipY;
-    const reverseConfig = config.transpose && !flipped ? {
-      transpose: config.transpose,
-      flipX: !config.flipX,
-      flipY: !config.flipY,
-    } : config;
-    transformRowsAndColumns.reverseCoordinates = (rowsAndColumns, coordinates) => {
-      return this.reverseTransformCoordinates(rowsAndColumns, coordinates, reverseConfig);
-    };
-
-    return transformRowsAndColumns;
-  }
-
-  static transformRowsAndColumns(rowsAndColumns, config) {
-    let {newRowCount, newColumnCount} = this.getNewRowAndColumnCount(rowsAndColumns, config);
-    const newXs = _.range(newColumnCount);
-    const newYs = _.range(newRowCount);
-
-    return newYs.map(newY => ({
-      y: newY,
-      cells: newXs.map(newX => {
-        let {oldX, oldY} = this.getOldCoordinates( {newX, newY}, {newRowCount, newColumnCount}, config);
-        return {
-        ...rowsAndColumns[oldY].cells[oldX],
-          x: newX, y: newY,
-        };
-      }),
-    }));
-  }
-
-  static reverseTransformCoordinates(rowsAndColumns, coordinates, config) {
-    let {newRowCount, newColumnCount} = this.getNewRowAndColumnCount(rowsAndColumns, config);
-    const {x: newX, y: newY} = coordinates;
-    const {oldX, oldY} = this.getOldCoordinates( {newX, newY}, {newRowCount, newColumnCount}, config);
-
-    return {x: oldX, y: oldY};
-  }
-
-  static getNewRowAndColumnCount(rowsAndColumns, config) {
-    const rowCount = rowsAndColumns.length;
-    const columnCount = Math.max(...rowsAndColumns.map(row => row.cells.length)) || 0;
-    const {transpose} = config;
-    let newRowCount, newColumnCount;
-    if (transpose) {
-      [newColumnCount, newRowCount] = [rowCount, columnCount];
-    } else {
-      [newColumnCount, newRowCount] = [columnCount, rowCount];
-    }
-    return {newRowCount, newColumnCount};
-  }
-
-  static getOldCoordinates({newX, newY}, {newColumnCount, newRowCount}, config) {
-    const {transpose, flipX, flipY} = config;
-    let oldX, oldY;
-    if (transpose) {
-      [oldX, oldY] = [newY, newX];
-    } else {
-      [oldX, oldY] = [newX, newY];
-    }
-    if (flipX) {
-      oldX = newColumnCount - 1 - oldX;
-    }
-    if (flipY) {
-      oldY = newRowCount - 1 - oldY;
-    }
-    return {oldX, oldY};
-  }
-
    updateOrientation = method => {
      this.setState(method, () => {
        if (this.props.onChange) {
          const {rotations, flippedHorizontally} = this.state;
-         const transformation = this.constructor.transformationMap[`${rotations},${flippedHorizontally}`];
+         const transformation = Game.Classic.transformationMap[`${rotations},${flippedHorizontally}`];
          this.props.onChange({rotations, flippedHorizontally, transformation});
        }
      });

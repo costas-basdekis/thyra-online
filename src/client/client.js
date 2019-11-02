@@ -377,6 +377,10 @@ class Client {
       public: puzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore()),
       private: puzzles.filter(puzzle => !puzzle.meta.public || puzzle.meta.publishDatetime.isAfter()),
       byId: _.fromPairs(puzzles.map(game => [game.id, game])),
+      byGameId: this.user ? _.groupBy(puzzles.filter(puzzle => (
+        puzzle.meta.gameId
+        && (puzzle.userId === this.user.id || (this.user.puzzlesStats[puzzle.id] && this.user.puzzlesStats[puzzle.id].meta.won))
+      )), puzzle => puzzle.meta.gameId) : {},
       mine: myPuzzles,
       myPublic: myPuzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore()),
       myPrivate: myPuzzles.filter(puzzle => !puzzle.meta.public || puzzle.meta.publishDatetime.isAfter()),

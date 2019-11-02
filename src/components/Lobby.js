@@ -355,7 +355,7 @@ class Lobby extends Component {
       client, user,
       usersInfo: {byId: usersById, users, online, offline, challengedUser, readyToPlay, readyToPlayMe},
       gamesInfo: {byId: gamesById, myLive, otherLive, myFinished, otherFinished}, selectLiveGame, selectLiveTournament,
-      puzzlesInfo: {otherUnsolved, puzzles, otherStarted, otherNotStarted, otherSolved},
+      puzzlesInfo: {otherUnsolved, puzzles, otherStarted, otherNotStarted, otherSolved, byGameId: puzzlesByGameId},
       tournamentsInfo,
     } = this.props;
     const {byId: tournamentsById} = tournamentsInfo;
@@ -401,7 +401,7 @@ class Lobby extends Component {
                 user={user}
                 usersById={usersById}
                 tournamentsById={tournamentsById}
-                allPuzzles={puzzles}
+                puzzlesByGameId={puzzlesByGameId}
                 games={items}
                 selectLiveGame={selectLiveGame}
                 applicableSettings={client.applicableSettings}

@@ -185,7 +185,7 @@ class ChosenOnlineGame extends Component {
     const {
       location, client, user, game, selectLiveGame,
       usersInfo: {challengedUser, byId: usersById}, gamesInfo: {otherLive: otherLiveGames, myLive: myLiveGames},
-      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {puzzles: allPuzzles},
+      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {byGameId: puzzlesByGameId},
     } = this.props;
     const {selectedGame} = this.state;
     const {gameGame} = this;
@@ -222,7 +222,7 @@ class ChosenOnlineGame extends Component {
           games={myLiveGames.concat(otherLiveGames)}
           usersById={usersById}
           tournamentsById={tournamentsById}
-          allPuzzles={allPuzzles}
+          puzzlesByGameId={puzzlesByGameId}
           terse
           live
           currentGameId={game ? game.id : null}
@@ -232,10 +232,7 @@ class ChosenOnlineGame extends Component {
       </Segment>
     );
     const tournament = game ? tournamentsById[game.tournamentId] : null;
-    const puzzles = user ? allPuzzles.filter(puzzle => (
-      puzzle.meta.gameId === game.id
-      && (puzzle.userId === user.id || (user.puzzlesStats[puzzle.id] && user.puzzlesStats[puzzle.id].meta.won))
-    )) : [];
+    const puzzles = game ? puzzlesByGameId[game.id] || [] : [];
 
     return (
       <Fragment>
@@ -349,7 +346,7 @@ class OnlineGame extends Component {
     const {
       selectLiveGame, game, client, user, usersInfo: {byId},
       gamesInfo: {games, myLive, otherLive, myFinished, otherFinished},
-      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {puzzles: allPuzzles},
+      tournamentsInfo: {byId: tournamentsById}, puzzlesInfo: {byGameId: puzzlesByGameId},
     } = this.props;
     if (!Object.values(byId).length) {
       return null;
@@ -371,7 +368,7 @@ class OnlineGame extends Component {
                   user={user}
                   usersById={byId}
                   tournamentsById={tournamentsById}
-                  allPuzzles={allPuzzles}
+                  puzzlesByGameId={puzzlesByGameId}
                   games={items}
                   selectLiveGame={selectLiveGame}
                   applicableSettings={client.applicableSettings}

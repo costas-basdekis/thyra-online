@@ -297,7 +297,7 @@ class PuzzlePlayer extends Component {
     const {
       client, user,
       usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo: {byId: tournamentsById},
-      puzzlesInfo: {puzzles: allPuzzles},
+      puzzlesInfo: {byGameId: puzzlesByGameId},
       location, selectLiveGame,
     } = this.props;
     const userIsCreator = !puzzle.id || (!!user && puzzle.userId === user.id);
@@ -338,7 +338,7 @@ class PuzzlePlayer extends Component {
                         user={null}
                         usersById={usersById}
                         tournamentsById={tournamentsById}
-                        allPuzzles={allPuzzles}
+                        puzzlesByGameId={puzzlesByGameId}
                         game={gamesById[puzzle.meta.gameId]}
                         selectLiveGame={selectLiveGame}
                         terse

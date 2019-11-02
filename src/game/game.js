@@ -412,6 +412,37 @@ class Game {
   get positionNotation() {
     return this._getProperty('_positionNotation', () => this.constructor.getPositionNotation(this.rowsAndColumns));
   }
+  get startingWorkersPositionGame() {
+    return this._getProperty('_startingWorkersPositionGame', () => {
+      if (this.history.length < 3) {
+        return null;
+      }
+      return this.history[2];
+    });
+  }
+  get startingWorkersPositionNormalisedPositionNotation() {
+    return this._getProperty('_startingWorkersPositionNormalisedPositionNotation', () => {
+      if (!this.startingWorkersPositionGame) {
+        return null;
+      }
+      return this.startingWorkersPositionGame.normalisedPositionNotation;
+    });
+  }
+  get normalisedPositionNotation() {
+    return this._getProperty('_normalisedPositionNotation', () => {
+      const [normalisedPositionNotation] = this.normalisedPositionNotationAndTransformationName;
+      return normalisedPositionNotation;
+    });
+  }
+  get normalisedPositionNotationAndTransformationName() {
+    return this._getProperty('_normalisedPositionNotationAndTransformationName', () => {
+      const nameByPositionNotation = _.fromPairs(Object.entries(this.constructor.transformationMap)
+        .map(([name, transformation]) => [name, transformation || this.constructor.noTransformation])
+        .map(([name, transformation]) => [Game.Classic.fromRowsAndColumns(transformation(this.rowsAndColumns)).positionNotation, name]));
+      const normalisedPositionNotation = Object.keys(nameByPositionNotation).sort()[0];
+      return [normalisedPositionNotation, nameByPositionNotation[normalisedPositionNotation]];
+    });
+  }
 
   static getAvailableMoves(availableMovesMatrix) {
     return _.flatten(availableMovesMatrix
@@ -911,7 +942,6 @@ class GameClassic extends Game {
   // noinspection JSSuspiciousNameCombination
   static transformationMap = {
     '0,false': null,
-    // makeTransformRowsAndColumns({transpose:  false, flipX: false, flipY: false}),
     '1,false': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: true}),
     '2,false': this.makeTransformRowsAndColumns({transpose: false, flipX: true, flipY: true}),
     '3,false': this.makeTransformRowsAndColumns({transpose: true, flipX: true, flipY: false}),
@@ -920,6 +950,7 @@ class GameClassic extends Game {
     '2,true': this.makeTransformRowsAndColumns({transpose: false, flipX: false, flipY: true}),
     '3,true': this.makeTransformRowsAndColumns({transpose: true, flipX: false, flipY: false}),
   };
+  static noTransformation = this.makeTransformRowsAndColumns({transpose:  false, flipX: false, flipY: false});
 
   static makeTransformRowsAndColumns(config) {
     const transformRowsAndColumns = rowsAndColumns => {

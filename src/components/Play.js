@@ -225,7 +225,7 @@ class Play extends Component {
           <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
         </Grid.Row>
         <Grid.Row>
-          <BoardTransformation onChange={this.onTransformationChange} />
+          <BoardTransformation onChange={this.onTransformationChange} gameType={game.constructor} />
         </Grid.Row>
         {children}
       </Fragment>

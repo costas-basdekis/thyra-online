@@ -111,11 +111,19 @@ class BoardTransformation extends PureComponent {
     flippedHorizontally: false,
   };
 
-   updateOrientation = method => {
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.gameType !== this.props.gameType) {
+      this.reset();
+    }
+  }
+
+  updateOrientation = method => {
      this.setState(method, () => {
        if (this.props.onChange) {
          const {rotations, flippedHorizontally} = this.state;
-         const transformation = Game.Classic.transformationMap[`${rotations},${flippedHorizontally}`];
+         const transformation = this.props.gameType.transformationMap
+           ? this.props.gameType.transformationMap[`${rotations},${flippedHorizontally}`]
+           : null;
          this.props.onChange({rotations, flippedHorizontally, transformation});
        }
      });
@@ -123,13 +131,13 @@ class BoardTransformation extends PureComponent {
 
   rotateCounterClockwise = () => {
     this.updateOrientation(state => ({
-      rotations: (state.rotations + 3) % 4,
+      rotations: (state.rotations + this.props.gameType.transformationMaxRotations - 1) % this.props.gameType.transformationMaxRotations,
     }));
   };
 
   rotateClockwise = () => {
     this.updateOrientation(state => ({
-      rotations: (state.rotations + 1) % 4,
+      rotations: (state.rotations + 1) % this.props.gameType.transformationMaxRotations,
     }));
   };
 
@@ -141,7 +149,7 @@ class BoardTransformation extends PureComponent {
 
   flipVertically = () => {
     this.updateOrientation(state => ({
-      rotations: (state.rotations + 2) % 4,
+      rotations: (state.rotations + this.props.gameType.transformationMaxRotations / 2) % this.props.gameType.transformationMaxRotations,
       flippedHorizontally: !state.flippedHorizontally,
     }));
   };
@@ -155,6 +163,11 @@ class BoardTransformation extends PureComponent {
 
   render() {
     const {rotations, flippedHorizontally} = this.state;
+    const {gameType} = this.props;
+
+    if (!gameType.transformationMap) {
+      return null;
+    }
 
     return (
       <Menu size={'massive'} items={[
@@ -170,6 +183,7 @@ class BoardTransformation extends PureComponent {
 
 BoardTransformation.propTypes = {
   onChange: PropTypes.func,
+  gameType: PropTypes.oneOf(Game.GAME_TYPES).isRequired,
 };
 
 export {

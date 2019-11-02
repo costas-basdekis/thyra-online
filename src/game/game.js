@@ -906,6 +906,8 @@ class GameClassic extends Game {
     );
   }
 
+  static transformationMaxRotations = 4;
+
   // noinspection JSSuspiciousNameCombination
   static transformationMap = {
     '0,false': null,

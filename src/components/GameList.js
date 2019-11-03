@@ -8,8 +8,17 @@ import Board from "./Board";
 import HashedIcon from "./HashedIcon";
 import classNames from "classnames";
 import {NavLink} from "react-router-dom";
+import {createSelector} from "reselect";
 
 export class GameCard extends Component {
+  gameGameSelector = createSelector([
+    props => props.game.game,
+  ], serializedGame => Game.Classic.deserialize(serializedGame));
+
+  get gameGame() {
+    return this.gameGameSelector(this.props);
+  }
+
   selectLiveGame = () => {
     this.props.selectLiveGame(this.props.game);
   };
@@ -19,7 +28,7 @@ export class GameCard extends Component {
 
     const tournament = tournamentsById[game.tournamentId];
 
-    const gameGame = Game.Classic.deserialize(game.game);
+    const gameGame = this.gameGame;
     const playerA = usersById[game.userIds[0]];
     const playerB = usersById[game.userIds[1]];
     const nextPlayerUser = gameGame.nextPlayer === Game.PLAYER_A ? playerA : playerB;

@@ -7,8 +7,17 @@ import Board from "./Board";
 import {NavLink} from "react-router-dom";
 import {withClient} from "../client/withClient";
 import * as utils from "../utils";
+import {createSelector} from "reselect";
 
 export class PuzzleCard extends Component {
+  positionGameSelector = createSelector([
+    props => props.puzzle.startingPosition.position,
+  ], position => Game.Classic.fromCompressedPositionNotation(position));
+
+  get positionGame() {
+    return this.positionGameSelector(this.props);
+  }
+
   selectPuzzle = () => {
     this.props.selectPuzzle(this.props.puzzle);
   };
@@ -26,6 +35,7 @@ export class PuzzleCard extends Component {
 
   render() {
     const {user, applicableSettings, usersById, gamesById, puzzle, currentPuzzleId} = this.props;
+    const positionGame = this.positionGame;
     const userPuzzle = this.userPuzzle;
 
     const creator = usersById[puzzle.userId];
@@ -115,7 +125,7 @@ export class PuzzleCard extends Component {
               )
             ) : null}
             <Board
-              game={Game.Classic.fromCompressedPositionNotation(puzzle.startingPosition.position)}
+              game={positionGame}
               medium
               settings={applicableSettings}
             />

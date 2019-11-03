@@ -436,13 +436,24 @@ class Game {
   }
   get normalisedPositionNotationAndTransformationName() {
     return this._getProperty('_normalisedPositionNotationAndTransformationName', () => {
-      const nameByPositionNotation = _.fromPairs(Object.entries(this.constructor.transformationMap)
-        .map(([name, transformation]) => [name, transformation || this.constructor.noTransformation])
-        .map(([name, transformation]) => [Game.Classic.fromRowsAndColumns(transformation(this.rowsAndColumns)).positionNotation, name]));
-      const normalisedPositionNotation = Object.keys(nameByPositionNotation).sort()[0];
-      return [normalisedPositionNotation, nameByPositionNotation[normalisedPositionNotation]];
+      const normalisedPositionNotation = this.allPositionNotations[0];
+      return [normalisedPositionNotation, (this.transformationNameByPositionNotation)[normalisedPositionNotation]];
     });
   }
+  get transformationNameByPositionNotation() {
+    return this._getProperty('_transformationNameByPositionNotation', () => (
+      _.fromPairs(Object.entries(this.constructor.transformationMap)
+      .map(([name, transformation]) => [name, transformation || this.constructor.noTransformation])
+      .map(([name, transformation]) => [Game.Classic.fromRowsAndColumns(transformation(this.rowsAndColumns)).positionNotation, name]))
+    ));
+  }
+
+  get allPositionNotations() {
+    return this._getProperty('_allPositionNotations', () => (
+      Object.keys(this.transformationNameByPositionNotation).sort().reverse()
+    ));
+  }
+
 
   static getAvailableMoves(availableMovesMatrix) {
     return _.flatten(availableMovesMatrix
@@ -639,7 +650,7 @@ class Game {
       this.checkCoordinatesAreValid(targetCoordinates);
     }
     if (!this.availableMovesMatrix[coordinates.y][coordinates.x]) {
-      throw new Error(`Move ${JSON.stringify(coordinates)} is not one of the available ones`);
+      throw new InvalidMoveError(`Move ${JSON.stringify(coordinates)} is not one of the available ones`);
     }
   }
 
@@ -1026,6 +1037,94 @@ class GameClassic extends Game {
       oldY = newRowCount - 1 - oldY;
     }
     return {oldX, oldY};
+  }
+
+  getSucceedingEquivalentPositionNotationAndMoves(nextGame) {
+    const allPositionNotations = nextGame.allPositionNotations;
+    for (const position of allPositionNotations) {
+      const game = this.constructor.fromCompressedPositionNotation(position);
+      const {moves} = this.inferMoves(game);
+      if (moves) {
+        return {position, moves};
+      }
+    }
+    return {position: null, moves: null};
+  }
+
+  inferMoves(nextGame) {
+    const previousRowsAndColumns = this.rowsAndColumns;
+    const rowsAndColumns = nextGame.rowsAndColumns;
+    let fromCoordinates = null, toCoordinates = null, isPlaceWorkersMove = false;
+    let buildCoordinates = null, canBeMissingBuildMove = true;
+    for (const y of this.constructor.ROWS) {
+      for (const x of this.constructor.COLUMNS) {
+        const previousCell = previousRowsAndColumns[y].cells[x];
+        const cell = rowsAndColumns[y].cells[x];
+
+        if (previousCell.player !== cell.player) {
+          if (previousCell.player && cell.player) {
+            return {moves: null, error: ['Both cells had different players', previousCell, cell]};
+          } else if (previousCell.player) {
+            if (fromCoordinates) {
+              return {moves: null, error: ['There was a from coordinates', previousCell, fromCoordinates]};
+            }
+            fromCoordinates = {x, y};
+          } else if (cell.player) {
+            if (toCoordinates) {
+              if (canBeMissingBuildMove) {
+                if (isPlaceWorkersMove) {
+                  return {moves: null, error: ['Trying to place too many workers', cell, fromCoordinates, toCoordinates]};
+                }
+                isPlaceWorkersMove = true;
+                fromCoordinates = toCoordinates;
+              } else {
+                return {moves: null, error: ['There was a to coordinates', cell, toCoordinates]};
+              }
+            }
+            toCoordinates = {x, y};
+          } else {
+            return {moves: null, error: ['Both cells had different false players', previousCell, cell]};
+          }
+        }
+
+        if (previousCell.level > 0 || cell.level > 0) {
+          if (isPlaceWorkersMove) {
+            return {moves: null, error: ['There are levels, while placing initial workers', previousCell, cell, fromCoordinates, toCoordinates]};
+          }
+          canBeMissingBuildMove = false;
+        }
+        if (previousCell.level !== cell.level) {
+          if (buildCoordinates) {
+            return {moves: null, error: ['There was a build coordinates', previousCell, cell, buildCoordinates]};
+          }
+          if (previousCell.level !== (cell.level - 1)) {
+            return {moves: null, error: ['The build was too high or too low', previousCell, cell]};
+          }
+          buildCoordinates = {x, y};
+        }
+      }
+    }
+    if (!fromCoordinates || !toCoordinates) {
+      return {moves: null, error: ['There was either no from or no to coordinates', fromCoordinates, toCoordinates]};
+    }
+    if (!canBeMissingBuildMove && !buildCoordinates) {
+      return {moves: null, error: ['It couldn\'t be missing build move but it did', canBeMissingBuildMove, buildCoordinates]};
+    }
+    let moves;
+    if (canBeMissingBuildMove) {
+      moves = [fromCoordinates, toCoordinates];
+    } else {
+      moves = [fromCoordinates, toCoordinates, buildCoordinates];
+    }
+    try {
+      this.makeMoves(moves);
+    } catch (e) {
+      if (e instanceof InvalidMoveError) {
+        return {moves: null, error: ['The moves were invalid', moves]};
+      }
+      throw e;
+    }
+    return {moves, error: null};
   }
 }
 Game.Classic = GameClassic;

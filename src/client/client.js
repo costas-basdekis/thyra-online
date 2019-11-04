@@ -100,12 +100,12 @@ class Client {
     this.usersInfo = this.prepareUsers([]);
     this.socket.on("users", this.gotUsers);
 
-    this.openingDatabase = null;
+    this.openingsDatabase = null;
     this.gamesInfo = this.prepareGames([]);
     this.socket.on("games", this.gotGames);
     this.socket.on("game", this.gotGame);
     this.socket.on("deleted-game", this.gotDeletedGame);
-    this.socket.on("opening-database", this.gotOpeningDatabase);
+    this.socket.on("openings-database", this.gotOpeningsDatabase);
 
     this.tournamentsInfo = this.prepareTournaments([]);
     this.socket.on("tournaments", this.gotTournaments);
@@ -273,11 +273,11 @@ class Client {
     client.gotGames(games);
   };
 
-  gotOpeningDatabase = openingDatabase => {
-    this.openingDatabase = openingDatabase;
+  gotOpeningsDatabase = openingsDatabase => {
+    this.openingsDatabase = openingsDatabase;
     this.gamesInfo = {
       ...this.gamesInfo,
-      openingDatabase: this.openingDatabase,
+      openingsDatabase: this.openingsDatabase,
     };
     this.onGames.map(callback => callback(this.gamesInfo));
   };
@@ -295,7 +295,7 @@ class Client {
       myFinished: this.user ? finished.filter(game => game.userIds.includes(this.user.id)) : [],
       otherFinished: this.user ? finished.filter(game => !game.userIds.includes(this.user.id)) : live,
       mine: this.user ? games.filter(game => game.userIds.includes(this.user.id)) : [],
-      openingDatabase: this.openingDatabase,
+      openingsDatabase: this.openingsDatabase,
     };
   }
 

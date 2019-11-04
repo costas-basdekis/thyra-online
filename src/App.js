@@ -18,7 +18,7 @@ import Settings from "./components/Settings";
 import LearnToPlay from "./components/LearnToPlay";
 import Puzzles from "./components/Puzzles";
 import * as utils from "./utils";
-import OpeningDatabase from "./components/OpeningDatabase";
+import OpeningsDatabase from "./components/OpeningsDatabase";
 
 class App extends Component {
   state = {
@@ -229,8 +229,8 @@ class App extends Component {
           client.available ? {menuItem: {icon: 'play', content: onlineGameLabel}, path: 'game', navigate: liveGame ? `game/${liveGame.id}` : 'game', render: () => (
             <Tab.Pane><OnlineGame game={liveGame} selectLiveGame={this.selectLiveGame} /></Tab.Pane>
           )} : null,
-          {menuItem: {icon: 'database', content: 'Opening Database'}, path: 'opening-database', render: () => (
-            <Tab.Pane><OpeningDatabase selectLiveGame={this.selectLiveGame} /></Tab.Pane>
+          {menuItem: {icon: 'database', content: 'Openings Database'}, path: 'openings-database', render: () => (
+            <Tab.Pane><OpeningsDatabase selectLiveGame={this.selectLiveGame} /></Tab.Pane>
           )},
           client.available ? {menuItem: {icon: 'sitemap', content: onlineTournamentLabel}, path: 'tournament', navigate: liveTournament ? `tournament/${liveTournament.id}` : 'tournament', render: () => (
             <Tab.Pane>

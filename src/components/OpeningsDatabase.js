@@ -7,20 +7,20 @@ import Game from "../game/game";
 import GameList from "./GameList";
 import {createSelector} from "reselect";
 
-class OpeningDatabase extends Component {
+class OpeningsDatabase extends Component {
   state = {
-    step: this.props.gamesInfo.openingDatabase,
+    step: this.props.gamesInfo.openingsDatabase,
     path: [],
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.gamesInfo.openingDatabase !== this.props.gamesInfo.openingDatabase) {
-      this.setState({step: this.props.gamesInfo.openingDatabase, path: this.getPathForNewOpeningDatabase()});
+    if (prevProps.gamesInfo.openingsDatabase !== this.props.gamesInfo.openingsDatabase) {
+      this.setState({step: this.props.gamesInfo.openingsDatabase, path: this.getPathForNewOpeningsDatabase()});
     }
   }
 
-  getPathForNewOpeningDatabase() {
-    let step = this.props.gamesInfo.openingDatabase;
+  getPathForNewOpeningsDatabase() {
+    let step = this.props.gamesInfo.openingsDatabase;
     const path = [];
     for (const oldStep of this.state.path.slice(1)) {
       step = step.next.find(nextStep => nextStep.position === oldStep.position);
@@ -37,13 +37,13 @@ class OpeningDatabase extends Component {
   };
 
   selectStepIndex = index => {
-    this.setState(state => ({step: state.path[index - 1] || this.props.gamesInfo.openingDatabase, path: state.path.slice(0, index)}));
+    this.setState(state => ({step: state.path[index - 1] || this.props.gamesInfo.openingsDatabase, path: state.path.slice(0, index)}));
   };
 
   render() {
     const {
       client,
-      usersInfo: {byId: usersById}, gamesInfo: {games, openingDatabase}, tournamentsInfo: {byId: tournamentsById},
+      usersInfo: {byId: usersById}, gamesInfo: {games, openingsDatabase}, tournamentsInfo: {byId: tournamentsById},
       puzzlesInfo: {byId: puzzlesByGameId},
       selectLiveGame,
     } = this.props;
@@ -58,7 +58,7 @@ class OpeningDatabase extends Component {
         <Grid centered>
           <Grid.Row>
             {path.map((step, index) => [step, index]).reverse().map(([step, index]) => (
-              <OpeningDatabaseHistoryCard
+              <OpeningsDatabaseHistoryCard
                 key={index}
                 step={step}
                 index={index}
@@ -71,9 +71,9 @@ class OpeningDatabase extends Component {
         <Header as={'h2'}>{step.next.length} Continuations</Header>
         <Card.Group>
           {step.next.map(nextStep => (
-            <OpeningDatabaseCard
+            <OpeningsDatabaseCard
               key={nextStep.displayPosition}
-              openingDatabase={openingDatabase}
+              openingsDatabase={openingsDatabase}
               step={step}
               nextStep={nextStep}
               applicableSettings={client.applicableSettings}
@@ -95,7 +95,7 @@ class OpeningDatabase extends Component {
   }
 }
 
-OpeningDatabase.propTypes = {
+OpeningsDatabase.propTypes = {
   client: PropTypes.object.isRequired,
   usersInfo: PropTypes.object.isRequired,
   gamesInfo: PropTypes.object.isRequired,
@@ -104,7 +104,7 @@ OpeningDatabase.propTypes = {
   selectLiveGame: PropTypes.func.isRequired,
 };
 
-class OpeningDatabaseCard extends Component {
+class OpeningsDatabaseCard extends Component {
   static winPercentageColours = [
     [25, 'red'],
     [45, 'orange'],
@@ -196,7 +196,7 @@ class OpeningDatabaseCard extends Component {
   }
 
   render() {
-    const {openingDatabase, step, nextStep, applicableSettings} = this.props;
+    const {openingsDatabase, step, nextStep, applicableSettings} = this.props;
     const game = this.game;
 
     const previousPlayerAWinPercentage = 100 * step.winCount[Game.PLAYER_A] / step.gameIds.length;
@@ -213,7 +213,7 @@ class OpeningDatabaseCard extends Component {
             <Label icon={'play'} content={
               `${nextStep.gameIds.length} games`
               + ` (${(100 * nextStep.gameIds.length / step.gameIds.length).toFixed()}%`
-              + `, ${(100 * nextStep.gameIds.length / openingDatabase.gameIds.length).toFixed()}% tot.)`
+              + `, ${(100 * nextStep.gameIds.length / openingsDatabase.gameIds.length).toFixed()}% tot.)`
             } />
             <Label
               icon={{name: 'chess king', color: 'grey'}}
@@ -241,15 +241,15 @@ class OpeningDatabaseCard extends Component {
   }
 }
 
-OpeningDatabaseCard.propTypes = {
-  openingDatabase: PropTypes.object.isRequired,
+OpeningsDatabaseCard.propTypes = {
+  openingsDatabase: PropTypes.object.isRequired,
   step: PropTypes.object.isRequired,
   nextStep: PropTypes.object.isRequired,
   applicableSettings: PropTypes.object.isRequired,
   selectStep: PropTypes.func.isRequired,
 };
 
-class OpeningDatabaseHistoryCard extends Component {
+class OpeningsDatabaseHistoryCard extends Component {
   gameSelector = createSelector([
     props => props.step.displayPosition,
   ], displayPosition => Game.Classic.fromCompressedPositionNotation(displayPosition));
@@ -277,11 +277,11 @@ class OpeningDatabaseHistoryCard extends Component {
   }
 }
 
-OpeningDatabaseHistoryCard.propTypes = {
+OpeningsDatabaseHistoryCard.propTypes = {
   step: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   applicableSettings: PropTypes.object.isRequired,
   selectStepIndex: PropTypes.func.isRequired,
 };
 
-export default withClient(OpeningDatabase);
+export default withClient(OpeningsDatabase);

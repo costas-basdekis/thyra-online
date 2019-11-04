@@ -36,7 +36,7 @@ class OpeningsDatabase extends Component {
       }
       return {game, error: false};
     } else {
-      return {game: Game.Classic.create(), error: false};
+      return {game: null, error: false};
     }
   }
 
@@ -58,7 +58,7 @@ class OpeningsDatabase extends Component {
     const {game, error} = this.constructor.getGameAndErrorFromUrlPosition();
     if (error) {
       this.setState({urlError: error});
-    } else {
+    } else if (game) {
       const path = game.history.map(pastGame => ({
         position: pastGame.normalisedPositionNotation,
         displayPosition: pastGame.normalisedPositionNotation,
@@ -89,11 +89,15 @@ class OpeningsDatabase extends Component {
   }
 
   selectStep = step => {
-    this.setState(state => ({step, path: [...state.path, step]}));
+    this.setState(state => ({step, path: [...state.path.slice(0, state.path.indexOf(state.step) + 1), step]}));
   };
 
   selectStepIndex = index => {
-    this.setState(state => ({step: state.path[index - 1] || this.props.gamesInfo.openingsDatabase, path: state.path.slice(0, index)}));
+    this.setState(state => ({step: state.path[index] || this.props.gamesInfo.openingsDatabase}));
+  };
+
+  goToStart = () => {
+    this.setState({step: this.props.gamesInfo.openingsDatabase});
   };
 
   render() {
@@ -113,15 +117,17 @@ class OpeningsDatabase extends Component {
       <Fragment>
         <Grid centered>
           <Grid.Row>
-            {path.map((step, index) => [step, index]).reverse().map(([step, index]) => (
+            {path.map((pathStep, index) => [pathStep, index]).reverse().map(([pathStep, index]) => (
               <OpeningsDatabaseHistoryCard
                 key={index}
-                step={step}
+                step={pathStep}
                 index={index}
                 applicableSettings={client.applicableSettings}
                 selectStepIndex={this.selectStepIndex}
+                selected={pathStep === step}
               />
             ))}
+            <Label icon={'play'} color={'green'} content={'Initial'} onClick={this.goToStart} as={'a'} />
           </Grid.Row>
         </Grid>
         <Header as={'h2'}>{step.next.length} Continuations</Header>
@@ -326,7 +332,7 @@ class OpeningsDatabaseHistoryCard extends Component {
   };
 
   render() {
-    const {applicableSettings} = this.props;
+    const {selected, applicableSettings} = this.props;
     const game = this.game;
 
     return (
@@ -335,6 +341,7 @@ class OpeningsDatabaseHistoryCard extends Component {
           game={game}
           small
           onSelect={this.onSelect}
+          selected={selected}
           settings={applicableSettings}
         />
       </NavLink>
@@ -347,6 +354,7 @@ OpeningsDatabaseHistoryCard.propTypes = {
   index: PropTypes.number.isRequired,
   applicableSettings: PropTypes.object.isRequired,
   selectStepIndex: PropTypes.func.isRequired,
+  selected: PropTypes.bool.isRequired,
 };
 
 export default withClient(OpeningsDatabase);

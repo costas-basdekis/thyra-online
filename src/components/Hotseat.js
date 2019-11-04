@@ -103,7 +103,10 @@ class Hotseat extends Component {
             <Menu inverted size={'massive'} items={[
               {key: 'share', icon: 'share', content: 'Share position', color: 'green', active: true, as: 'a',
                 href: `?position=${(selectedGame || game).compressedFullNotation}`,
-                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'}
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game'},
+              {key: 'openings-database', icon: 'database', content: 'See in openings DB', color: 'green', active: true, as: 'a',
+                href: `/openings-database?position=${(selectedGame || game).compressedFullNotation}`,
+                title: navigator.share ? 'Click to open the sharing menu' : 'Click to copy URL to game', target: '_blank'},
             ]} />
           </Grid.Row>
         </Grid>

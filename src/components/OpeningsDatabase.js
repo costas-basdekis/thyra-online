@@ -6,24 +6,80 @@ import Board from "./Board";
 import Game from "../game/game";
 import GameList from "./GameList";
 import {createSelector} from "reselect";
+import {NavLink} from "react-router-dom";
 
 class OpeningsDatabase extends Component {
   state = {
     step: this.props.gamesInfo.openingsDatabase,
     path: [],
+    urlError: null,
   };
+
+  static getGameAndErrorFromUrlPosition() {
+    const params = new URLSearchParams(window.location.search);
+    const position = params.get('position');
+    if (position) {
+      let game, error;
+      try {
+        game = Game.Classic.fromCompressedMoveNotation(position);
+        if (!game) {
+          error = 'The position was not valid';
+        } else {
+          error = null;
+        }
+      } catch (e) {
+        game = null;
+        error = 'The series of moves where not valid';
+      }
+      if (!game) {
+        return {game: Game.Classic.create(), error};
+      }
+      return {game, error: false};
+    } else {
+      return {game: Game.Classic.create(), error: false};
+    }
+  }
+
+  componentDidMount() {
+    this.selectPathFromUrlPosition();
+  }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.gamesInfo.openingsDatabase !== this.props.gamesInfo.openingsDatabase) {
-      this.setState({step: this.props.gamesInfo.openingsDatabase, path: this.getPathForNewOpeningsDatabase()});
+      const path = this.getPathForNewOpeningsDatabase();
+      this.setState({
+        step: path.length ? path[path.length - 1] : this.props.gamesInfo.openingsDatabase,
+        path: path,
+      });
+    }
+  }
+
+  selectPathFromUrlPosition() {
+    const {game, error} = this.constructor.getGameAndErrorFromUrlPosition();
+    if (error) {
+      this.setState({urlError: error});
+    } else {
+      const path = game.history.map(pastGame => ({
+        position: pastGame.normalisedPositionNotation,
+        displayPosition: pastGame.normalisedPositionNotation,
+      }));
+      if (this.props.gamesInfo.openingsDatabase) {
+        this.setState({path: this.getPathForPositions(path)});
+      } else {
+        this.setState({path, urlError: null});
+      }
     }
   }
 
   getPathForNewOpeningsDatabase() {
+    return this.getPathForPositions(this.state.path.map(step => step.position));
+  }
+
+  getPathForPositions(positions) {
     let step = this.props.gamesInfo.openingsDatabase;
     const path = [];
-    for (const oldStep of this.state.path.slice(1)) {
-      step = step.next.find(nextStep => nextStep.position === oldStep.position);
+    for (const position of positions) {
+      step = step.next.find(nextStep => nextStep.position === position);
       if (!step) {
         break;
       }
@@ -133,9 +189,11 @@ class OpeningsDatabaseCard extends Component {
     props => props.step,
     props => props.nextStep,
   ], (step, nextStep) => (
-    nextStep.moves
-      ? Game.Classic.fromCompressedPositionNotation(step.displayPosition).makeMoves(nextStep.moves)
-      : Game.Classic.fromCompressedPositionNotation(nextStep.displayPosition)
+    nextStep.allMoves
+      ? Game.Classic.fromMoves(nextStep.allMoves)
+      : nextStep.moves
+        ? Game.Classic.fromCompressedPositionNotation(step.displayPosition).makeMoves(nextStep.moves)
+        : Game.Classic.fromCompressedPositionNotation(nextStep.displayPosition)
   ));
 
   get game() {
@@ -207,7 +265,7 @@ class OpeningsDatabaseCard extends Component {
     let winDiffPercentageIcon = this.winDiffPercentageIcon;
     let winDiffPercentageColour = this.winDiffPercentageColour;
     return (
-      <Card onClick={this.onClick}>
+      <Card as={NavLink} to={`/openings-database?position=${game.compressedFullNotation}`} onClick={this.onClick}>
         <Card.Content>
           <Card.Meta>
             <Label icon={'play'} content={
@@ -252,7 +310,12 @@ OpeningsDatabaseCard.propTypes = {
 class OpeningsDatabaseHistoryCard extends Component {
   gameSelector = createSelector([
     props => props.step.displayPosition,
-  ], displayPosition => Game.Classic.fromCompressedPositionNotation(displayPosition));
+    props => props.step.allMoves,
+  ], (displayPosition, allMoves) => (
+    allMoves
+      ? Game.Classic.fromMoves(allMoves)
+      : Game.Classic.fromCompressedPositionNotation(displayPosition)
+  ));
 
   get game() {
     return this.gameSelector(this.props);
@@ -267,12 +330,14 @@ class OpeningsDatabaseHistoryCard extends Component {
     const game = this.game;
 
     return (
-      <Board
-        game={game}
-        small
-        onSelect={this.onSelect}
-        settings={applicableSettings}
-      />
+      <NavLink to={`/openings-database?position=${game.compressedFullNotation}`}>
+        <Board
+          game={game}
+          small
+          onSelect={this.onSelect}
+          settings={applicableSettings}
+        />
+      </NavLink>
     );
   }
 }

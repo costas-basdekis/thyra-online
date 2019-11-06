@@ -140,7 +140,7 @@ class EditPosition extends Component {
           </Grid.Row>
         </Grid>
         <Segment>
-          {positionError ? <Message error content={positionError} /> : null}
+          <Message error={!!positionError} content={positionError || 'Position ready to use'} />
           <Play
             user={user}
             settings={settings}

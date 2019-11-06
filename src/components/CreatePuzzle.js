@@ -8,8 +8,8 @@ import {withClient} from "../client/withClient";
 import Play from "./Play";
 import EditPosition from "./EditPosition";
 import moment from "moment";
-import * as utils from "../utils";
 import {withRouter} from "react-router-dom";
+import {PuzzleHeader} from "./Puzzles";
 
 class CreatePuzzle extends Component {
   state = {
@@ -84,16 +84,6 @@ class CreatePuzzle extends Component {
       game: puzzle.startingPosition.game,
     });
   };
-
-  getDifficultyStars(difficulty, maxDifficulty) {
-    return _.range(maxDifficulty).map(index => (
-      <Icon
-        key={index}
-        name={difficulty > index ? 'star' : 'star outline'}
-        color={'yellow'}
-      />
-    ));
-  }
 
   makeMove = newGame => {
     this.setState({game: newGame});
@@ -305,7 +295,7 @@ class CreatePuzzle extends Component {
   };
 
   render() {
-    const {user, client, gamesInfo: {byId: gamesById}} = this.props;
+    const {user, client, gamesInfo: {byId: gamesById}, selectLiveGame} = this.props;
     const {editing, puzzle, game, tree, currentStep} = this.state;
     const settings = client.applicableSettings;
 
@@ -323,11 +313,7 @@ class CreatePuzzle extends Component {
       <Fragment>
         <Grid centered>
           <Grid.Row>
-            <Segment>
-              <Header as={'h1'}>{utils.getPuzzleTitle(puzzle)}</Header>
-              <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(puzzle.meta.difficulty, puzzle.meta.maxDifficulty)}</Header>
-              <Header as={'h4'}>{puzzle.meta.source}</Header>
-            </Segment>
+            <PuzzleHeader puzzle={puzzle} won={false} selectLiveGame={selectLiveGame} />
           </Grid.Row>
           <Grid.Row>
             <Button secondary onClick={this.editPuzzle}>Edit</Button>
@@ -391,6 +377,7 @@ CreatePuzzle.propTypes = {
   gamesInfo: PropTypes.object.isRequired,
   puzzlesInfo: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
+  selectLiveGame: PropTypes.func.isRequired,
 };
 
 class PuzzleForm extends Component {

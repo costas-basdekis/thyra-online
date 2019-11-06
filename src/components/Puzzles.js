@@ -18,6 +18,7 @@ class Puzzles extends Component {
     const {
       user,
       puzzlesInfo: {otherStarted, otherNotStarted, otherSolved, myPublic, myPublicUnattempted, myPrivate},
+      selectLiveGame,
     } = this.props;
 
     return (
@@ -45,12 +46,12 @@ class Puzzles extends Component {
         </Route>
         {(user && user.admin) ? (
           <Route exact path={`${this.props.match.path}/create`}>
-            <CreatePuzzle />
+            <CreatePuzzle selectLiveGame={selectLiveGame} />
           </Route>
         ) : null}
         {(user && user.admin) ? (
           <Route exact path={`${this.props.match.path}/:id/edit`}>
-            <EditPuzzle />
+            <EditPuzzle selectLiveGame={selectLiveGame} />
           </Route>
         ) : null}
         <Route exact path={`${this.props.match.path}/:id`}>
@@ -235,16 +236,6 @@ class PuzzlePlayer extends Component {
     }
   };
 
-  getDifficultyStars(difficulty, maxDifficulty) {
-    return _.range(maxDifficulty).map(index => (
-      <Icon
-        key={index}
-        name={difficulty > index ? 'star' : 'star outline'}
-        color={'yellow'}
-      />
-    ));
-  }
-
   dismissUrlPuzzleError = () => {
     this.props.selectLivePuzzle(null);
   };
@@ -298,13 +289,7 @@ class PuzzlePlayer extends Component {
       return null;
     }
 
-    const {
-      client, user,
-      usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo: {byId: tournamentsById},
-      puzzlesInfo: {byGameId: puzzlesByGameId},
-      location, selectLiveGame,
-    } = this.props;
-    const userIsCreator = !puzzle.id || (!!user && puzzle.userId === user.id);
+    const {user, location, selectLiveGame} = this.props;
     const message = (
       wrongMove ? (
         <Message error icon={'warning'} content={"That's not the right answer"} />
@@ -329,38 +314,7 @@ class PuzzlePlayer extends Component {
             ].filter(item => item)} />
           </Grid.Row>
           <Grid.Row>
-            <Segment>
-              <Header as={'h1'}>{utils.getPuzzleTitle(puzzle)}</Header>
-              <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(puzzle.meta.difficulty, puzzle.meta.maxDifficulty)}</Header>
-              {puzzle.meta.source ? <Header as={'h4'}>{puzzle.meta.source}</Header> : null}
-              {puzzle.meta.gameId ? (
-                <Header as={'h4'}>
-                  {won || userIsCreator ? (
-                    <Fragment>
-                      From{" "}
-                      <GameCard
-                        user={null}
-                        usersById={usersById}
-                        tournamentsById={tournamentsById}
-                        puzzlesByGameId={puzzlesByGameId}
-                        game={gamesById[puzzle.meta.gameId]}
-                        selectLiveGame={selectLiveGame}
-                        terse
-                        live
-                        applicableSettings={client.applicableSettings}
-                      />
-                    </Fragment>
-                  ) : "Solve puzzle to see source game"}
-                </Header>
-              ) : null}
-              <Header as={'h4'}>
-                {puzzle.usersStats.attempted ? (
-                  <Fragment>
-                    {puzzle.usersStats.perfect} perfectly solved, out of {puzzle.usersStats.imperfect} solved, out of {puzzle.usersStats.attempted} attempted
-                  </Fragment>
-                ) : 'Not attempted yet'}
-              </Header>
-            </Segment>
+            <PuzzleHeader puzzle={puzzle} won={won} selectLiveGame={selectLiveGame} />
           </Grid.Row>
           <Grid.Row>
             {message}
@@ -394,5 +348,82 @@ PuzzlePlayer.propTypes = {
 };
 
 PuzzlePlayer = withRouter(withClient(PuzzlePlayer));
+
+class PuzzleHeader extends Component {
+  getDifficultyStars(difficulty, maxDifficulty) {
+    return _.range(maxDifficulty).map(index => (
+      <Icon
+        key={index}
+        name={difficulty > index ? 'star' : 'star outline'}
+        color={'yellow'}
+      />
+    ));
+  }
+
+  render() {
+    const {
+      client, user,
+      usersInfo: {byId: usersById}, gamesInfo: {byId: gamesById}, tournamentsInfo: {byId: tournamentsById},
+      puzzlesInfo: {byGameId: puzzlesByGameId},
+      puzzle, won, selectLiveGame,
+    } = this.props;
+    const userIsCreator = !puzzle.id || (!!user && puzzle.userId === user.id);
+
+    return (
+      <Segment>
+        <Header as={'h1'}>{utils.getPuzzleTitle(puzzle)}</Header>
+        <Header as={'h4'} className={'difficulty-header'}>{this.getDifficultyStars(puzzle.meta.difficulty, puzzle.meta.maxDifficulty)}</Header>
+        {puzzle.meta.source ? <Header as={'h4'}>{puzzle.meta.source}</Header> : null}
+        {puzzle.meta.gameId ? (
+          <Header as={'h4'}>
+            {won || userIsCreator ? (
+              <Fragment>
+                From{" "}
+                <GameCard
+                  user={null}
+                  usersById={usersById}
+                  tournamentsById={tournamentsById}
+                  puzzlesByGameId={puzzlesByGameId}
+                  game={gamesById[puzzle.meta.gameId]}
+                  selectLiveGame={selectLiveGame}
+                  terse
+                  live
+                  applicableSettings={client.applicableSettings}
+                />
+              </Fragment>
+            ) : "Solve puzzle to see source game"}
+          </Header>
+        ) : null}
+        {puzzle.usersStats ? (
+          <Header as={'h4'}>
+            {puzzle.usersStats.attempted ? (
+              <Fragment>
+                {puzzle.usersStats.perfect} perfectly solved, out of {puzzle.usersStats.imperfect} solved, out of {puzzle.usersStats.attempted} attempted
+              </Fragment>
+            ) : 'Not attempted yet'}
+          </Header>
+        ) : null}
+      </Segment>
+    );
+  }
+}
+
+PuzzleHeader.propTypes = {
+  puzzle: PropTypes.object.isRequired,
+  won: PropTypes.bool.isRequired,
+  selectLiveGame: PropTypes.func.isRequired,
+  user: PropTypes.object,
+  client: PropTypes.object.isRequired,
+  usersInfo: PropTypes.object.isRequired,
+  gamesInfo: PropTypes.object.isRequired,
+  tournamentsInfo: PropTypes.object.isRequired,
+  puzzlesInfo: PropTypes.object.isRequired,
+};
+
+PuzzleHeader = withClient(PuzzleHeader);
+
+export {
+  PuzzleHeader,
+};
 
 export default withRouter(withClient(Puzzles));

@@ -18,6 +18,7 @@ class EditPuzzle extends Component {
 
   render() {
     const puzzle = this.puzzle;
+    const {selectLiveGame} = this.props;
     if (!puzzle || !puzzle.isMyPuzzle) {
       return (
         <Fragment>
@@ -35,7 +36,7 @@ class EditPuzzle extends Component {
     }
 
     return (
-      <CreatePuzzle initialPuzzle={puzzle} />
+      <CreatePuzzle initialPuzzle={puzzle} selectLiveGame={selectLiveGame} />
     );
   }
 }
@@ -44,6 +45,7 @@ EditPuzzle.propTypes = {
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   puzzlesInfo: PropTypes.object.isRequired,
+  selectLiveGame: PropTypes.func.isRequired,
 };
 
 export default withRouter(withClient(EditPuzzle));

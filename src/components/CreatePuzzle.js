@@ -85,6 +85,12 @@ class CreatePuzzle extends Component {
     });
   };
 
+  onDiscardPuzzle = () => {
+    this.setState({
+      editing: false,
+    });
+  };
+
   makeMove = newGame => {
     this.setState({game: newGame});
   };
@@ -301,7 +307,12 @@ class CreatePuzzle extends Component {
 
     if (editing && (!puzzle || puzzle.isMyPuzzle)) {
       return (
-        <PuzzleForm initialPuzzle={puzzle} onCreatePuzzle={this.onCreatePuzzle} gamesById={gamesById} />
+        <PuzzleForm
+          initialPuzzle={puzzle}
+          onCreatePuzzle={this.onCreatePuzzle}
+          onDiscardPuzzle={this.onDiscardPuzzle}
+          gamesById={gamesById}
+        />
       )
     }
 
@@ -539,6 +550,10 @@ class PuzzleForm extends Component {
     this.props.onCreatePuzzle(puzzle);
   };
 
+  discardPuzzle = () => {
+    this.props.onDiscardPuzzle();
+  };
+
   usePosition = positionNotation => {
     this.setState({
       editingPosition: false,
@@ -546,7 +561,7 @@ class PuzzleForm extends Component {
     this.setValue(null, {name: 'startingPosition.position', value: positionNotation});
   };
 
-  discard = () => {
+  discardPosition = () => {
     this.setState({
       editingPosition: false,
     });
@@ -565,7 +580,7 @@ class PuzzleForm extends Component {
       return (
         <EditPosition
           usePosition={this.usePosition}
-          discard={this.discard}
+          discard={this.discardPosition}
           initialPositionNotation={puzzle.startingPosition.position}
         />
       );
@@ -716,6 +731,7 @@ class PuzzleForm extends Component {
             </Form.Group>
             <Form.Button primary content={initialPuzzle ? 'Update' : 'Create'} />
           </Form>
+          <Button negative content={'Discard'} onClick={this.discardPuzzle} />
         </Segment>
       </Fragment>
     );
@@ -725,6 +741,7 @@ class PuzzleForm extends Component {
 PuzzleForm.propTypes = {
   initialPuzzle: PropTypes.object,
   onCreatePuzzle: PropTypes.func.isRequired,
+  onDiscardPuzzle: PropTypes.func.isRequired,
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
   gamesById: PropTypes.object.isRequired,

@@ -19,6 +19,7 @@ import LearnToPlay from "./components/LearnToPlay";
 import Puzzles from "./components/Puzzles";
 import * as utils from "./utils";
 import OpeningsDatabase from "./components/OpeningsDatabase";
+import moment from "moment";
 
 class App extends Component {
   state = {
@@ -140,7 +141,7 @@ class App extends Component {
       const otherUser = this.props.usersInfo.byId[otherUserId];
       services.notifications.notify(otherUser ? `New game vs ${otherUser.name} started` : `New game started`);
     }
-    if (newGame.move === 1) {
+    if (newGame.move === 1 && moment(newGame.startDatetime).isSameOrAfter(moment().subtract(10, 's'))) {
       this.selectLiveGame(newGame);
     }
   }

@@ -15,7 +15,10 @@ import {GameCard} from "./GameList";
 
 class Puzzles extends Component {
   render() {
-    const {user, puzzlesInfo: {otherStarted, otherNotStarted, otherSolved, myPublic, myPrivate}} = this.props;
+    const {
+      user,
+      puzzlesInfo: {otherStarted, otherNotStarted, otherSolved, myPublic, myPublicUnattempted, myPrivate},
+    } = this.props;
 
     return (
       <Switch>
@@ -31,6 +34,7 @@ class Puzzles extends Component {
               {key: 'other-not-started', label: "New Puzzles", items: otherNotStarted},
               {key: 'other-solved', label: "Solved Puzzles", items: otherSolved},
               {key: 'my-public', label: "My Public Puzzles", items: myPublic},
+              {key: 'my-public-unattempted', label: "My Public Unattempted Puzzles", items: myPublicUnattempted},
               {key: 'my-private', label: "My Private Puzzles", items: myPrivate},
             ].filter(({items}) => items.length).map(({key, label, items, color}) => (
               {menuItem: {key, content: <Fragment>{label} <Label content={items.length} color={color} /></Fragment>}, render: () => (

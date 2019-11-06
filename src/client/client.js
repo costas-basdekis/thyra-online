@@ -400,6 +400,7 @@ class Client {
       )), puzzle => puzzle.meta.gameId) : {},
       mine: myPuzzles,
       myPublic: myPuzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore()),
+      myPublicUnattempted: myPuzzles.filter(puzzle => puzzle.meta.public && puzzle.meta.publishDatetime.isSameOrBefore() && !puzzle.usersStats.attempted),
       myPrivate: myPuzzles.filter(puzzle => !puzzle.meta.public || puzzle.meta.publishDatetime.isAfter()),
       other: otherPuzzles,
       otherSolved: this.user ? otherPuzzles.filter(puzzle => this.user.puzzles[puzzle.id] && this.user.puzzles[puzzle.id].meta.won) : [],

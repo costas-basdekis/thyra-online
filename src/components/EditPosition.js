@@ -110,8 +110,12 @@ class EditPosition extends Component {
     this.props.usePosition(Game.Classic.fromPosition(this.state.position).positionNotation);
   };
 
+  discard = () => {
+    this.props.discard();
+  };
+
   render() {
-    const {user, client, keydown, usePosition} = this.props;
+    const {user, client, keydown, usePosition, discard} = this.props;
     const {paletteSelectedItem, position, paletteUpdate, positionError, urlError, game, selectedGame, previousPosition} = this.state;
     const settings = client.applicableSettings;
 
@@ -185,14 +189,23 @@ class EditPosition extends Component {
               update={paletteUpdate}
               onPositionChange={this.onPositionChange}
             />
-            {usePosition ? (
+            {usePosition || discard ? (
               <div>
-                <Button
-                  content={'Use position'}
-                  primary
-                  onClick={this.usePosition}
-                  disabled={!!positionError}
-                />
+                {usePosition ? (
+                  <Button
+                    content={'Use position'}
+                    primary
+                    onClick={this.usePosition}
+                    disabled={!!positionError}
+                  />
+                ) : null}
+                {discard ? (
+                  <Button
+                    content={'Discard'}
+                    negative
+                    onClick={this.discard}
+                  />
+                ) : null}
               </div>
             ) : null}
           </Play>
@@ -207,6 +220,7 @@ EditPosition.propTypes = {
   user: PropTypes.object,
   client: PropTypes.object.isRequired,
   usePosition: PropTypes.func,
+  discard: PropTypes.func,
   initialPositionNotation: PropTypes.string,
 };
 

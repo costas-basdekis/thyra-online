@@ -546,6 +546,12 @@ class PuzzleForm extends Component {
     this.setValue(null, {name: 'startingPosition.position', value: positionNotation});
   };
 
+  discard = () => {
+    this.setState({
+      editingPosition: false,
+    });
+  };
+
   editPosition = () => {
     this.setState({editingPosition: true});
   };
@@ -559,6 +565,7 @@ class PuzzleForm extends Component {
       return (
         <EditPosition
           usePosition={this.usePosition}
+          discard={this.discard}
           initialPositionNotation={puzzle.startingPosition.position}
         />
       );

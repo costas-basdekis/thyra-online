@@ -172,7 +172,7 @@ class Play extends Component {
 
   render() {
     const {
-      client, user, names, allowControl, matchGame, children, usersInfo: {byId: usersById},
+      client, names, allowControl, matchGame, children, usersInfo: {byId: usersById},
     } = this.props;
     const {selectedGame, game, transformation} = this.state;
     const displayGame = selectedGame || game;
@@ -257,8 +257,20 @@ class Play extends Component {
             </Responsive>
             <Responsive as={Fragment} maxWidth={800}>
               <Grid.Row>
-                <Grid.Column stretched={false} textAlign={'center'}>
-                  {boardNode}
+                <Grid.Column textAlign={'center'}>
+                  <Grid.Row>
+                    <BoardTransformation onChange={this.onTransformationChange} gameType={game.constructor} />
+                  </Grid.Row>
+                  <Grid.Row>
+                    {boardNode}
+                  </Grid.Row>
+                  <Grid.Row>
+                    <PlayNavigation game={game} selectedGame={selectedGame} selectGame={this.selectGame} />
+                  </Grid.Row>
+                  <Grid.Row>
+                    <Button negative content={'Undo'} disabled={!canUndo} onClick={this.props.submit ? this.takeMoveBack : this.undo} />
+                    <Button negative content={'Take move back'} disabled={canUndo || !canTakeBack} onClick={this.takeMoveBack}/>
+                  </Grid.Row>
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -292,13 +304,6 @@ class Play extends Component {
             </Statistic.Group>
           </Segment>
         ) : null}
-        <PlayHistory
-          game={game}
-          selectedGame={selectedGame}
-          selectGame={this.selectGame}
-          user={user}
-          applicableSettings={client.applicableSettings}
-        />
         {selectedGame ? (
           <Segment textAlign={"center"}>
             <Header as={"h2"}>Reviewing previous move</Header>

@@ -353,6 +353,13 @@ class PuzzlePlayer extends Component {
                   ) : "Solve puzzle to see source game"}
                 </Header>
               ) : null}
+              <Header as={'h4'}>
+                {puzzle.usersStats.attempted ? (
+                  <Fragment>
+                    {puzzle.usersStats.perfect} perfectly solved, out of {puzzle.usersStats.imperfect} solved, out of {puzzle.usersStats.attempted} attempted
+                  </Fragment>
+                ) : 'Not attempted yet'}
+              </Header>
             </Segment>
           </Grid.Row>
           <Grid.Row>

@@ -191,6 +191,13 @@ class OpeningsDatabaseCard extends Component {
     [35, 'angle double up'],
   ];
 
+  static gameCountSizes = [
+    [4, 'tiny'],
+    [14, 'small'],
+    [34, 'medium'],
+    [35, 'large'],
+  ];
+
   gameSelector = createSelector([
     props => props.step,
     props => props.nextStep,
@@ -214,7 +221,7 @@ class OpeningsDatabaseCard extends Component {
     props => props.nextStep,
   ], nextStep => {
     const playerAWinPercentage = 100 * nextStep.winCount[Game.PLAYER_A] / nextStep.gameIds.length;
-    return this.getPercentageColour(playerAWinPercentage, this.constructor.winPercentageColours);
+    return this.getValueByLevel(playerAWinPercentage, this.constructor.winPercentageColours);
   });
 
   get winPercentageColour() {
@@ -228,7 +235,7 @@ class OpeningsDatabaseCard extends Component {
     const previousPlayerAWinPercentage = 100 * step.winCount[Game.PLAYER_A] / step.gameIds.length;
     const playerAWinPercentage = 100 * nextStep.winCount[Game.PLAYER_A] / nextStep.gameIds.length;
     const playerAWinDiffPercentage = playerAWinPercentage - previousPlayerAWinPercentage;
-    return this.getPercentageColour(playerAWinDiffPercentage, this.constructor.winDiffPercentageIcons);
+    return this.getValueByLevel(playerAWinDiffPercentage, this.constructor.winDiffPercentageIcons);
   });
 
   get winDiffPercentageIcon() {
@@ -242,21 +249,31 @@ class OpeningsDatabaseCard extends Component {
     const previousPlayerAWinPercentage = 100 * step.winCount[Game.PLAYER_A] / step.gameIds.length;
     const playerAWinPercentage = 100 * nextStep.winCount[Game.PLAYER_A] / nextStep.gameIds.length;
     const playerAWinDiffPercentage = playerAWinPercentage - previousPlayerAWinPercentage;
-    return this.getPercentageColour(playerAWinDiffPercentage, this.constructor.winDiffPercentageColours);
+    return this.getValueByLevel(playerAWinDiffPercentage, this.constructor.winDiffPercentageColours);
   });
 
   get winDiffPercentageColour() {
     return this.winDiffPercentageColourSelector(this.props);
   }
 
-  getPercentageColour(percentage, percentageColours) {
-    for (const [maxPercentage, colour] of percentageColours) {
-      if (percentage <= maxPercentage) {
-        return colour;
+  gameCountSizesSelector = createSelector([
+    props => props.nextStep.gameIds.length,
+  ], gameCount => {
+    return this.getValueByLevel(gameCount, this.constructor.gameCountSizes);
+  });
+
+  get gameCountSize() {
+    return this.gameCountSizesSelector(this.props);
+  }
+
+  getValueByLevel(value, levels) {
+    for (const [maxValue, level] of levels) {
+      if (value <= maxValue) {
+        return level;
       }
     }
-    const [, lastColour] = percentageColours[percentageColours.length - 1];
-    return lastColour;
+    const [, lastLevel] = levels[levels.length - 1];
+    return lastLevel;
   }
 
   render() {
@@ -270,6 +287,7 @@ class OpeningsDatabaseCard extends Component {
     let winPercentageColour = this.winPercentageColour;
     let winDiffPercentageIcon = this.winDiffPercentageIcon;
     let winDiffPercentageColour = this.winDiffPercentageColour;
+    let gameCountSize = this.gameCountSize;
     return (
       <Card as={NavLink} to={`/openings-database?position=${game.compressedFullNotation}`} onClick={this.onClick}>
         <Card.Content>
@@ -291,7 +309,12 @@ class OpeningsDatabaseCard extends Component {
               icon={{name: winDiffPercentageIcon, color: winDiffPercentageColour}}
               content={`${playerAWinDiffPercentage > 0 ? '+' : ''}${playerAWinDiffPercentage.toFixed()}%`}
             />
-            <Progress percent={playerAWinPercentage.toFixed()} color={winPercentageColour} progress={'percent'} />
+            <Progress
+              percent={playerAWinPercentage.toFixed()}
+              color={winPercentageColour}
+              progress={'percent'}
+              size={gameCountSize}
+            />
             <Board
               game={game}
               medium

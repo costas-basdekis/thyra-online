@@ -377,8 +377,8 @@ class Client {
   };
 
   gotNonPersonalPuzzles = nonPersonalPuzzles => {
-    const nonPersonalPuzzlesIds = nonPersonalPuzzles.map(puzzle => puzzle.id);
-    this.gotPuzzles(nonPersonalPuzzles.concat(this.puzzlesInfo.mine.filter(puzzle => !nonPersonalPuzzlesIds.includes(puzzle.id))));
+    const personalPuzzlesIds = this.puzzlesInfo.mine.map(puzzle => puzzle.id);
+    this.gotPuzzles(nonPersonalPuzzles.filter(puzzle => !personalPuzzlesIds.includes(puzzle.id)).concat(this.puzzlesInfo.mine));
   };
 
   gotPersonalPuzzles = personalPuzzles => {

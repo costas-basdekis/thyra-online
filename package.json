@@ -7,7 +7,7 @@
     "env-cmd": "^9.0.3",
     "fomantic-ui-css": "^2.7.7",
     "jdenticon": "^2.2.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",

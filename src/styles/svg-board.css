@@ -29,39 +29,39 @@
   --level-border: var(--cell-undoable-hovered-border);
 }
 
-.svg-board .cell-border .border {
+.cell-border .border {
     fill: var(--level-border);
 }
 
-.svg-board .cell-0 {
+.cell-0 .fill {
     fill: var(--level-0-background);
 }
 
-.svg-board .cell-1 .border {
+.cell-1 .border {
     fill: var(--level-1-border);
 }
-.svg-board .cell-1 .fill {
+.cell-1 .fill {
     fill: var(--level-1-background);
 }
 
-.svg-board .cell-2 .border {
+.cell-2 .border {
     fill: var(--level-2-border);
 }
-.svg-board .cell-2 .fill {
+.cell-2 .fill {
     fill: var(--level-2-background);
 }
 
-.svg-board .cell-3 .border {
+.cell-3 .border {
     fill: var(--level-3-border);
 }
-.svg-board .cell-3 .fill {
+.cell-3 .fill {
     fill: var(--level-3-background);
 }
 
-.svg-board .cell-4 .border {
+.cell-4 .border {
     fill: var(--level-4-border);
 }
-.svg-board .cell-4 .fill {
+.cell-4 .fill {
     fill: var(--level-4-background);
 }
 
